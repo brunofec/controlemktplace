@@ -11,7 +11,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link rel="icon" href="logo.png"/>
 
-<!-- Libs: Chart.js (gráficos), SheetJS (Excel), Supabase JS, Config -->
+<!-- Libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -53,20 +53,31 @@
   .prio-alta{border:1px solid var(--danger);color:#ff9f9f} .prio-media{border:1px solid var(--warning);color:#ffd58a} .prio-baixa{border:1px solid #6fb7ff;color:#a8d3ff}
   .table-actions{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
   .muted{color:var(--muted)} .nowrap{white-space:nowrap}
+
+  /* Destaques por categoria */
   .sak-row{background-image: linear-gradient(to right, rgba(255,159,71,.06), transparent)}
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
+  .frota-row{background-image: linear-gradient(to right, rgba(79,140,255,.06), transparent)}
+  .frota-badge{background:#223348; color:#aeddff; border:1px solid #2f4e68}
+
+  /* Badge do chat não lido */
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
     min-width:16px; height:16px; padding:0 4px; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel)}
+
   .watermark{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;color:#7a8596;font-size:12px;opacity:.65;pointer-events:none}
   .space{height:14px}
   .hidden{display:none !important}
   .readonly input, .readonly select, .readonly textarea{pointer-events:none; opacity:.8}
+
+  /* Modal */
   .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);z-index:20}
   .modal.show{display:grid}
   .modal .card{width:min(980px,96vw);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px}
   .grid-2{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
   .grid-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
   .grid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  /* Chat */
   .chat-box{display:flex;flex-direction:column;height:520px;border:1px solid var(--border);border-radius:12px;background:#0e1318}
   .chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
   .bubble{max-width:88%;padding:10px 12px;border-radius:12px}
@@ -75,9 +86,13 @@
   .bubble time{display:block;font-size:11px;color:#9aacbf;margin-top:6px}
   .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
   .chat-input input{flex:1}
+
+  /* Toast */
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
+
+  /* KPIs */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
   .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
@@ -214,6 +229,11 @@
             <label>Assunto</label>
             <select id="assunto" required>
               <option value="">Selecione…</option>
+              <!-- novos -->
+              <option>Cliente Ausente</option>
+              <option>Solicitação contato</option>
+              <option>End. não encontrado</option>
+              <!-- existentes -->
               <option>Arrependimento</option>
               <option>Atraso de entrega</option>
               <option>Mercado Fraude</option>
@@ -407,8 +427,15 @@ function render(){
     const showConfirm = d.status==='Aberto';
     const unread = d.status==='Em tratativa' ? getUnreadCount(d) : 0;
     const unreadBadge = unread>0 ? `<span class="badge-unread" title="${unread} nova(s)">${unread}</span>` : '';
-    const rowCls = d.categoria==='SAK' ? 'sak-row' : '';
-    const catCell = d.categoria==='SAK' ? `<span class="badge sak-badge">SAK</span>` : (d.categoria||'-');
+    const rowCls =
+      d.categoria === 'SAK' ? 'sak-row' :
+      d.categoria === 'Frota - Transportadora' ? 'frota-row' : '';
+    const catCell =
+      d.categoria === 'SAK'
+        ? `<span class="badge sak-badge">SAK</span>`
+        : d.categoria === 'Frota - Transportadora'
+          ? `<span class="badge frota-badge">Frota - Transportadora</span>`
+          : (d.categoria || '-');
 
     return `<tr class="${rowCls}">
       <td class="nowrap"><strong>${d.id}</strong></td>
@@ -573,7 +600,11 @@ async function confirmTicket(id){
   const d = data.find(x=>x.id===id); if(!d) return;
   if(d.status==='Aberto'){
     d.status='Em tratativa';
-    if(d.categoria==='SAK'){ d.responsavel = currentUser()?.name || d.responsavel || ''; toast(`Responsável definido: ${d.responsavel}`); }
+    // define responsável automaticamente para SAK e Frota
+    if (['SAK','Frota - Transportadora'].includes(d.categoria)) {
+      d.responsavel = currentUser()?.name || d.responsavel || '';
+      toast(`Responsável definido: ${d.responsavel}`);
+    }
     await supaUpsertTicket(d);
     await addHistory(id,'Ticket confirmado e movido para Em tratativa');
     render();
