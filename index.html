@@ -4,18 +4,17 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Controle Interno de Solicitações</title>
-<link rel="icon" href="logo.png">
 
 <!-- Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link rel="icon" href="logo.png"/>
 
 <!-- Libs: Chart.js (gráficos), SheetJS (Excel), Supabase JS, Config -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- suas chaves ficam em public/config.js -->
 <script src="config.js"></script>
 
 <style>
@@ -54,29 +53,20 @@
   .prio-alta{border:1px solid var(--danger);color:#ff9f9f} .prio-media{border:1px solid var(--warning);color:#ffd58a} .prio-baixa{border:1px solid #6fb7ff;color:#a8d3ff}
   .table-actions{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
   .muted{color:var(--muted)} .nowrap{white-space:nowrap}
-
-  /* Sinais SAK */
   .sak-row{background-image: linear-gradient(to right, rgba(255,159,71,.06), transparent)}
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
-
-  /* Badge não lidas (chat) */
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
     min-width:16px; height:16px; padding:0 4px; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel)}
-
   .watermark{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;color:#7a8596;font-size:12px;opacity:.65;pointer-events:none}
   .space{height:14px}
   .hidden{display:none !important}
   .readonly input, .readonly select, .readonly textarea{pointer-events:none; opacity:.8}
-
-  /* Modal */
   .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);z-index:20}
   .modal.show{display:grid}
   .modal .card{width:min(980px,96vw);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px}
   .grid-2{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
   .grid-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
   .grid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-  /* Chat */
   .chat-box{display:flex;flex-direction:column;height:520px;border:1px solid var(--border);border-radius:12px;background:#0e1318}
   .chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
   .bubble{max-width:88%;padding:10px 12px;border-radius:12px}
@@ -85,13 +75,9 @@
   .bubble time{display:block;font-size:11px;color:#9aacbf;margin-top:6px}
   .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
   .chat-input input{flex:1}
-
-  /* Toast */
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
-
-  /* KPIs */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
   .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
@@ -108,10 +94,10 @@
     <div class="row" style="justify-content:flex-start;align-items:center;gap:12px">
       <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
     </div>
-    <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
+    <p class="muted" style="font-size:12px">Use: bruno/jb1805 • maurilios/ivan2319 • jessica/jessica01 • annaj/anna02</p>
     <div class="space"></div>
     <div class="row" style="flex-direction:column;gap:10px">
-      <input id="loginUser" placeholder="Usuário ou e-mail (ex.: brunofec ou brunofec@koerich.com.br)">
+      <input id="loginUser" placeholder="Usuário ou e-mail (ex.: brunofec ou brunofec@koerich.com.br)" autofocus>
       <input id="loginPass" placeholder="Senha" type="password">
       <button id="btnLogin" class="btn-success"><i class="fa fa-right-to-bracket"></i> Entrar</button>
     </div>
@@ -224,7 +210,20 @@
           <div><label>Prioridade</label><select id="prioridade"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
         </div>
         <div class="grid-row">
-          <div><label>Assunto</label><input id="assunto" required placeholder="Resumo do pedido"/></div>
+          <div>
+            <label>Assunto</label>
+            <select id="assunto" required>
+              <option value="">Selecione…</option>
+              <option>Arrependimento</option>
+              <option>Atraso de entrega</option>
+              <option>Mercado Fraude</option>
+              <option>Ruptura de estoque</option>
+              <option>Danificado</option>
+              <option>Erro cadastro</option>
+              <option>Solicitar Coleta</option>
+              <option>Barrar Entrega</option>
+            </select>
+          </div>
           <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select></div>
         </div>
         <div class="grid-row">
@@ -266,9 +265,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-  // domínio padrão para quando digitar só o usuário
-const DEFAULT_EMAIL_DOMAIN = "koerich.com.br";
-
 /* ========= Helpers UI ========= */
 const qs=(s,el=document)=>el.querySelector(s);
 const qsa=(s,el=document)=>[...el.querySelectorAll(s)];
@@ -282,27 +278,25 @@ function slaStatus(dateStr){ if(!dateStr) return {code:'',label:'—'}; const to
 function statusBadge(status){ const map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'}; return `<span class="badge ${map[status]||''}"><i class="fa fa-circle"></i>${status}</span>`; }
 function prioBadge(p){ const cls=p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa'; return `<span class="badge ${cls}">${p}</span>`; }
 const ym = d => d.toISOString().slice(0,7);
+const DEFAULT_EMAIL_DOMAIN = "koerich.com.br";
 
 /* ========= Sessão + Supabase ========= */
 const SESSION_KEY='ticket_session_v1';
 const setSession = (u)=> localStorage.setItem(SESSION_KEY, JSON.stringify(u));
 const currentUser = ()=> { try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||''); }catch{ return null; } };
 const clearSession = ()=> localStorage.removeItem(SESSION_KEY);
-
 const supa = supabase.createClient(window.ENV.SUPABASE_URL, window.ENV.SUPABASE_ANON_KEY);
 
 /* ========= Estado ========= */
-let data = [];              // tickets
-let lastReadMap = {};       // ticket_id -> timestamp (ms) do Supabase
+let data = [];
+let lastReadMap = {};
 let chartAbertos=null, chartConcluidos=null;
 
-/* ========= DB: Load/Upsert/Delete/Chat/Reads ========= */
+/* ========= DB ========= */
 async function loadFromSupabase(){
-  // tickets
   const { data: tks, error } = await supa.from('tickets').select('*').order('aberto_em',{ascending:false});
   if(error){ console.error(error); alert('Falha ao carregar tickets.'); return; }
 
-  // messages por ticket
   const ids = tks.map(t=>t.id);
   let msgsByTicket = {};
   if(ids.length){
@@ -312,7 +306,6 @@ async function loadFromSupabase(){
     });
   }
 
-  // last_reads do usuário para "não lidas"
   const me = currentUser();
   lastReadMap = {};
   if(me){
@@ -320,7 +313,6 @@ async function loadFromSupabase(){
     (lr||[]).forEach(r=> lastReadMap[r.ticket_id] = new Date(r.last_read_at).getTime());
   }
 
-  // monta data[]
   data = tks.map(t=>({
     id: t.id,
     abertoEm: new Date(t.aberto_em).getTime(),
@@ -336,7 +328,6 @@ async function loadFromSupabase(){
     historico: msgsByTicket[t.id]||[]
   }));
 }
-
 async function supaUpsertTicket(rec){
   const payload = {
     id: rec.id,
@@ -356,19 +347,16 @@ async function supaUpsertTicket(rec){
   const { error } = await supa.from('tickets').upsert(payload);
   if(error) console.error(error);
 }
-
 async function supaDeleteTicket(id){
   const { error } = await supa.from('tickets').delete().eq('id', id);
   if(error) console.error(error);
 }
-
 async function supaAddMessage(ticketId, text){
   const u = currentUser();
   const payload = { ticket_id: ticketId, sender: u?.id, sender_name: u?.name, body: text };
   const { error } = await supa.from('messages').insert(payload);
   if(error) console.error(error);
 }
-
 async function supaMarkRead(ticketId){
   const u = currentUser(); if(!u) return;
   const nowIso = new Date().toISOString();
@@ -376,7 +364,7 @@ async function supaMarkRead(ticketId){
   lastReadMap[ticketId] = new Date(nowIso).getTime();
 }
 
-/* ========= Realtime (opcional: já ligado) ========= */
+/* ========= Realtime ========= */
 function setupRealtime(){
   supa.channel('realtime:messages')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'}, payload=>{
@@ -385,7 +373,6 @@ function setupRealtime(){
       if(d){
         d.historico.push({at:new Date(m.created_at).getTime(), txt:m.body, user:m.sender_name||'—'});
         render();
-        // notificação visual se não for o autor
         if((currentUser()?.name||'') !== (m.sender_name||'')) toast(`Nova mensagem no ticket ${m.ticket_id}`);
       }
     })
@@ -472,7 +459,6 @@ function renderKPIs(){
   qs('#mKpiPctVenc').textContent = pctLate+'%';
   qs('#mKpiQtdVenc').textContent = `${denom-onTime} de ${denom}`;
 
-  // Gráficos por categoria
   const categorias = [...new Set(data.map(d=> d.categoria||'—'))].sort();
   const arrByCat = c => baseAbertos.filter(d=>d.categoria===c);
   const valsAberto = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Aberto').length );
@@ -492,11 +478,28 @@ function renderKPIs(){
 }
 
 /* ========= Modal + Form ========= */
-function openModal(show=true){ qs('#modal').classList.toggle('show', show); }
+function openModal(show = true) {
+  const m = qs('#modal');
+  if (!m) return;
+  if (show) { m.classList.add('show'); m.style.display = 'grid'; }
+  else { m.classList.remove('show'); m.style.display = 'none'; }
+}
 function setEditable(edit){ const form=qs('#frm'); form.classList.toggle('readonly', !edit); qsa('#frm input,#frm select,#frm textarea').forEach(el=>{ if(['ticketId'].includes(el.id)) return; el.readOnly=!edit; el.disabled=!edit; }); qs('#solicitante').readOnly=true; qs('#solicitante').disabled=true; }
 function toggleResponsavelByCategoria(){ qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK'); }
 function resetForm(){ qs('#ticketId').value=''; qs('#solicitante').value=currentUser()?.name||''; qs('#categoriaSel').value='Frota - Transportadora'; qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value=''; qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#prazo').value=''; qs('#codigo').value=''; qs('#chatHistory').innerHTML=''; qs('#chatText').value=''; qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none'; qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden'); setEditable(true); toggleResponsavelByCategoria(); }
 function renderChat(list){ const u=currentUser()?.name||''; qs('#chatHistory').innerHTML=(list||[]).slice().sort((a,b)=>a.at-b.at).map(h=>`<div class="bubble ${h.user===u?'me':'them'}">${escapeHtml(h.txt)}<time>${new Date(h.at).toLocaleString('pt-BR')} • ${escapeHtml(h.user||'')}</time></div>`).join(''); const div=qs('#chatHistory'); div.scrollTop=div.scrollHeight; }
+
+function setSelectValue(sel, value) {
+  if (!sel) return;
+  const has = [...sel.options].some(o => o.value === value);
+  if (value && !has) {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = value + ' (legado)';
+    sel.appendChild(opt);
+  }
+  sel.value = value || sel.value;
+}
 
 function openNew(){ resetForm(); qs('#modalTitle').textContent='Nova solicitação'; openModal(true); }
 
@@ -507,7 +510,7 @@ async function openEdit(id){
   qs('#ticketId').value = d.id;
   qs('#solicitante').value = d.solicitante||currentUser()?.name||'';
   qs('#categoriaSel').value = d.categoria||'Frota - Transportadora';
-  qs('#assunto').value = d.assunto||'';
+  setSelectValue(qs('#assunto'), d.assunto || '');
   qs('#prioridade').value = d.prioridade||'Média';
   qs('#descricao').value = d.descricao||'';
   qs('#status').value = d.status||'Aberto';
@@ -576,7 +579,6 @@ async function confirmTicket(id){
     render();
   }
 }
-
 async function closeTicket(id){
   const d = data.find(x=>x.id===id); if(!d) return;
   if(d.status!=='Encerrado'){
@@ -587,15 +589,17 @@ async function closeTicket(id){
   }
 }
 
-/* ========= Bindings Modal ========= */
+/* ========= Bindings ========= */
 qs('#btnDelete').onclick = ()=> removeTicket(qs('#ticketId').value);
 qs('#btnConfirm').onclick = async ()=>{ const id=qs('#ticketId').value || (alert('Salve primeiro para confirmar.'), null); if(!id) return; await confirmTicket(id); await openEdit(id); };
 qs('#frm').addEventListener('submit', save);
 qs('#btnSave').addEventListener('click', save);
-qs('#closeModal').onclick = ()=>openModal(false);
+qs('#closeModal').addEventListener('click', ()=>openModal(false));
 qs('#categoriaSel').addEventListener('change', toggleResponsavelByCategoria);
 
-/* ========= Chat ========= */
+// botão Nova com fallback robusto
+qs('#btnNew').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openNew(); });
+
 async function sendChat(){
   const id = qs('#ticketId').value || (alert('Salve primeiro para conversar.'), null); if(!id) return;
   const txt = qs('#chatText').value.trim(); if(!txt) return;
@@ -636,9 +640,10 @@ boot();
 
 qs('#btnLogout').onclick = async ()=>{ await supa.auth.signOut(); clearSession(); showLogin(); };
 
-qs('#btnLogin').onclick = async () => {
+qs('#btnLogin').onclick = async ()=>{
   const login = qs('#loginUser').value.trim().toLowerCase();
   const pass  = qs('#loginPass').value;
+  const email = login.includes('@') ? login : `${login}@${DEFAULT_EMAIL_DOMAIN}`;
 
   if (!window.ENV?.SUPABASE_URL || !window.ENV?.SUPABASE_ANON_KEY) {
     alert('config.js não carregado ou chaves ausentes.');
@@ -646,44 +651,20 @@ qs('#btnLogin').onclick = async () => {
     return;
   }
 
-  // aceita usuário OU e-mail
-  const email = login.includes('@') ? login : `${login}@${DEFAULT_EMAIL_DOMAIN}`;
-
   const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if (error) {
-    console.error('Auth error:', error);
-    alert(error.message || 'Usuário ou senha inválidos.');
-    return;
-  }
+  if (error){ console.error('Auth error:', error); alert(error.message || 'Usuário ou senha inválidos.'); return; }
 
-  // busca/gera profile automaticamente
   let { data: profile } = await supa.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
   if (!profile) {
     const username = email.split('@')[0];
-    const display_name = username
-      .replace(/[._-]+/g, ' ')
-      .replace(/\b\w/g, c => c.toUpperCase());
-    await supa.from('profiles').upsert({
-      id: data.user.id,
-      username,
-      display_name,
-      role: 'operador'         // padrão
-    });
+    const display_name = username.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    await supa.from('profiles').upsert({ id: data.user.id, username, display_name, role: 'operador' });
     ({ data: profile } = await supa.from('profiles').select('*').eq('id', data.user.id).single());
   }
 
-  const user = {
-    id: data.user.id,
-    username: profile.username,
-    name: profile.display_name,
-    role: profile.role
-  };
+  const user = { id:data.user.id, username:profile.username, name:profile.display_name, role:profile.role };
   setSession(user);
-
-  await loadFromSupabase();
-  showApp();
-  render();
-  setupRealtime();
+  await loadFromSupabase(); showApp(); render(); setupRealtime();
 };
 
 /* ========= Expose (console) ========= */
