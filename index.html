@@ -4,13 +4,19 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Controle Interno de Solicitações</title>
+
+<!-- Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-<!-- Chart.js (gráficos) -->
+
+<!-- Libs: Chart.js (gráficos), SheetJS (Excel), Supabase JS, Config -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<!-- SheetJS (Excel .xlsx) -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- suas chaves ficam em public/config.js -->
+<script src="config.js"></script>
+
 <style>
   :root{
     --bg:#0f1216; --panel:#151a21; --panel-2:#1b222b; --text:#e9eef5; --muted:#9aacbf;
@@ -52,7 +58,7 @@
   .sak-row{background-image: linear-gradient(to right, rgba(255,159,71,.06), transparent)}
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
 
-  /* Badge não lidas */
+  /* Badge não lidas (chat) */
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
     min-width:16px; height:16px; padding:0 4px; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel)}
 
@@ -75,16 +81,16 @@
   .bubble{max-width:88%;padding:10px 12px;border-radius:12px}
   .me{align-self:flex-end;background:#1a2430;border:1px solid #203042}
   .them{align-self:flex-start;background:#171321;border:1px solid #2a2538}
-  .bubble time{display:block;font-size:11px;color:var(--muted);margin-top:6px}
+  .bubble time{display:block;font-size:11px;color:#9aacbf;margin-top:6px}
   .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
   .chat-input input{flex:1}
 
-  /* Toaster */
+  /* Toast */
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
 
-  /* KPIs page */
+  /* KPIs */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
   .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
@@ -96,16 +102,15 @@
 <body>
 
 <!-- ===== LOGIN ===== -->
-<section id="loginSection" class="login-wrap" style="min-height:100vh;display:none;place-items:center;padding:20px">
-  <div class="login-card" style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
+<section id="loginSection" style="min-height:100vh;display:none;place-items:center;padding:20px">
+  <div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
     <div class="row" style="justify-content:flex-start;align-items:center;gap:12px">
-      <img src="logo.png" class="logo-top" alt="Logo">
-      <h2 style="margin:0">Entrar</h2>
+      <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
     </div>
-    <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
+    <p class="muted" style="font-size:12px">Use: bruno/jb1805 • maurilios/ivan2319 • jessica/jessica01 • annaj/anna02</p>
     <div class="space"></div>
     <div class="row" style="flex-direction:column;gap:10px">
-      <input id="loginUser" placeholder="Usuário" autofocus>
+      <input id="loginUser" placeholder="Usuário (ex.: bruno)" autofocus>
       <input id="loginPass" placeholder="Senha" type="password">
       <button id="btnLogin" class="btn-success"><i class="fa fa-right-to-bracket"></i> Entrar</button>
     </div>
@@ -122,39 +127,24 @@
       </div>
       <div class="actions">
         <span id="whoami" class="pill"></span>
-        <button id="btnKPIs" class="btn-ghost" title="Painel de KPIs"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
-        <button id="btnNew" title="Abrir nova solicitação"><i class="fa fa-plus"></i> Nova</button>
+        <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
+        <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost" title="Exportar Excel (.xlsx)"><i class="fa fa-file-excel"></i> Exportar</button>
-        <button id="btnLogout" class="btn-ghost" title="Sair"><i class="fa fa-right-from-bracket"></i></button>
+        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button>
       </div>
     </div>
   </header>
 
-  <!-- ===== LIST PAGE ===== -->
+  <!-- LISTA -->
   <main id="listPage" class="wrap">
     <section class="panel">
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
           <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, código/NF/DF, descrição..."/>
-          <select id="fStatus">
-            <option value="">Todos os status</option>
-            <option>Aberto</option><option>Em tratativa</option><option>Encerrado</option>
-          </select>
-          <select id="fPrio">
-            <option value="">Todas as prioridades</option>
-            <option>Alta</option><option>Média</option><option>Baixa</option>
-          </select>
-          <select id="fCategoria">
-            <option value="">Todas as categorias</option>
-            <option>Frota - Transportadora</option>
-            <option>SAK</option>
-          </select>
-          <select id="fSLA">
-            <option value="">SLA</option>
-            <option value="ok">No prazo</option>
-            <option value="risk">Risco (<=12h)</option>
-            <option value="late">Vencido</option>
-          </select>
+          <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select>
+          <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
+          <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
+          <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (<=12h)</option><option value="late">Vencido</option></select>
         </div>
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
@@ -163,36 +153,24 @@
         <table id="tbl">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Aberto em</th>
-              <th>Solicitante</th>
-              <th>Assunto</th>
-              <th>Código/NF/DF</th>
-              <th>Categoria</th>
-              <th>Prioridade</th>
-              <th>Status</th>
-              <th>SLA</th>
-              <th>Resp.</th>
-              <th class="nowrap">Ações</th>
+              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código/NF/DF</th>
+              <th>Categoria</th><th>Prioridade</th><th>Status</th><th>SLA</th><th>Resp.</th><th class="nowrap">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
-      <div class="badge" style="margin-top:10px">
-        SLA por prioridade: Alta 1 dia • Média 3 dias • Baixa 5 dias
-      </div>
+      <div class="badge" style="margin-top:10px">SLA por prioridade: Alta 1 dia • Média 3 dias • Baixa 5 dias</div>
     </section>
   </main>
 
-  <!-- ===== KPI PAGE ===== -->
+  <!-- KPIs -->
   <main id="kpiPage" class="wrap hidden">
     <section class="panel">
       <div class="row" style="align-items:center;gap:12px">
         <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-          <label class="muted" for="kpiMonth">Mês:</label>
-          <input id="kpiMonth" type="month" />
+          <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
           <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
         </div>
       </div>
@@ -207,145 +185,74 @@
 
       <div class="space"></div>
       <div class="kpi-grid">
-        <div class="kpi-card">
-          <small>Concluídos no mês</small>
-          <strong id="mKpiFechadosMes">0</strong>
-          <div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div>
-        </div>
-        <div class="kpi-card">
-          <small>% concluídos no prazo</small>
-          <strong id="mKpiPctPrazo">0%</strong>
-          <div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div>
-        </div>
-        <div class="kpi-card">
-          <small>% concluídos vencidos</small>
-          <strong id="mKpiPctVenc">0%</strong>
-          <div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div>
-        </div>
-        <div class="kpi-card">
-          <small>Mês selecionado</small>
-          <strong id="mKpiMesLabel">—</strong>
-          <div class="kpi-sub">Base dos KPIs acima</div>
-        </div>
+        <div class="kpi-card"><small>Concluídos no mês</small><strong id="mKpiFechadosMes">0</strong><div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div></div>
+        <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPctPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
+        <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiPctVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
+        <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
       </div>
 
-      <!-- Gráficos -->
       <div class="charts">
-        <div class="panel">
-          <h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3>
-          <canvas id="chartAbertos"></canvas>
-        </div>
-        <div class="panel">
-          <h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3>
-          <canvas id="chartConcluidos"></canvas>
-        </div>
+        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
+        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
       </div>
 
       <div class="space"></div>
-      <div class="badge">Regras: “Abertos/Tratativa/Vencido/Encerrado” consideram tickets cuja <u>abertura</u> está no mês. Percentuais consideram tickets <u>encerrados</u> no mês e com SLA definido.</div>
+      <div class="badge">Regras: KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês e com SLA definido.</div>
     </section>
   </main>
 
   <div class="watermark">Desenvolvido por Bruno Ferreira da Cruz</div>
 </section>
 
-<!-- ===== MODAL ===== -->
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="card">
     <div class="row" style="align-items:center">
       <h2 id="modalTitle" style="margin:0;font-size:18px">Nova solicitação</h2>
-      <div class="actions" style="margin-left:auto">
-        <button class="btn-ghost" id="closeModal" title="Fechar"><i class="fa fa-xmark"></i></button>
-      </div>
+      <div class="actions" style="margin-left:auto"><button class="btn-ghost" id="closeModal"><i class="fa fa-xmark"></i></button></div>
     </div>
     <div class="space"></div>
 
     <div class="grid-2">
-      <!-- Coluna esquerda: FORM -->
+      <!-- FORM -->
       <form id="frm" autocomplete="off" style="display:flex;flex-direction:column;gap:12px">
         <input type="hidden" id="ticketId">
         <div class="grid-form">
-          <div>
-            <label>Solicitante</label>
-            <input id="solicitante" readonly title="Usa o usuário logado"/>
-          </div>
-          <div>
-            <label>Categoria</label>
-            <select id="categoriaSel">
-              <option>Frota - Transportadora</option>
-              <option>SAK</option>
-            </select>
-          </div>
-          <div>
-            <label>Prioridade</label>
-            <select id="prioridade" required>
-              <option>Alta</option><option selected>Média</option><option>Baixa</option>
-            </select>
-          </div>
+          <div><label>Solicitante</label><input id="solicitante" readonly/></div>
+          <div><label>Categoria</label><select id="categoriaSel"><option>Frota - Transportadora</option><option>SAK</option></select></div>
+          <div><label>Prioridade</label><select id="prioridade"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
         </div>
-
         <div class="grid-row">
-          <div>
-            <label>Assunto</label>
-            <input id="assunto" required placeholder="Resumo do pedido"/>
-          </div>
-          <div>
-            <label>Status</label>
-            <select id="status">
-              <option>Aberto</option><option>Em tratativa</option><option>Encerrado</option>
-            </select>
-          </div>
+          <div><label>Assunto</label><input id="assunto" required placeholder="Resumo do pedido"/></div>
+          <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select></div>
         </div>
-
         <div class="grid-row">
-          <div>
-            <label>Código do Cliente</label>
-            <input id="codigo" placeholder="Ex.: Cód. Cliente12345"/>
-          </div>
-          <div id="responsavelWrap">
-            <label>Responsável</label>
-            <select id="responsavel">
-              <option></option>
-              <option>Bruno</option>
-              <option>Maurilio</option>
-              <option>Jessica</option>
-              <option>Anna</option>
-            </select>
+          <div><label>Código do Cliente, NF ou DF</label><input id="codigo" placeholder="Ex.: 12345 / NF 98765 / DF 0001"/></div>
+          <div id="responsavelWrap"><label>Responsável</label>
+            <select id="responsavel"><option></option><option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option></select>
           </div>
         </div>
-
-        <div>
-          <label>Descrição</label>
-          <textarea id="descricao" rows="4" placeholder="Detalhe o que precisa"></textarea>
-        </div>
-
+        <div><label>Descrição</label><textarea id="descricao" rows="4" placeholder="Detalhe o que precisa"></textarea></div>
         <div class="grid-row">
-          <div>
-            <label>Prazo (SLA) — Data</label>
-            <input id="prazo" type="date"/>
-          </div>
-          <div>
-            <label>&nbsp;</label>
-            <div class="badge">Definido automaticamente se vazio</div>
-          </div>
+          <div><label>Prazo (SLA) — Data</label><input id="prazo" type="date"/></div>
+          <div><label>&nbsp;</label><div class="badge">Definido automaticamente se vazio</div></div>
         </div>
-
-        <div class="row" style="justify-content:flex-start;gap:8px">
-          <button type="button" class="btn-warning btn-icon" id="btnConfirm" title="Confirmar e colocar em tratativa"><i class="fa fa-check-double"></i></button>
+        <div class="row" style="gap:8px">
+          <button type="button" class="btn-warning btn-icon" id="btnConfirm" title="Confirmar (tratativa)"><i class="fa fa-check-double"></i></button>
           <button type="button" class="btn-danger btn-icon" id="btnDelete" title="Excluir"><i class="fa fa-trash"></i></button>
           <div style="flex:1"></div>
-          <button class="btn-success" id="btnSave" title="Salvar"><i class="fa fa-floppy-disk"></i> Salvar</button>
+          <button class="btn-success" id="btnSave"><i class="fa fa-floppy-disk"></i> Salvar</button>
         </div>
       </form>
 
-      <!-- Coluna direita: CHAT -->
+      <!-- CHAT -->
       <div>
         <label>Chat da Solicitação</label>
         <div class="chat-box">
           <div id="chatHistory" class="chat-history"></div>
           <div class="chat-input">
             <input id="chatText" placeholder="Digite uma mensagem e Enter"/>
-            <button id="btnSendChat" class="btn-ghost btn-icon" title="Enviar"><i class="fa fa-paper-plane"></i></button>
+            <button id="btnSendChat" class="btn-ghost btn-icon"><i class="fa fa-paper-plane"></i></button>
           </div>
         </div>
         <div style="margin-top:10px" class="muted" id="chatHint">Mensagens ficam registradas no histórico do ticket.</div>
@@ -358,108 +265,148 @@
 <div id="toast" class="toast"></div>
 
 <script>
-/* ========= Auth ========= */
-const USERS = {
-  'bruno':      {name:'Bruno', role:'admin', pass:'jb1805'},
-  'maurilios':  {name:'Maurilio', role:'admin', pass:'ivan2319'},
-  'jessica':    {name:'Jessica', role:'operador', pass:'jessica01'},
-  'annaj':      {name:'Anna', role:'operador', pass:'anna02'}
-};
-const SESSION_KEY='ticket_session_v1';
-function currentUser(){ try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||''); }catch{return null} }
-function setSession(user){ localStorage.setItem(SESSION_KEY, JSON.stringify(user)); }
-function clearSession(){ localStorage.removeItem(SESSION_KEY); }
-function showLogin(){ document.getElementById('loginSection').style.display='grid'; document.getElementById('appSection').style.display='none'; }
-function showApp(){
-  document.getElementById('loginSection').style.display='none';
-  document.getElementById('appSection').style.display='block';
-  const u = currentUser();
-  document.getElementById('whoami').textContent = `${u.name} • ${u.role}`;
-}
-
-/* ========= Utils ========= */
+/* ========= Helpers UI ========= */
 const qs=(s,el=document)=>el.querySelector(s);
 const qsa=(s,el=document)=>[...el.querySelectorAll(s)];
 const fmtDate=(ts)=> new Date(ts).toLocaleString('pt-BR');
 const uid=()=> Math.random().toString(36).slice(2,8).toUpperCase();
-const storeKey='tickets_v1';
+const escapeHtml=(str='')=>str.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function toast(msg){ const cont=qs('#toast'); const el=document.createElement('div'); el.className='t'; el.textContent=msg; cont.appendChild(el); requestAnimationFrame(()=>el.classList.add('show')); setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>cont.removeChild(el),250); }, 3000); }
 function prioToDays(p){ if(p==='Alta')return 1; if(p==='Média')return 3; return 5; }
-function ensureSLA(prazo, prioridade, abertoEm){
-  if(prazo) return prazo; // YYYY-MM-DD
-  const base = new Date(abertoEm || Date.now());
-  base.setHours(0,0,0,0);
-  base.setDate(base.getDate()+prioToDays(prioridade||'Média'));
-  return base.toISOString().slice(0,10);
-}
-function slaStatus(dateStr){
-  if(!dateStr) return {code:'', label:'—'};
-  const today = new Date(); today.setHours(23,59,59,999);
-  const due = new Date(dateStr+'T23:59:59');
-  const diffH = (due - today)/36e5;
-  if(diffH < 0) return {code:'late', label:'Vencido'};
-  if(diffH <= 12) return {code:'risk', label:'Risco'};
-  return {code:'ok', label:'No prazo'};
-}
-function statusBadge(status){
-  const map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'};
-  return `<span class="badge ${map[status]||''}"><i class="fa fa-circle"></i>${status}</span>`;
-}
+function ensureSLA(prazo,prioridade,abertoEm){ if(prazo) return prazo; const base=new Date(abertoEm||Date.now()); base.setHours(0,0,0,0); base.setDate(base.getDate()+prioToDays(prioridade||'Média')); return base.toISOString().slice(0,10); }
+function slaStatus(dateStr){ if(!dateStr) return {code:'',label:'—'}; const today=new Date(); today.setHours(23,59,59,999); const due=new Date(dateStr+'T23:59:59'); const diffH=(due-today)/36e5; if(diffH<0) return {code:'late',label:'Vencido'}; if(diffH<=12) return {code:'risk',label:'Risco'}; return {code:'ok',label:'No prazo'}; }
+function statusBadge(status){ const map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'}; return `<span class="badge ${map[status]||''}"><i class="fa fa-circle"></i>${status}</span>`; }
 function prioBadge(p){ const cls=p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa'; return `<span class="badge ${cls}">${p}</span>`; }
-function saveAll(list){ localStorage.setItem(storeKey, JSON.stringify(list)); }
-function loadAll(){ try{ return JSON.parse(localStorage.getItem(storeKey)||'[]'); }catch{ return []; } }
-function escapeHtml(str=''){return str.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-function toast(msg){
-  const cont=qs('#toast'); const el=document.createElement('div'); el.className='t'; el.textContent=msg; cont.appendChild(el);
-  requestAnimationFrame(()=>el.classList.add('show'));
-  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>cont.removeChild(el),250); }, 3000);
-}
 const ym = d => d.toISOString().slice(0,7);
 
-/* ========= "Não lidas" por usuário ========= */
-function lastReadKey(){ return 'lastread_v1_'+(currentUser()?.username || 'anon'); }
-function getLastReadMap(){ try{ return JSON.parse(localStorage.getItem(lastReadKey())||'{}'); }catch{ return {}; } }
-function setLastRead(id, ts=Date.now()){ const m=getLastReadMap(); m[id]=ts; localStorage.setItem(lastReadKey(), JSON.stringify(m)); }
+/* ========= Sessão + Supabase ========= */
+const SESSION_KEY='ticket_session_v1';
+const setSession = (u)=> localStorage.setItem(SESSION_KEY, JSON.stringify(u));
+const currentUser = ()=> { try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||''); }catch{ return null; } };
+const clearSession = ()=> localStorage.removeItem(SESSION_KEY);
+
+const supa = supabase.createClient(window.ENV.SUPABASE_URL, window.ENV.SUPABASE_ANON_KEY);
+
+/* ========= Estado ========= */
+let data = [];              // tickets
+let lastReadMap = {};       // ticket_id -> timestamp (ms) do Supabase
+let chartAbertos=null, chartConcluidos=null;
+
+/* ========= DB: Load/Upsert/Delete/Chat/Reads ========= */
+async function loadFromSupabase(){
+  // tickets
+  const { data: tks, error } = await supa.from('tickets').select('*').order('aberto_em',{ascending:false});
+  if(error){ console.error(error); alert('Falha ao carregar tickets.'); return; }
+
+  // messages por ticket
+  const ids = tks.map(t=>t.id);
+  let msgsByTicket = {};
+  if(ids.length){
+    const { data: msgs } = await supa.from('messages').select('*').in('ticket_id', ids).order('created_at',{ascending:true});
+    (msgs||[]).forEach(m=>{
+      (msgsByTicket[m.ticket_id] ??= []).push({at:new Date(m.created_at).getTime(), txt:m.body, user:m.sender_name||'—'});
+    });
+  }
+
+  // last_reads do usuário para "não lidas"
+  const me = currentUser();
+  lastReadMap = {};
+  if(me){
+    const { data: lr } = await supa.from('last_reads').select('*').eq('user_id', me.id);
+    (lr||[]).forEach(r=> lastReadMap[r.ticket_id] = new Date(r.last_read_at).getTime());
+  }
+
+  // monta data[]
+  data = tks.map(t=>({
+    id: t.id,
+    abertoEm: new Date(t.aberto_em).getTime(),
+    solicitante: t.solicitante,
+    categoria: t.categoria,
+    assunto: t.assunto,
+    prioridade: t.prioridade,
+    descricao: t.descricao||'',
+    status: t.status,
+    responsavel: t.responsavel||'',
+    prazo: t.prazo ? new Date(t.prazo).toISOString().slice(0,10) : '',
+    codigo: t.codigo||'',
+    historico: msgsByTicket[t.id]||[]
+  }));
+}
+
+async function supaUpsertTicket(rec){
+  const payload = {
+    id: rec.id,
+    aberto_em: new Date(rec.abertoEm).toISOString(),
+    solicitante: rec.solicitante,
+    categoria: rec.categoria,
+    assunto: rec.assunto,
+    prioridade: rec.prioridade,
+    descricao: rec.descricao || null,
+    status: rec.status,
+    responsavel: rec.responsavel || null,
+    prazo: rec.prazo || null,
+    codigo: rec.codigo || null,
+    opened_by: currentUser()?.id || null,
+    closed_at: rec.status==='Encerrado' ? new Date().toISOString() : null
+  };
+  const { error } = await supa.from('tickets').upsert(payload);
+  if(error) console.error(error);
+}
+
+async function supaDeleteTicket(id){
+  const { error } = await supa.from('tickets').delete().eq('id', id);
+  if(error) console.error(error);
+}
+
+async function supaAddMessage(ticketId, text){
+  const u = currentUser();
+  const payload = { ticket_id: ticketId, sender: u?.id, sender_name: u?.name, body: text };
+  const { error } = await supa.from('messages').insert(payload);
+  if(error) console.error(error);
+}
+
+async function supaMarkRead(ticketId){
+  const u = currentUser(); if(!u) return;
+  const nowIso = new Date().toISOString();
+  await supa.from('last_reads').upsert({ ticket_id: ticketId, user_id: u.id, last_read_at: nowIso });
+  lastReadMap[ticketId] = new Date(nowIso).getTime();
+}
+
+/* ========= Realtime (opcional: já ligado) ========= */
+function setupRealtime(){
+  supa.channel('realtime:messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'}, payload=>{
+      const m = payload.new;
+      const d = data.find(x=>x.id===m.ticket_id);
+      if(d){
+        d.historico.push({at:new Date(m.created_at).getTime(), txt:m.body, user:m.sender_name||'—'});
+        render();
+        // notificação visual se não for o autor
+        if((currentUser()?.name||'') !== (m.sender_name||'')) toast(`Nova mensagem no ticket ${m.ticket_id}`);
+      }
+    })
+    .subscribe();
+
+  supa.channel('realtime:tickets')
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'}, async ()=>{ await loadFromSupabase(); render(); })
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'}, async ()=>{ await loadFromSupabase(); render(); })
+    .subscribe();
+}
+
+/* ========= Render Lista ========= */
 function getUnreadCount(d){
-  const map=getLastReadMap(); const last=map[d.id]||0; const me=currentUser()?.name || '';
+  const last = lastReadMap[d.id]||0;
+  const me = currentUser()?.name || '';
   return (d.historico||[]).filter(h=> h.at>last && h.user!==me).length;
 }
-
-/* ========= State ========= */
-let data = loadAll();
-/* migra status antigos */
-let migrated=false;
-data.forEach(d=>{ if(d.status==='Devolvido p/ desfecho'){ d.status='Em tratativa'; migrated=true; } });
-if(migrated) saveAll(data);
-
-if(!data.length){
-  data = [
-    {id:uid(), abertoEm:Date.now()-36e5*8, solicitante:'Ana', categoria:'Frota - Transportadora', codigo:'NF 12345', assunto:'Acesso ao sistema', prioridade:'Alta', descricao:'Sem acesso ao ERP', status:'Aberto', responsavel:'', prazo:ensureSLA('', 'Alta', Date.now()-36e5*8), historico:[{at:Date.now()-36e5*8, txt:'Ticket aberto por Ana', user:'Ana'}]},
-  ];
-  saveAll(data);
-}
-
-/* ========= Helpers: fechamento ========= */
-function getClosedAt(d){
-  const h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
-  for(const e of h){ if((e.txt||'').toLowerCase().includes('encerrado')) return e.at; }
-  return null;
-}
-
-/* ========= LIST RENDER ========= */
 function render(){
   const term = qs('#fSearch').value.toLowerCase().trim();
-  const st = qs('#fStatus').value; const pr = qs('#fPrio').value;
-  const cat = qs('#fCategoria').value; const sla = qs('#fSLA').value;
+  const st = qs('#fStatus').value, pr = qs('#fPrio').value, cat = qs('#fCategoria').value, sla = qs('#fSLA').value;
 
   const rows = data.filter(d=>{
     const sLA = slaStatus(d.prazo).code;
     const searchable = [d.id,d.solicitante,d.assunto,d.descricao,d.codigo].join(' ').toLowerCase();
-    const ok = (!term || searchable.includes(term)) &&
-               (!st || d.status===st) &&
-               (!pr || d.prioridade===pr) &&
-               (!cat || d.categoria===cat) &&
-               (!sla || sLA===sla);
-    return ok;
+    return (!term || searchable.includes(term)) && (!st || d.status===st) && (!pr || d.prioridade===pr) && (!cat || d.categoria===cat) && (!sla || sLA===sla);
   }).sort((a,b)=> b.abertoEm - a.abertoEm);
 
   const tbody = qs('#tbody');
@@ -492,146 +439,65 @@ function render(){
   }).join('') || `<tr><td colspan="11" class="muted">Nenhum registro encontrado</td></tr>`;
 }
 
-/* ========= KPI RENDER ========= */
-let chartAbertos=null, chartConcluidos=null;
+/* ========= KPIs ========= */
+function getClosedAt(d){
+  const h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
+  for(const e of h){ if((e.txt||'').toLowerCase().includes('encerrado')) return e.at; }
+  return null;
+}
 function renderKPIs(){
-  const input = qs('#kpiMonth');
-  if(!input.value){ const now=new Date(); input.value = ym(now); }
-  const sel = input.value; // YYYY-MM
-  qs('#mKpiMesLabel').textContent = sel;
+  const input = qs('#kpiMonth'); if(!input.value){ input.value = ym(new Date()); }
+  const sel = input.value; qs('#mKpiMesLabel').textContent = sel;
 
-  // Base "abertos no mês"
   const baseAbertos = data.filter(d=> ym(new Date(d.abertoEm))===sel );
-  const mAberto = baseAbertos.filter(d=> d.status==='Aberto').length;
-  const mTrat = baseAbertos.filter(d=> d.status==='Em tratativa').length;
-  const mEnc = baseAbertos.filter(d=> d.status==='Encerrado').length;
-  const mVenc = baseAbertos.filter(d=> slaStatus(d.prazo).code==='late' && d.status!=='Encerrado').length;
+  qs('#mKpiAberto').textContent    = baseAbertos.filter(d=>d.status==='Aberto').length;
+  qs('#mKpiTratativa').textContent = baseAbertos.filter(d=>d.status==='Em tratativa').length;
+  qs('#mKpiEncerrado').textContent = baseAbertos.filter(d=>d.status==='Encerrado').length;
+  qs('#mKpiVencido').textContent   = baseAbertos.filter(d=> slaStatus(d.prazo).code==='late' && d.status!=='Encerrado').length;
 
-  qs('#mKpiAberto').textContent = mAberto;
-  qs('#mKpiTratativa').textContent = mTrat;
-  qs('#mKpiEncerrado').textContent = mEnc;
-  qs('#mKpiVencido').textContent = mVenc;
-
-  // Qualidade dos encerramentos no mês
-  const closedThisMonth = data.map(d=>({d, closedAt:getClosedAt(d)}))
-                              .filter(x=> x.closedAt && ym(new Date(x.closedAt))===sel);
-  const closedTotal = closedThisMonth.length;
+  const closedThisMonth = data.map(d=>({d, closedAt:getClosedAt(d)})).filter(x=> x.closedAt && ym(new Date(x.closedAt))===sel);
   const closedWithSLA = closedThisMonth.filter(x=> !!x.d.prazo);
   const denom = closedWithSLA.length;
   const onTime = closedWithSLA.filter(x=> new Date(x.d.prazo+'T23:59:59') >= new Date(x.closedAt)).length;
-  const late = denom - onTime;
-  const pctOn = denom? Math.round(onTime/denom*100) : 0;
-  const pctLate = denom? 100 - pctOn : 0;
-
-  qs('#mKpiFechadosMes').textContent = closedTotal;
+  const pctOn   = denom? Math.round(onTime/denom*100) : 0;
+  const pctLate = denom? 100-pctOn : 0;
+  qs('#mKpiFechadosMes').textContent = closedThisMonth.length;
   qs('#mKpiFechadosBase').textContent = `com SLA: ${denom}`;
   qs('#mKpiPctPrazo').textContent = pctOn+'%';
   qs('#mKpiQtdPrazo').textContent = `${onTime} de ${denom}`;
   qs('#mKpiPctVenc').textContent = pctLate+'%';
-  qs('#mKpiQtdVenc').textContent = `${late} de ${denom}`;
+  qs('#mKpiQtdVenc').textContent = `${denom-onTime} de ${denom}`;
 
-  // ===== Gráficos por categoria =====
+  // Gráficos por categoria
   const categorias = [...new Set(data.map(d=> d.categoria||'—'))].sort();
-  // gráfico 1: contagem por status (base: abertos no mês)
-  const arrByCat = cat => baseAbertos.filter(d=>d.categoria===cat);
+  const arrByCat = c => baseAbertos.filter(d=>d.categoria===c);
   const valsAberto = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Aberto').length );
-  const valsTrat = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Em tratativa').length );
-  const valsEnc  = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Encerrado').length );
+  const valsTrat   = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Em tratativa').length );
+  const valsEnc    = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Encerrado').length );
 
   const ctx1 = document.getElementById('chartAbertos').getContext('2d');
   if(chartAbertos) chartAbertos.destroy();
-  chartAbertos = new Chart(ctx1,{
-    type:'bar',
-    data:{
-      labels:categorias,
-      datasets:[
-        {label:'Aberto', data:valsAberto},
-        {label:'Em tratativa', data:valsTrat},
-        {label:'Encerrado', data:valsEnc}
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{position:'bottom'} },
-      scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
-    }
-  });
+  chartAbertos = new Chart(ctx1,{ type:'bar', data:{ labels:categorias, datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Encerrado',data:valsEnc}] }, options:{ plugins:{legend:{position:'bottom'}}, scales:{y:{beginAtZero:true,ticks:{precision:0}}}} });
 
-  // gráfico 2: concl. mês (no prazo x vencidos) por categoria
-  const closedByCat = cat => closedWithSLA.filter(x=> x.d.categoria===cat);
+  const closedByCat = c => closedWithSLA.filter(x=> x.d.categoria===c);
   const valsPrazo = categorias.map(c=> closedByCat(c).filter(x=> new Date(x.d.prazo+'T23:59:59') >= new Date(x.closedAt)).length );
   const valsVenc  = categorias.map(c=> closedByCat(c).filter(x=> new Date(x.d.prazo+'T23:59:59') <  new Date(x.closedAt)).length );
-
   const ctx2 = document.getElementById('chartConcluidos').getContext('2d');
   if(chartConcluidos) chartConcluidos.destroy();
-  chartConcluidos = new Chart(ctx2,{
-    type:'bar',
-    data:{
-      labels:categorias,
-      datasets:[
-        {label:'No prazo', data:valsPrazo},
-        {label:'Vencidos', data:valsVenc}
-      ]
-    },
-    options:{
-      responsive:true,
-      plugins:{ legend:{position:'bottom'} },
-      scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } }
-    }
-  });
+  chartConcluidos = new Chart(ctx2,{ type:'bar', data:{ labels:categorias, datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}] }, options:{ plugins:{legend:{position:'bottom'}}, scales:{y:{beginAtZero:true,ticks:{precision:0}}}} });
 }
 
-/* ========= Modal / Chat ========= */
+/* ========= Modal + Form ========= */
 function openModal(show=true){ qs('#modal').classList.toggle('show', show); }
-function setEditable(editable){
-  const form = qs('#frm');
-  form.classList.toggle('readonly', !editable);
-  qsa('#frm input, #frm select, #frm textarea').forEach(el=>{
-    if(['ticketId'].includes(el.id)) return;
-    el.readOnly = !editable; el.disabled = !editable;
-  });
-  qs('#solicitante').readOnly = true; qs('#solicitante').disabled = true;
-}
-function toggleResponsavelByCategoria(){
-  const isSAK = qs('#categoriaSel').value==='SAK';
-  qs('#responsavelWrap').classList.toggle('hidden', isSAK);
-}
-function resetForm(){
-  qs('#ticketId').value='';
-  qs('#solicitante').value=currentUser()?.name||'';
-  qs('#categoriaSel').value='Frota - Transportadora';
-  qs('#assunto').value='';
-  qs('#prioridade').value='Média';
-  qs('#descricao').value='';
-  qs('#status').value='Aberto';
-  qs('#responsavel').value='';
-  qs('#prazo').value='';
-  qs('#codigo').value='';
-  qs('#chatHistory').innerHTML='';
-  qs('#chatText').value='';
-  const isAdmin = currentUser()?.role==='admin';
-  qs('#btnDelete').style.display = isAdmin ? 'inline-flex' : 'none';
-  qs('#btnConfirm').disabled = true; // habilita após salvar
-  qs('#btnSave').classList.remove('hidden');
-  setEditable(true);
-  toggleResponsavelByCategoria();
-}
-function renderChat(list){
-  const u = currentUser()?.name || '';
-  qs('#chatHistory').innerHTML = (list||[]).slice().sort((a,b)=>a.at-b.at).map(h=>{
-    const mine = h.user===u;
-    return `<div class="bubble ${mine?'me':'them'}">${escapeHtml(h.txt)}<time>${new Date(h.at).toLocaleString('pt-BR')} • ${escapeHtml(h.user||'')}</time></div>`;
-  }).join('');
-  const div = qs('#chatHistory'); div.scrollTop = div.scrollHeight;
-}
-function openNew(){
-  resetForm();
-  qs('#modalTitle').textContent='Nova solicitação';
-  openModal(true);
-}
-function openEdit(id){
-  const d = data.find(x=>x.id===id);
-  if(!d) return;
+function setEditable(edit){ const form=qs('#frm'); form.classList.toggle('readonly', !edit); qsa('#frm input,#frm select,#frm textarea').forEach(el=>{ if(['ticketId'].includes(el.id)) return; el.readOnly=!edit; el.disabled=!edit; }); qs('#solicitante').readOnly=true; qs('#solicitante').disabled=true; }
+function toggleResponsavelByCategoria(){ qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK'); }
+function resetForm(){ qs('#ticketId').value=''; qs('#solicitante').value=currentUser()?.name||''; qs('#categoriaSel').value='Frota - Transportadora'; qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value=''; qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#prazo').value=''; qs('#codigo').value=''; qs('#chatHistory').innerHTML=''; qs('#chatText').value=''; qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none'; qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden'); setEditable(true); toggleResponsavelByCategoria(); }
+function renderChat(list){ const u=currentUser()?.name||''; qs('#chatHistory').innerHTML=(list||[]).slice().sort((a,b)=>a.at-b.at).map(h=>`<div class="bubble ${h.user===u?'me':'them'}">${escapeHtml(h.txt)}<time>${new Date(h.at).toLocaleString('pt-BR')} • ${escapeHtml(h.user||'')}</time></div>`).join(''); const div=qs('#chatHistory'); div.scrollTop=div.scrollHeight; }
+
+function openNew(){ resetForm(); qs('#modalTitle').textContent='Nova solicitação'; openModal(true); }
+
+async function openEdit(id){
+  const d = data.find(x=>x.id===id); if(!d) return;
   resetForm();
   qs('#modalTitle').textContent = `Solicitação ${d.id}`;
   qs('#ticketId').value = d.id;
@@ -645,188 +511,144 @@ function openEdit(id){
   qs('#prazo').value = d.prazo || '';
   qs('#codigo').value = d.codigo || '';
   renderChat(d.historico||[]);
-
-  const isAdmin = currentUser()?.role==='admin';
-  qs('#btnDelete').style.display = isAdmin ? 'inline-flex' : 'none';
+  qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled = d.status!=='Aberto';
+  setEditable(false); toggleResponsavelByCategoria(); qs('#btnSave').classList.add('hidden');
 
-  setEditable(false);
-  toggleResponsavelByCategoria();
-  qs('#btnSave').classList.add('hidden');
-
-  setLastRead(d.id, Date.now());
-  render();
-
+  await supaMarkRead(d.id); render();
   openModal(true);
 }
+
 function collectForm(){
   const id = qs('#ticketId').value || uid();
-  const now = Date.now();
-  const exists = data.find(x=>x.id===id);
-  const abertoEm = exists ? exists.abertoEm : now;
-
-  let prazo = qs('#prazo').value;
-  const prioridade = qs('#prioridade').value;
-  prazo = ensureSLA(prazo, prioridade, abertoEm);
-
+  const now = Date.now(); const exists = data.find(x=>x.id===id); const abertoEm = exists ? exists.abertoEm : now;
+  let prazo = ensureSLA(qs('#prazo').value, qs('#prioridade').value, abertoEm);
   const categoria = qs('#categoriaSel').value;
-  let responsavel = qs('#responsavel').value.trim();
-  if(categoria==='SAK'){ responsavel=''; }
-
+  let responsavel = qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
   return {
-    id,
-    abertoEm,
+    id, abertoEm,
     solicitante: qs('#solicitante').value.trim(),
-    categoria,
-    assunto: qs('#assunto').value.trim(),
-    prioridade,
-    descricao: qs('#descricao').value.trim(),
-    status: qs('#status').value,
-    responsavel,
-    prazo,
-    codigo: qs('#codigo').value.trim(),
+    categoria, assunto: qs('#assunto').value.trim(),
+    prioridade: qs('#prioridade').value, descricao: qs('#descricao').value.trim(),
+    status: qs('#status').value, responsavel, prazo, codigo: qs('#codigo').value.trim(),
     historico: exists ? exists.historico : [{at:abertoEm, txt:`Ticket aberto por ${qs('#solicitante').value.trim()||'usuário'}`, user: qs('#solicitante').value.trim()||'usuário'}]
   };
 }
-function save(e){
+
+async function save(e){
   e.preventDefault();
   const rec = collectForm();
   if(!rec.solicitante || !rec.assunto){ alert('Preencha Assunto. Solicitante vem do login.'); return; }
   const i = data.findIndex(x=>x.id===rec.id);
-  const label = i>=0 ? 'Atualizado' : 'Criado';
   if(i>=0) data[i] = {...data[i], ...rec}; else data.push(rec);
-  saveAll(data); render();
-  addHistory(rec.id, `${label} por ${currentUser()?.name || 'sistema'}`);
+  await supaUpsertTicket(rec);
+  render();
+  await addHistory(rec.id, `${i>=0?'Atualizado':'Criado'} por ${currentUser()?.name || 'sistema'}`);
   openEdit(rec.id);
 }
-function addHistory(id, text){
+
+async function addHistory(id, text){
   const d = data.find(x=>x.id===id); if(!d) return;
   d.historico = d.historico || [];
   d.historico.push({at:Date.now(), txt:text, user: currentUser()?.name || ''});
-  saveAll(data);
   renderChat(d.historico);
+  await supaAddMessage(id, text);
 }
-function removeTicket(id){
-  const isAdmin = currentUser()?.role==='admin';
-  if(!isAdmin) return alert('Apenas administradores podem excluir.');
+
+async function removeTicket(id){
+  if((currentUser()?.role)!=='admin'){ alert('Apenas administradores podem excluir.'); return; }
   if(!confirm('Deseja excluir esta solicitação?')) return;
-  data = data.filter(x=>x.id!==id);
-  saveAll(data); render(); openModal(false);
+  data = data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false);
 }
 
 /* ========= Ações ========= */
-function confirmTicket(id){
+async function confirmTicket(id){
   const d = data.find(x=>x.id===id); if(!d) return;
   if(d.status==='Aberto'){
     d.status='Em tratativa';
     if(d.categoria==='SAK'){ d.responsavel = currentUser()?.name || d.responsavel || ''; toast(`Responsável definido: ${d.responsavel}`); }
-    addHistory(id, 'Ticket confirmado e movido para Em tratativa');
-    saveAll(data); render();
+    await supaUpsertTicket(d);
+    await addHistory(id,'Ticket confirmado e movido para Em tratativa');
+    render();
   }
 }
-function closeTicket(id){
+
+async function closeTicket(id){
   const d = data.find(x=>x.id===id); if(!d) return;
   if(d.status!=='Encerrado'){
-    const old = d.status;
-    d.status='Encerrado';
-    addHistory(id, `Status alterado: ${old} ➜ Encerrado`);
-    saveAll(data); render();
+    const old = d.status; d.status='Encerrado';
+    await supaUpsertTicket(d);
+    await addHistory(id, `Status alterado: ${old} ➜ Encerrado`);
+    render();
   }
 }
 
 /* ========= Bindings Modal ========= */
 qs('#btnDelete').onclick = ()=> removeTicket(qs('#ticketId').value);
-qs('#btnConfirm').onclick = ()=>{
-  const id = qs('#ticketId').value || (alert('Salve primeiro para confirmar.'), null);
-  if(!id) return;
-  confirmTicket(id);
-  openEdit(id);
-};
+qs('#btnConfirm').onclick = async ()=>{ const id=qs('#ticketId').value || (alert('Salve primeiro para confirmar.'), null); if(!id) return; await confirmTicket(id); await openEdit(id); };
 qs('#frm').addEventListener('submit', save);
 qs('#btnSave').addEventListener('click', save);
 qs('#closeModal').onclick = ()=>openModal(false);
 qs('#categoriaSel').addEventListener('change', toggleResponsavelByCategoria);
 
-/* ========= Chat Bindings ========= */
-function sendChat(){
-  const id = qs('#ticketId').value || (alert('Salve primeiro para conversar.'), null);
-  if(!id) return;
+/* ========= Chat ========= */
+async function sendChat(){
+  const id = qs('#ticketId').value || (alert('Salve primeiro para conversar.'), null); if(!id) return;
   const txt = qs('#chatText').value.trim(); if(!txt) return;
-  addHistory(id, txt);
-  qs('#chatText').value='';
-  setLastRead(id, Date.now()); // autor leu
-  render();
+  await addHistory(id, txt); qs('#chatText').value='';
+  await supaMarkRead(id); render();
 }
 qs('#btnSendChat').onclick = sendChat;
-qs('#chatText').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendChat(); }});
+qs('#chatText').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendChat(); }});
 
-/* ========= Botões globais ========= */
-qs('#btnNew').onclick = openNew;
-qs('#btnLogout').onclick = ()=>{ clearSession(); showLogin(); };
-
-/* ========= Filtros (lista) ========= */
-qsa('#fSearch,#fStatus,#fPrio,#fCategoria,#fSLA').forEach(el=> el.addEventListener('input', render));
-qs('#btnClear').onclick = ()=>{ qsa('#fSearch,#fStatus,#fPrio,#fCategoria,#fSLA').forEach(el=> el.value=''); render(); };
-
-/* ========= Export Excel (.xlsx) ========= */
-function buildHistoricoString(hist){
-  return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>{
-    const dt=new Date(h.at).toLocaleString('pt-BR');
-    return `${dt} — ${h.user||''}: ${h.txt||''}`;
-  }).join('\n');
-}
+/* ========= Export Excel ========= */
+function buildHistoricoString(hist){ return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>`${new Date(h.at).toLocaleString('pt-BR')} — ${h.user||''}: ${h.txt||''}`).join('\n'); }
 function exportXLSX(){
   const rows = data.slice().sort((a,b)=> b.abertoEm - a.abertoEm);
   const header = ['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código/NF/DF','Histórico (chat)'];
   const aoa = [header];
-  rows.forEach(r=>{
-    aoa.push([
-      r.id,
-      new Date(r.abertoEm), // Date real -> Excel interpreta
-      r.solicitante||'',
-      r.categoria||'',
-      r.assunto||'',
-      r.prioridade||'',
-      r.descricao||'',
-      r.status||'',
-      r.responsavel||'',
-      r.prazo? new Date(r.prazo+'T00:00:00') : '',
-      r.codigo||'',
-      buildHistoricoString(r.historico)
-    ]);
-  });
-  const ws = XLSX.utils.aoa_to_sheet(aoa, {cellDates:true});
-  // larguras
-  ws['!cols'] = [
-    {wch:8},{wch:19},{wch:12},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:60}
-  ];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Tickets');
-  XLSX.writeFile(wb, `solicitacoes_${new Date().toISOString().slice(0,10)}.xlsx`);
+  rows.forEach(r=> aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo? new Date(r.prazo+'T00:00:00'):'', r.codigo||'', buildHistoricoString(r.historico) ]));
+  const ws = XLSX.utils.aoa_to_sheet(aoa, {cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:12},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:60}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Tickets'); XLSX.writeFile(wb, `solicitacoes_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 qs('#btnExportXLSX').onclick = exportXLSX;
 
-/* ========= KPIs page nav ========= */
+/* ========= Navegação KPIs ========= */
 qs('#btnKPIs').onclick = ()=>{ qs('#listPage').classList.add('hidden'); qs('#kpiPage').classList.remove('hidden'); renderKPIs(); };
 qs('#btnBackList').onclick = ()=>{ qs('#kpiPage').classList.add('hidden'); qs('#listPage').classList.remove('hidden'); render(); };
 qs('#kpiMonth').addEventListener('input', renderKPIs);
 
-/* ========= Boot & Login ========= */
-function boot(){ const u=currentUser(); if(!u){ showLogin(); return; } showApp(); render(); }
+/* ========= App Boot & Login ========= */
+function showLogin(){ qs('#loginSection').style.display='grid'; qs('#appSection').style.display='none'; }
+function showApp(){ qs('#loginSection').style.display='none'; qs('#appSection').style.display='block'; const u=currentUser(); qs('#whoami').textContent=`${u.name} • ${u.role}`; }
+
+async function boot(){
+  const u = currentUser();
+  if(!u){ showLogin(); return; }
+  showApp();
+  await loadFromSupabase(); render(); setupRealtime();
+}
 boot();
-qs('#btnLogin').onclick = ()=>{
-  const user = qs('#loginUser').value.trim().toLowerCase();
+
+qs('#btnLogout').onclick = async ()=>{ await supa.auth.signOut(); clearSession(); showLogin(); };
+
+qs('#btnLogin').onclick = async ()=>{
+  const username = qs('#loginUser').value.trim().toLowerCase();
   const pass = qs('#loginPass').value;
-  const rec = USERS[user];
-  if(!rec || rec.pass !== pass){ alert('Usuário ou senha inválidos.'); return; }
-  setSession({username:user, name:rec.name, role:rec.role}); boot();
+  const email = `${username}@koerich.app`;
+
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+  if (error){ alert('Usuário ou senha inválidos.'); return; }
+
+  // busca perfil
+  const { data: profile } = await supa.from('profiles').select('*').eq('id', data.user.id).single();
+  const user = { id:data.user.id, username:profile?.username||username, name:profile?.display_name||username, role:profile?.role||'operador' };
+  setSession(user);
+  await loadFromSupabase(); showApp(); render(); setupRealtime();
 };
 
-/* ========= Expose ========= */
-window.openEdit = openEdit;
-window.closeTicket = closeTicket;
-window.confirmTicket = confirmTicket;
+/* ========= Expose (console) ========= */
+window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=confirmTicket;
 </script>
 </body>
 </html>
-
