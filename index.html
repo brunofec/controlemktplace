@@ -109,10 +109,10 @@
     <div class="row" style="justify-content:flex-start;align-items:center;gap:12px">
       <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
     </div>
-    <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
+    <p class="muted" style="font-size:12px">Use: bruno/jb1805 • maurilios/ivan2319 • jessica/jessica01 • annaj/anna02</p>
     <div class="space"></div>
     <div class="row" style="flex-direction:column;gap:10px">
-      <input id="loginUser" placeholder="Usuário ou e-mail" autofocus>
+      <input id="loginUser" placeholder="Usuário ou e-mail (ex.: brunofec ou brunofec@koerich.com.br)" autofocus>
       <input id="loginPass" placeholder="Senha" type="password">
       <button id="btnLogin" class="btn-success"><i class="fa fa-right-to-bracket"></i> Entrar</button>
     </div>
@@ -247,7 +247,7 @@
           <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select></div>
         </div>
         <div class="grid-row">
-          <div><label>Código do Cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
+          <div><label>Código do Cliente, NF ou DF</label><input id="codigo" placeholder="Ex.: 12345 / NF 98765 / DF 0001"/></div>
           <div id="responsavelWrap"><label>Responsável</label>
             <select id="responsavel"><option></option><option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option></select>
           </div>
@@ -406,6 +406,8 @@ function setupRealtime(){
 }
 
 /* ========= Render Lista ========= */
+const prioRank = (p)=> p==='Alta'?0 : p==='Média'?1 : 2;
+
 function getUnreadCount(d){
   const last = lastReadMap[d.id]||0;
   const me = currentUser()?.name || '';
@@ -419,7 +421,9 @@ function render(){
     const sLA = slaStatus(d.prazo).code;
     const searchable = [d.id,d.solicitante,d.assunto,d.descricao,d.codigo].join(' ').toLowerCase();
     return (!term || searchable.includes(term)) && (!st || d.status===st) && (!pr || d.prioridade===pr) && (!cat || d.categoria===cat) && (!sla || sLA===sla);
-  }).sort((a,b)=> b.abertoEm - a.abertoEm);
+  })
+  // Ordenação pedida: Alta > Média > Baixa, e dentro por data desc
+  .sort((a,b)=> prioRank(a.prioridade) - prioRank(b.prioridade) || b.abertoEm - a.abertoEm);
 
   const tbody = qs('#tbody');
   tbody.innerHTML = rows.map(d=>{
@@ -527,9 +531,13 @@ function enablePriorityOnly(){
     if (['ticketId','prioridade'].includes(el.id)) return;
     el.readOnly = true; el.disabled = true;
   });
-  // …menos a prioridade
-  const p = qs('#prioridade'); p.disabled=false; p.readOnly=false;
-  // permite salvar a mudança
+  // …menos a prioridade (e remove o efeito da classe .readonly)
+  const p = qs('#prioridade');
+  p.disabled = false; p.readOnly = false;
+  p.style.pointerEvents = 'auto';
+  p.style.opacity = '1';
+
+  // mostra o botão Salvar para persistir a mudança
   qs('#btnSave').classList.remove('hidden');
 }
 function toggleResponsavelByCategoria(){ qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK'); }
@@ -568,7 +576,7 @@ async function openEdit(id){
   qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled = d.status!=='Aberto';
   setEditable(false); toggleResponsavelByCategoria();
-  enablePriorityOnly(); // permite editar só a prioridade
+  enablePriorityOnly(); // permite editar só a prioridade, mesmo com .readonly
 
   await supaMarkRead(d.id); render();
   openModal(true);
@@ -680,7 +688,8 @@ qs('#chatText').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.prevent
 /* ========= Export Excel ========= */
 function buildHistoricoString(hist){ return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>`${new Date(h.at).toLocaleString('pt-BR')} — ${h.user||''}: ${h.txt||''}`).join('\n'); }
 function exportXLSX(){
-  const rows = data.slice().sort((a,b)=> b.abertoEm - a.abertoEm);
+  const rows = data.slice()
+    .sort((a,b)=> prioRank(a.prioridade) - prioRank(b.prioridade) || b.abertoEm - a.abertoEm);
   const header = ['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código/NF/DF','Histórico (chat)'];
   const aoa = [header];
   rows.forEach(r=> aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo? new Date(r.prazo+'T00:00:00'):'', r.codigo||'', buildHistoricoString(r.historico) ]));
@@ -740,6 +749,3 @@ window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=c
 </script>
 </body>
 </html>
-
-
-
