@@ -99,6 +99,12 @@
   .kpi-sub{font-size:12px;color:var(--muted);margin-top:6px}
   .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
   @media (max-width:1100px){ .charts{grid-template-columns:1fr} }
+  .login-head{
+  flex-direction: column;   /* empilha */
+  align-items: flex-center;  /* mantém alinhado à esquerda */
+  gap: 6px;
+}
+.login-head h2{ margin: 0; }
 </style>
 </head>
 <body>
@@ -106,8 +112,9 @@
 <!-- ===== LOGIN ===== -->
 <section id="loginSection" style="min-height:100vh;display:none;place-items:center;padding:20px">
   <div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
-    <div class="row" style="justify-content:flex-start;align-items:center;gap:12px">
-      <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
+    <div class="row login-head">
+      <img src="logo.png" class="logo-top" alt="Logo">
+      <h2>Entrar</h2>
     </div>
     <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
     <div class="space"></div>
@@ -749,4 +756,5 @@ window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=c
 </script>
 </body>
 </html>
+
 
