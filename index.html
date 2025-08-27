@@ -338,33 +338,61 @@ let chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
 /* ========= DB ========= */
 async function loadFromSupabase(){
-  const {data:tks,error}=await supa.from('tickets').select('*').order('aberto_em',{ascending:false});
-  if(error){console.error(error);alert('Falha ao carregar tickets.');return;}
-  const ids=tks.map(t=>t.id);
-  let msgsByTicket={};
-  if(ids.length){
-    const {data:msgs}=await supa.from('messages').select('*').in('ticket_id',ids).order('created_at',{ascending:true});
-    (msgs||[]).forEach(m=>{(msgsByTicket[m.ticket_id]??=[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})});
-  }
-  const me=currentUser(); lastReadMap={};
-  if(me){const {data:lr}=await supa.from('last_reads').select('*').eq('user_id',me.id);(lr||[]).forEach(r=>lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime());}
+  // Seleciona colunas explicitamente e ordena no cliente (evita erro se o server não tiver alguma coluna/índice)
+  const { data: tks, error } = await supa
+    .from('tickets')
+    .select('id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora');
 
-  data=tks.map(t=>({
-    id:t.id,
-    abertoEm:new Date(t.aberto_em).getTime(),
-    solicitante:t.solicitante,
-    categoria:t.categoria,
-    assunto:t.assunto,
-    prioridade:t.prioridade,
-    descricao:t.descricao||'',
-    status:t.status,
-    responsavel:t.responsavel||'',
-    prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
-    codigo:t.codigo||'',
-    transportadora:t.transportadora||'',
-    historico:msgsByTicket[t.id]||[]
+  if (error) {
+    console.error('Supabase select tickets error:', error);
+    toast('Erro ao carregar tickets: ' + (error.message || 'ver console'));
+    return;
+  }
+
+  // ordena por aberto_em desc mesmo se o servidor não ordenou
+  (tks || []).sort((a,b) => new Date(b.aberto_em) - new Date(a.aberto_em));
+
+  // carrega mensagens
+  const ids = (tks || []).map(t => t.id);
+  let msgsByTicket = {};
+  if (ids.length) {
+    const { data: msgs, error: e2 } = await supa
+      .from('messages')
+      .select('ticket_id, body, sender_name, created_at')
+      .in('ticket_id', ids);
+    if (e2) { console.error('Supabase select messages error:', e2); toast('Erro ao carregar mensagens'); }
+    (msgs || []).forEach(m => {
+      (msgsByTicket[m.ticket_id] ??= []).push({ at: new Date(m.created_at).getTime(), txt: m.body, user: m.sender_name || '—' });
+    });
+  }
+
+  // last_reads
+  const me = currentUser();
+  lastReadMap = {};
+  if (me) {
+    const { data: lr, error: e3 } = await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id', me.id);
+    if (e3) console.warn('last_reads error:', e3);
+    (lr || []).forEach(r => lastReadMap[r.ticket_id] = new Date(r.last_read_at).getTime());
+  }
+
+  // mapeia
+  data = (tks || []).map(t => ({
+    id: t.id,
+    abertoEm: new Date(t.aberto_em).getTime(),
+    solicitante: t.solicitante,
+    categoria: t.categoria,
+    assunto: t.assunto,
+    prioridade: t.prioridade,
+    descricao: t.descricao || '',
+    status: t.status,
+    responsavel: t.responsavel || '',
+    prazo: t.prazo ? new Date(t.prazo).toISOString().slice(0,10) : '',
+    codigo: t.codigo || '',
+    transportadora: t.transportadora || '',
+    historico: msgsByTicket[t.id] || []
   }));
 }
+
 async function supaUpsertTicket(rec){
   const payload={
     id:rec.id,
