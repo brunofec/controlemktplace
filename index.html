@@ -5,13 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Controle Interno de Solicitações</title>
 
-<!-- Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <link rel="icon" href="logo.png"/>
 
-<!-- Libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -33,14 +31,14 @@
   .brand h1{font-size:22px;margin:0}
   .logo-top{height:48px;object-fit:contain}
   .actions{margin-left:auto;display:flex;gap:10px;align-items:center}
-  button,.btn{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;
+  button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;
     transition:.2s transform ease,.2s opacity ease,.2s box-shadow ease;box-shadow:0 8px 18px rgba(79,140,255,.25)}
   button:hover{transform:translateY(-1px)} .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);box-shadow:none}
   .btn-danger{background:var(--danger);box-shadow:0 8px 18px rgba(255,93,93,.25)} .btn-success{background:var(--success)}
   .btn-warning{background:var(--warning);color:#10151b}
   .btn-icon{padding:8px 10px;border-radius:10px;min-width:36px; display:inline-flex; align-items:center; justify-content:center; position:relative}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-  .filters{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr .8fr;gap:10px}
+  .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .8fr 1fr auto;gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1319;color:var(--text);outline:none;font-size:14px}
   .table-wrap{overflow:auto}
   table{width:100%;border-collapse:collapse}
@@ -54,13 +52,15 @@
   .table-actions{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
   .muted{color:var(--muted)} .nowrap{white-space:nowrap}
 
-  /* Destaques por categoria */
   .sak-row{background-image: linear-gradient(to right, rgba(255,159,71,.06), transparent)}
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
   .frota-row{background-image: linear-gradient(to right, rgba(79,140,255,.06), transparent)}
   .frota-badge{background:#223348; color:#aeddff; border:1px solid #2f4e68}
 
-  /* Badge do chat não lido */
+  .pending-row{background-image:linear-gradient(to right, rgba(255,191,71,.06), transparent)}
+  .badge-pendente{background:#473b1e; color:#ffd58a; border:1px solid #5a4b23}
+  .badge-pendente.badge-venc{background:#4a2222; color:#ffb0b0; border-color:#5a2a2a}
+
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
     min-width:16px; height:16px; padding:0 4px; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel)}
 
@@ -69,15 +69,14 @@
   .hidden{display:none !important}
   .readonly input, .readonly select, .readonly textarea{pointer-events:none; opacity:.8}
 
-  /* Modal */
   .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.45);z-index:20}
   .modal.show{display:grid}
   .modal .card{width:min(980px,96vw);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);padding:16px}
   .grid-2{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
   .grid-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
   .grid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 
-  /* Chat */
   .chat-box{display:flex;flex-direction:column;height:520px;border:1px solid var(--border);border-radius:12px;background:#0e1318}
   .chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
   .bubble{max-width:88%;padding:10px 12px;border-radius:12px}
@@ -87,34 +86,28 @@
   .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
   .chat-input input{flex:1}
 
-  /* Toast */
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
 
-  /* KPIs */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
   .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
   .kpi-sub{font-size:12px;color:var(--muted);margin-top:6px}
   .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
   @media (max-width:1100px){ .charts{grid-template-columns:1fr} }
-  .login-head{
-  flex-direction: column;   /* empilha */
-  align-items: flex-center;  /* mantém alinhado à esquerda */
-  gap: 6px;
-}
-.login-head h2{ margin: 0; }
+
+  .login-head{flex-direction:column;align-items:center;gap:6px}
+  .login-head h2{margin:0}
 </style>
 </head>
 <body>
 
-<!-- ===== LOGIN ===== -->
+<!-- LOGIN -->
 <section id="loginSection" style="min-height:100vh;display:none;place-items:center;padding:20px">
   <div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
     <div class="row login-head">
-      <img src="logo.png" class="logo-top" alt="Logo">
-      <h2>Entrar</h2>
+      <img src="logo.png" class="logo-top" alt="Logo"><h2>Entrar</h2>
     </div>
     <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
     <div class="space"></div>
@@ -126,34 +119,46 @@
   </div>
 </section>
 
-<!-- ===== APP ===== -->
+<!-- APP -->
 <section id="appSection" style="display:none">
   <header>
     <div class="wrap row">
-      <div class="brand">
-        <img src="logo.png" class="logo-top" alt="Logo">
-        <h1>Controle Interno de Solicitações</h1>
-      </div>
+      <div class="brand"><img src="logo.png" class="logo-top" alt="Logo"><h1>Controle Interno de Solicitações</h1></div>
       <div class="actions">
         <span id="whoami" class="pill"></span>
         <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
-        <button id="btnExportXLSX" class="btn-ghost" title="Exportar Excel (.xlsx)"><i class="fa fa-file-excel"></i> Exportar</button>
+        <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
+        <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
         <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button>
       </div>
     </div>
   </header>
+
+  <!-- Diagnóstico -->
+  <div id="diagBar" class="hidden" style="background:#13202e;color:#cde2ff;border-bottom:1px solid #213448">
+    <div class="wrap" style="display:flex;gap:16px;align-items:center;padding:8px 0;font-size:13px">
+      <strong>Diagnóstico</strong>
+      <span id="diagEnv"></span>
+      <span id="diagUser"></span>
+      <span id="diagCount"></span>
+      <span id="diagErr" style="color:#ffb0b0"></span>
+      <button id="diagClose" class="btn-ghost" style="margin-left:auto">Fechar</button>
+    </div>
+  </div>
 
   <!-- LISTA -->
   <main id="listPage" class="wrap">
     <section class="panel">
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód. do cliente..."/>
+          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód./NF/DF, transportadora, descrição..."/>
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
           <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (<=12h)</option><option value="late">Vencido</option></select>
+          <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
+          <label class="badge" style="gap:8px"><input type="checkbox" id="fMine"> Só meus</label>
         </div>
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
@@ -200,13 +205,21 @@
         <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
       </div>
 
+      <div class="space"></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><small>Pendentes (abertos no mês)</small><strong id="mKpiPend">0</strong></div>
+        <div class="kpi-card"><small>Pendentes vencidas (mês)</small><strong id="mKpiPendVenc">0</strong></div>
+        <div class="kpi-card" style="grid-column:1/-1"><small>Observação</small><div class="kpi-sub">Pendência = ticket adiado (ainda não encerrado). Vencida = data de retomada anterior a hoje.</div></div>
+      </div>
+
       <div class="charts">
         <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
         <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
+        <div class="panel" style="grid-column:1/-1"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por transportadora</h3><canvas id="chartTransp"></canvas></div>
       </div>
 
       <div class="space"></div>
-      <div class="badge">Regras: KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês e com SLA definido.</div>
+      <div class="badge">Regras: KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês. Transportadora considera apenas tickets com campo preenchido.</div>
     </section>
   </main>
 
@@ -226,21 +239,21 @@
       <!-- FORM -->
       <form id="frm" autocomplete="off" style="display:flex;flex-direction:column;gap:12px">
         <input type="hidden" id="ticketId">
+
         <div class="grid-form">
           <div><label>Solicitante</label><input id="solicitante" readonly/></div>
           <div><label>Categoria</label><select id="categoriaSel"><option>Frota - Transportadora</option><option>SAK</option></select></div>
           <div><label>Prioridade</label><select id="prioridade"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
         </div>
+
         <div class="grid-row">
           <div>
             <label>Assunto</label>
             <select id="assunto" required>
               <option value="">Selecione…</option>
-              <!-- novos -->
               <option>Cliente Ausente</option>
               <option>Solicitação contato</option>
               <option>End. não encontrado</option>
-              <!-- existentes -->
               <option>Arrependimento</option>
               <option>Atraso de entrega</option>
               <option>Mercado Fraude</option>
@@ -253,17 +266,30 @@
           </div>
           <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select></div>
         </div>
-        <div class="grid-row">
-          <div><label>Código do Cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
+
+        <div class="grid-3">
+          <div><label>Código do Cliente, NF ou DF</label><input id="codigo" placeholder="Ex.: 12345 / NF 98765 / DF 0001"/></div>
+          <div id="transportadoraWrap">
+            <label>Transportadora</label>
+            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
+            <datalist id="lstTransportadora">
+              <option value="Total Express"></option><option value="Correios / Sedex"></option><option value="Jadlog"></option>
+              <option value="Sequoia"></option><option value="Loggi"></option><option value="J&amp;T"></option>
+              <option value="Kangu"></option><option value="DHL"></option><option value="Outros"></option>
+            </datalist>
+          </div>
           <div id="responsavelWrap"><label>Responsável</label>
             <select id="responsavel"><option></option><option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option></select>
           </div>
         </div>
+
         <div><label>Descrição</label><textarea id="descricao" rows="4" placeholder="Detalhe o que precisa"></textarea></div>
+
         <div class="grid-row">
           <div><label>Prazo (SLA) — Data</label><input id="prazo" type="date"/></div>
           <div><label>&nbsp;</label><div class="badge">Definido automaticamente se vazio</div></div>
         </div>
+
         <div class="row" style="gap:8px">
           <button type="button" class="btn-warning btn-icon" id="btnConfirm" title="Confirmar (tratativa)"><i class="fa fa-check-double"></i></button>
           <button type="button" class="btn-danger btn-icon" id="btnDelete" title="Excluir"><i class="fa fa-trash"></i></button>
@@ -288,473 +314,512 @@
   </div>
 </div>
 
-<!-- Toaster -->
 <div id="toast" class="toast"></div>
 
 <script>
-/* ========= Helpers UI ========= */
-const qs=(s,el=document)=>el.querySelector(s);
-const qsa=(s,el=document)=>[...el.querySelectorAll(s)];
-const fmtDate=(ts)=> new Date(ts).toLocaleString('pt-BR');
-const uid=()=> Math.random().toString(36).slice(2,8).toUpperCase();
-const escapeHtml=(str='')=>str.replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-const debounce = (fn, ms=150) => { let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn.apply(null,args),ms); }; };
-function toast(msg){ const cont=qs('#toast'); const el=document.createElement('div'); el.className='t'; el.textContent=msg; cont.appendChild(el); requestAnimationFrame(()=>el.classList.add('show')); setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>cont.removeChild(el),250); }, 3000); }
-function prioToDays(p){ if(p==='Alta')return 1; if(p==='Média')return 3; return 5; }
-function ensureSLA(prazo,prioridade,abertoEm){ if(prazo) return prazo; const base=new Date(abertoEm||Date.now()); base.setHours(0,0,0,0); base.setDate(base.getDate()+prioToDays(prioridade||'Média')); return base.toISOString().slice(0,10); }
-function slaStatus(dateStr){ if(!dateStr) return {code:'',label:'—'}; const today=new Date(); today.setHours(23,59,59,999); const due=new Date(dateStr+'T23:59:59'); const diffH=(due-today)/36e5; if(diffH<0) return {code:'late',label:'Vencido'}; if(diffH<=12) return {code:'risk',label:'Risco'}; return {code:'ok',label:'No prazo'}; }
-function statusBadge(status){ const map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'}; return `<span class="badge ${map[status]||''}"><i class="fa fa-circle"></i>${status}</span>`; }
-function prioBadge(p){ const cls=p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa'; return `<span class="badge ${cls}">${p}</span>`; }
-const ym = d => d.toISOString().slice(0,7);
-const DEFAULT_EMAIL_DOMAIN = "koerich.com.br";
+/* ===== Helpers ===== */
+function qs(s,el){return (el||document).querySelector(s)}
+function qsa(s,el){return Array.prototype.slice.call((el||document).querySelectorAll(s))}
+function fmtDate(ts){return new Date(ts).toLocaleString('pt-BR')}
+function uid(){return Math.random().toString(36).slice(2,8).toUpperCase()}
+function escapeHtml(str){str=str||'';return str.replace(/[&<>\"']/g,function(m){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m]})}
+function debounce(fn,ms){ms=ms||150;var t;return function(){var a=arguments;clearTimeout(t);t=setTimeout(function(){fn.apply(null,a)},ms)}}
+function toast(msg){var c=qs('#toast');var el=document.createElement('div');el.className='t';el.textContent=msg;c.appendChild(el);requestAnimationFrame(function(){el.classList.add('show')});setTimeout(function(){el.classList.remove('show');setTimeout(function(){if(el.parentNode)c.removeChild(el)},250)},3000)}
+function prioToDays(p){if(p==='Alta')return 1;if(p==='Média')return 3;return 5}
+function ensureSLA(prazo,prioridade,abertoEm){if(prazo)return prazo;var base=new Date(abertoEm||Date.now());base.setHours(0,0,0,0);base.setDate(base.getDate()+prioToDays(prioridade||'Média'));return base.toISOString().slice(0,10)}
+function slaStatus(dateStr){if(!dateStr)return{code:'',label:'—'};var today=new Date();today.setHours(23,59,59,999);var due=new Date(dateStr+'T23:59:59');var diffH=(due-today)/36e5;if(diffH<0)return{code:'late',label:'Vencido'};if(diffH<=12)return{code:'risk',label:'Risco'};return{code:'ok',label:'No prazo'}}
+function statusBadge(s){var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'};return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'}
+function prioBadge(p){var cls=p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa';return '<span class="badge '+cls+'">'+p+'</span>'}
+function ym(d){return d.toISOString().slice(0,7)}
+function startOfDay(dt){var d=new Date(dt);d.setHours(0,0,0,0);return d}
+function today0(){var d=new Date();d.setHours(0,0,0,0);return d}
+var DEFAULT_EMAIL_DOMAIN="koerich.com.br";
 
-/* ========= Sessão + Supabase ========= */
-const SESSION_KEY='ticket_session_v1';
-const setSession = (u)=> localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-const currentUser = ()=> { try{ return JSON.parse(localStorage.getItem(SESSION_KEY)||''); }catch{ return null; } };
-const clearSession = ()=> localStorage.removeItem(SESSION_KEY);
-const supa = supabase.createClient(window.ENV.SUPABASE_URL, window.ENV.SUPABASE_ANON_KEY);
+/* ===== Sessão + Supabase ===== */
+var SESSION_KEY='ticket_session_v1';
+function setSession(u){localStorage.setItem(SESSION_KEY,JSON.stringify(u))}
+function currentUser(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'')}catch(e){return null}}
+function clearSession(){localStorage.removeItem(SESSION_KEY)}
+var supa=supabase.createClient(window.ENV.SUPABASE_URL,window.ENV.SUPABASE_ANON_KEY);
 
-/* ========= Estado ========= */
-let data = [];
-let lastReadMap = {};
-let chartAbertos=null, chartConcluidos=null;
+/* ===== Estado ===== */
+var data=[]; var lastReadMap={};
+var chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
-/* ========= DB ========= */
+/* ===== Banco (robusto) ===== */
 async function loadFromSupabase(){
-  const { data: tks, error } = await supa.from('tickets').select('*').order('aberto_em',{ascending:false});
-  if(error){ console.error(error); alert('Falha ao carregar tickets.'); return; }
+  var sessRes=await supa.auth.getSession();
+  var sess = (sessRes && sessRes.data) ? sessRes.data.session : null;
+  window.__APP_DIAG=window.__APP_DIAG||{};
+  window.__APP_DIAG.sessionUser = (sess && sess.user)? sess.user.id : null;
+  window.__APP_DIAG.envUrl = (window.ENV && window.ENV.SUPABASE_URL) ? window.ENV.SUPABASE_URL : 'N/D';
 
-  const ids = tks.map(t=>t.id);
-  let msgsByTicket = {};
+  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em';
+  var resp=await supa.from('tickets').select(sel);
+  var tks=resp.data; var error=resp.error;
+
+  if(error && /column .*transportadora|column .*pendente|column .*retomar_em|unknown column|42703/i.test(error.message||'')){
+    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
+    resp=await supa.from('tickets').select(sel);
+    tks=resp.data; error=resp.error;
+  }
+  if(error){
+    console.error('tickets error',error);
+    window.__APP_DIAG.lastError=error.message||String(error);
+    toast('Erro ao carregar tickets: '+(error.message||'ver console'));
+    data=[]; render(); return;
+  }
+
+  (tks||[]).sort(function(a,b){return new Date(b.aberto_em)-new Date(a.aberto_em)});
+  window.__APP_DIAG.rows = tks ? tks.length : 0;
+
+  var ids=(tks||[]).map(function(t){return t.id});
+  var msgsByTicket={};
   if(ids.length){
-    const { data: msgs } = await supa.from('messages').select('*').in('ticket_id', ids).order('created_at',{ascending:true});
-    (msgs||[]).forEach(m=>{
-      (msgsByTicket[m.ticket_id] ??= []).push({at:new Date(m.created_at).getTime(), txt:m.body, user:m.sender_name||'—'});
-    });
+    var resp2=await supa.from('messages').select('ticket_id, body, sender_name, created_at').in('ticket_id',ids).order('created_at',{ascending:true});
+    if(!resp2.error){
+      (resp2.data||[]).forEach(function(m){
+        if(!msgsByTicket[m.ticket_id]) msgsByTicket[m.ticket_id]=[];
+        msgsByTicket[m.ticket_id].push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'});
+      });
+    }else{
+      console.warn('messages error',resp2.error); window.__APP_DIAG.msgsError=resp2.error.message||String(resp2.error);
+    }
   }
 
-  const me = currentUser();
-  lastReadMap = {};
+  lastReadMap={};
+  var me=currentUser();
   if(me){
-    const { data: lr } = await supa.from('last_reads').select('*').eq('user_id', me.id);
-    (lr||[]).forEach(r=> lastReadMap[r.ticket_id] = new Date(r.last_read_at).getTime());
+    var lrResp=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id);
+    (lrResp.data||[]).forEach(function(r){ lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime() })
   }
 
-  data = tks.map(t=>({
-    id: t.id,
-    abertoEm: new Date(t.aberto_em).getTime(),
-    solicitante: t.solicitante,
-    categoria: t.categoria,
-    assunto: t.assunto,
-    prioridade: t.prioridade,
-    descricao: t.descricao||'',
-    status: t.status,
-    responsavel: t.responsavel||'',
-    prazo: t.prazo ? new Date(t.prazo).toISOString().slice(0,10) : '',
-    codigo: t.codigo||'',
-    historico: msgsByTicket[t.id]||[]
-  }));
+  data=(tks||[]).map(function(t){
+    return {
+      id:t.id,
+      abertoEm:new Date(t.aberto_em).getTime(),
+      solicitante:t.solicitante,
+      categoria:t.categoria,
+      assunto:t.assunto,
+      prioridade:t.prioridade,
+      descricao:t.descricao||'',
+      status:t.status,
+      responsavel:t.responsavel||'',
+      prazo:t.prazo? new Date(t.prazo).toISOString().slice(0,10) : '',
+      codigo:t.codigo||'',
+      transportadora:t.transportadora||'',
+      pendente: !!t.pendente,
+      retomar_em: t.retomar_em ? new Date(t.retomar_em).toISOString().slice(0,10) : '',
+      historico: msgsByTicket[t.id] || []
+    }
+  });
 }
+
+/* ===== Upserts ===== */
 async function supaUpsertTicket(rec){
-  const payload = {
-    id: rec.id,
-    aberto_em: new Date(rec.abertoEm).toISOString(),
-    solicitante: rec.solicitante,
-    categoria: rec.categoria,
-    assunto: rec.assunto,
-    prioridade: rec.prioridade,
-    descricao: rec.descricao || null,
-    status: rec.status,
-    responsavel: rec.responsavel || null,
-    prazo: rec.prazo || null,
-    codigo: rec.codigo || null,
-    opened_by: currentUser()?.id || null,
-    closed_at: rec.status==='Encerrado' ? new Date().toISOString() : null
+  var payload={
+    id:rec.id,
+    aberto_em:new Date(rec.abertoEm).toISOString(),
+    solicitante:rec.solicitante,
+    categoria:rec.categoria,
+    assunto:rec.assunto,
+    prioridade:rec.prioridade,
+    descricao:rec.descricao||null,
+    status:rec.status,
+    responsavel:rec.responsavel||null,
+    prazo:rec.prazo||null,
+    codigo:rec.codigo||null,
+    transportadora:rec.transportadora||null,
+    pendente: !!rec.pendente,
+    retomar_em: rec.retomar_em || null,
+    opened_by:(currentUser()||{}).id||null,
+    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
   };
-  const { error } = await supa.from('tickets').upsert(payload);
-  if(error) console.error(error);
+  var r=await supa.from('tickets').upsert(payload);
+  if(r.error) console.error(r.error);
 }
-async function supaDeleteTicket(id){
-  const { error } = await supa.from('tickets').delete().eq('id', id);
-  if(error) console.error(error);
-}
-async function supaAddMessage(ticketId, text){
-  const u = currentUser();
-  const payload = { ticket_id: ticketId, sender: u?.id, sender_name: u?.name, body: text };
-  const { error } = await supa.from('messages').insert(payload);
-  if(error) console.error(error);
+async function supaDeleteTicket(id){var r=await supa.from('tickets').delete().eq('id',id); if(r.error) console.error(r.error)}
+async function supaAddMessage(ticketId,text){
+  var u=currentUser(); var payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text};
+  var r=await supa.from('messages').insert(payload); if(r.error) console.error(r.error)
 }
 async function supaMarkRead(ticketId){
-  const u = currentUser(); if(!u) return;
-  const nowIso = new Date().toISOString();
-  await supa.from('last_reads').upsert({ ticket_id: ticketId, user_id: u.id, last_read_at: nowIso });
-  lastReadMap[ticketId] = new Date(nowIso).getTime();
+  var u=currentUser(); if(!u) return;
+  var nowIso=new Date().toISOString();
+  await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso});
+  lastReadMap[ticketId]=new Date(nowIso).getTime();
 }
 
-/* ========= Realtime ========= */
+/* ===== Realtime + fallback ===== */
+var __rtOK={messages:false,tickets:false}; var __pollId=null;
+async function refreshNow(){await loadFromSupabase(); render()}
+function setPollTimer(){ if(__pollId) clearInterval(__pollId); var ms=(document.visibilityState==='visible')?2000:10000; __pollId=setInterval(function(){ if(!__rtOK.messages||!__rtOK.tickets){refreshNow()} },ms)}
 function setupRealtime(){
-  supa.channel('realtime:messages')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'}, payload=>{
-      const m = payload.new;
-      const d = data.find(x=>x.id===m.ticket_id);
+  supa.getChannels().forEach(function(ch){supa.removeChannel(ch)});
+  supa.channel('realtime-messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},function(payload){
+      var m=payload.new; var d=data.find(function(x){return x.id===m.ticket_id});
       if(d){
-        d.historico.push({at:new Date(m.created_at).getTime(), txt:m.body, user:m.sender_name||'—'});
-        render();
-        if((currentUser()?.name||'') !== (m.sender_name||'')) toast(`Nova mensagem no ticket ${m.ticket_id}`);
+        d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
+        var me=(currentUser()||{}).name||''; if(me!==(m.sender_name||'')) toast('Nova mensagem no ticket '+m.ticket_id);
       }
     })
-    .subscribe();
+    .subscribe(function(status){ __rtOK.messages=(status==='SUBSCRIBED') });
 
-  supa.channel('realtime:tickets')
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'}, async ()=>{ await loadFromSupabase(); render(); })
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'}, async ()=>{ await loadFromSupabase(); render(); })
-    .subscribe();
+  supa.channel('realtime-tickets')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},function(){ refreshNow() })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},function(){ refreshNow() })
+    .subscribe(function(status){ __rtOK.tickets=(status==='SUBSCRIBED') });
+
+  setPollTimer();
 }
+document.addEventListener('visibilitychange', setPollTimer);
+window.addEventListener('focus', refreshNow);
+window.addEventListener('online', function(){ setupRealtime(); refreshNow() });
 
-/* ========= Render Lista ========= */
-const prioRank = (p)=> p==='Alta'?0 : p==='Média'?1 : 2;
+/* ===== Render Lista ===== */
+function prioRank(p){return p==='Alta'?0:(p==='Média'?1:2)}
+function getUnreadCount(d){var last=lastReadMap[d.id]||0;var me=(currentUser()||{}).name||'';return (d.historico||[]).filter(function(h){return h.at>last && h.user!==me}).length}
 
-function getUnreadCount(d){
-  const last = lastReadMap[d.id]||0;
-  const me = currentUser()?.name || '';
-  return (d.historico||[]).filter(h=> h.at>last && h.user!==me).length;
-}
 function render(){
-  const term = qs('#fSearch').value.toLowerCase().trim();
-  const st = qs('#fStatus').value, pr = qs('#fPrio').value, cat = qs('#fCategoria').value, sla = qs('#fSLA').value;
+  var term=(qs('#fSearch').value||'').toLowerCase().trim();
+  var st=qs('#fStatus').value, pr=qs('#fPrio').value, cat=qs('#fCategoria').value, sla=qs('#fSLA').value;
+  var pend=qs('#fPend').value; var mine=qs('#fMine').checked;
 
-  const rows = data.filter(d=>{
-    const sLA = slaStatus(d.prazo).code;
-    const searchable = [d.id,d.solicitante,d.assunto,d.descricao,d.codigo].join(' ').toLowerCase();
-    return (!term || searchable.includes(term)) && (!st || d.status===st) && (!pr || d.prioridade===pr) && (!cat || d.categoria===cat) && (!sla || sLA===sla);
-  })
-  // Ordenação pedida: Alta > Média > Baixa, e dentro por data desc
-  .sort((a,b)=> prioRank(a.prioridade) - prioRank(b.prioridade) || b.abertoEm - a.abertoEm);
+  var rows=data.filter(function(d){
+    var sLA=slaStatus(d.prazo).code;
+    var searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
 
-  const tbody = qs('#tbody');
-  tbody.innerHTML = rows.map(d=>{
-    const slaObj = slaStatus(d.prazo);
-    const slaPill = `<span class="badge" title="${d.prazo || ''}">${slaObj.label}</span>`;
-    const showConfirm = d.status==='Aberto';
-    const unread = d.status==='Em tratativa' ? getUnreadCount(d) : 0;
-    const unreadBadge = unread>0 ? `<span class="badge-unread" title="${unread} nova(s)">${unread}</span>` : '';
-    const rowCls =
-      d.categoria === 'SAK' ? 'sak-row' :
-      d.categoria === 'Frota - Transportadora' ? 'frota-row' : '';
-    const catCell =
-      d.categoria === 'SAK'
-        ? `<span class="badge sak-badge">SAK</span>`
-        : d.categoria === 'Frota - Transportadora'
-          ? `<span class="badge frota-badge">Frota - Transportadora</span>`
-          : (d.categoria || '-');
+    var isPend=!!d.pendente && d.status!=='Encerrado';
+    var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
+    var isPendDue=isPend && retoma && retoma < today0();
 
-    return `<tr class="${rowCls}">
-      <td class="nowrap"><strong>${d.id}</strong></td>
-      <td>${fmtDate(d.abertoEm)}</td>
-      <td>${d.solicitante||'-'}</td>
-      <td>${d.assunto||'-'}</td>
-      <td>${d.codigo||'<span class="muted">—</span>'}</td>
-      <td>${catCell}</td>
-      <td>${prioBadge(d.prioridade||'-')}</td>
-      <td>${statusBadge(d.status||'-')}</td>
-      <td>${d.prazo? slaPill : '<span class="muted">—</span>'}</td>
-      <td>${d.responsavel||'<span class="muted">—</span>'}</td>
-      <td class="table-actions">
-        ${showConfirm? `<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket('${d.id}')"><i class="fa fa-check-double"></i></button>`:''}
-        <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit('${d.id}')"><i class="fa fa-pen-to-square"></i>${unreadBadge}</button>
-        <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket('${d.id}')"><i class="fa fa-check"></i></button>
-      </td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="11" class="muted">Nenhum registro encontrado</td></tr>`;
+    if(term && searchable.indexOf(term)===-1) return false;
+    if(st && d.status!==st) return false;
+    if(pr && d.prioridade!==pr) return false;
+    if(cat && d.categoria!==cat) return false;
+    if(sla && sLA!==sla) return false;
+    if(pend==='pend' && !isPend) return false;
+    if(pend==='due' && !isPendDue) return false;
+    if(mine){
+      var me=(currentUser()||{}).name||'';
+      var souResp=(d.responsavel||'')===me;
+      var souSolic=(d.solicitante||'')===me;
+      if(!souResp && !souSolic) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    function score(x){
+      var isP=!!x.pendente && x.status!=='Encerrado';
+      var r=x.retomar_em? startOfDay(x.retomar_em):null;
+      var t=today0();
+      var venc = (isP && r && r < t)? 2 : 0;
+      var hoje = (isP && r && r.getTime()===t.getTime())? 1 : 0;
+      return (venc*100)+(hoje*10);
+    }
+    var s=score(b)-score(a); if(s) return s;
+    return prioRank(a.prioridade)-prioRank(b.prioridade) || b.abertoEm-a.abertoEm;
+  });
+
+  var tbody=qs('#tbody');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="11" class="muted">Nenhum registro encontrado</td></tr>';return;}
+
+  tbody.innerHTML=rows.map(function(d){
+    var slaObj=slaStatus(d.prazo);
+    var slaPill='<span class="badge" title="'+(d.prazo||'')+'">'+slaObj.label+'</span>';
+    var showConfirm=d.status==='Aberto';
+    var unread=d.status==='Em tratativa'?getUnreadCount(d):0;
+    var unreadBadge=unread>0?'<span class="badge-unread" title="'+unread+' nova(s)">'+unread+'</span>':'';
+
+    var isPend=!!d.pendente && d.status!=='Encerrado';
+    var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
+    var pendVenc=isPend && retoma && retoma < today0();
+    var pendBadge=isPend?('<span class="badge badge-pendente '+(pendVenc?'badge-venc':'')+'" title="Retomar em '+d.retomar_em+'">⏰ '+(pendVenc?'Pendente (vencida)':'Pendente')+' • '+(d.retomar_em?d.retomar_em.split('-').reverse().join('/'):'')+'</span>'):'';
+
+    var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
+               : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
+               : (d.categoria||'-');
+
+    var rowCls=(isPend?'pending-row ':'') + (d.categoria==='SAK'?'sak-row':(d.categoria==='Frota - Transportadora'?'frota-row':''));
+
+    return '<tr class="'+rowCls+'">'+
+      '<td class="nowrap"><strong>'+d.id+'</strong></td>'+
+      '<td>'+fmtDate(d.abertoEm)+'</td>'+
+      '<td>'+ (d.solicitante||'-') +'</td>'+
+      '<td>'+ (d.assunto||'-') +'</td>'+
+      '<td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>'+
+      '<td>'+catCell+'</td>'+
+      '<td>'+prioBadge(d.prioridade||'-')+'</td>'+
+      '<td>'+statusBadge(d.status||'-')+' '+pendBadge+'</td>'+
+      '<td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>'+
+      '<td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>'+
+      '<td class="table-actions">'+
+        (showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+
+        '<button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>'+
+        '<button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>'+
+        '<button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>'+
+        (d.pendente?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+
+      '</td>'+
+    '</tr>';
+  }).join('');
 }
 
-/* ========= KPIs ========= */
+/* ===== KPIs ===== */
 function getClosedAt(d){
-  const h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
-  for(const e of h){ if((e.txt||'').toLowerCase().includes('encerrado')) return e.at; }
+  var h=(d.historico||[]).slice().sort(function(a,b){return a.at-b.at});
+  for(var i=0;i<h.length;i++){ if((h[i].txt||'').toLowerCase().indexOf('encerrado')>-1) return h[i].at }
   return null;
 }
 function renderKPIs(){
-  const input = qs('#kpiMonth'); if(!input.value){ input.value = ym(new Date()); }
-  const sel = input.value; qs('#mKpiMesLabel').textContent = sel;
+  var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
+  var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
 
-  const baseAbertos = data.filter(d=> ym(new Date(d.abertoEm))===sel );
-  qs('#mKpiAberto').textContent    = baseAbertos.filter(d=>d.status==='Aberto').length;
-  qs('#mKpiTratativa').textContent = baseAbertos.filter(d=>d.status==='Em tratativa').length;
-  qs('#mKpiEncerrado').textContent = baseAbertos.filter(d=>d.status==='Encerrado').length;
-  qs('#mKpiVencido').textContent   = baseAbertos.filter(d=> slaStatus(d.prazo).code==='late' && d.status!=='Encerrado').length;
+  var baseAbertos=data.filter(function(d){return ym(new Date(d.abertoEm))===sel});
+  qs('#mKpiAberto').textContent    = baseAbertos.filter(function(d){return d.status==='Aberto'}).length;
+  qs('#mKpiTratativa').textContent = baseAbertos.filter(function(d){return d.status==='Em tratativa'}).length;
+  qs('#mKpiEncerrado').textContent = baseAbertos.filter(function(d){return d.status==='Encerrado'}).length;
+  qs('#mKpiVencido').textContent   = baseAbertos.filter(function(d){return slaStatus(d.prazo).code==='late' && d.status!=='Encerrado'}).length;
 
-  const closedThisMonth = data.map(d=>({d, closedAt:getClosedAt(d)})).filter(x=> x.closedAt && ym(new Date(x.closedAt))===sel);
-  const closedWithSLA = closedThisMonth.filter(x=> !!x.d.prazo);
-  const denom = closedWithSLA.length;
-  const onTime = closedWithSLA.filter(x=> new Date(x.d.prazo+'T23:59:59') >= new Date(x.closedAt)).length;
-  const pctOn   = denom? Math.round(onTime/denom*100) : 0;
-  const pctLate = denom? 100-pctOn : 0;
-  qs('#mKpiFechadosMes').textContent = closedThisMonth.length;
-  qs('#mKpiFechadosBase').textContent = `com SLA: ${denom}`;
-  qs('#mKpiPctPrazo').textContent = pctOn+'%';
-  qs('#mKpiQtdPrazo').textContent = `${onTime} de ${denom}`;
-  qs('#mKpiPctVenc').textContent = pctLate+'%';
-  qs('#mKpiQtdVenc').textContent = `${denom-onTime} de ${denom}`;
+  var closedThisMonth=data.map(function(d){return {d:d,closedAt:getClosedAt(d)}}).filter(function(x){return x.closedAt && ym(new Date(x.closedAt))===sel});
+  var closedWithSLA=closedThisMonth.filter(function(x){return !!x.d.prazo});
+  var denom=closedWithSLA.length;
+  var onTime=closedWithSLA.filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length;
+  var pctOn=denom?Math.round(onTime/denom*100):0;
+  var pctLate=denom?100-pctOn:0;
+  qs('#mKpiFechadosMes').textContent=closedThisMonth.length;
+  qs('#mKpiFechadosBase').textContent='com SLA: '+denom;
+  qs('#mKpiPctPrazo').textContent=pctOn+'%';
+  qs('#mKpiQtdPrazo').textContent=onTime+' de '+denom;
+  qs('#mKpiPctVenc').textContent=pctLate+'%';
+  qs('#mKpiQtdVenc').textContent=(denom-onTime)+' de '+denom;
 
-  const categorias = [...new Set(data.map(d=> d.categoria||'—'))].sort();
-  const arrByCat = c => baseAbertos.filter(d=>d.categoria===c);
-  const valsAberto = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Aberto').length );
-  const valsTrat   = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Em tratativa').length );
-  const valsEnc    = categorias.map(c=> arrByCat(c).filter(d=>d.status==='Encerrado').length );
+  var t0=today0();
+  var pendMes=baseAbertos.filter(function(d){return d.pendente && d.status!=='Encerrado'});
+  var pendVencMes=pendMes.filter(function(d){return d.retomar_em && startOfDay(d.retomar_em) < t0});
+  qs('#mKpiPend').textContent=pendMes.length;
+  qs('#mKpiPendVenc').textContent=pendVencMes.length;
 
-  const ctx1 = document.getElementById('chartAbertos').getContext('2d');
-  if(chartAbertos) chartAbertos.destroy();
-  chartAbertos = new Chart(ctx1,{ type:'bar', data:{ labels:categorias, datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Encerrado',data:valsEnc}] }, options:{ plugins:{legend:{position:'bottom'}}, scales:{y:{beginAtZero:true,ticks:{precision:0}}}} });
+  var categorias=[].sort.call(new Set(data.map(function(d){return d.categoria||'—'})));
+  categorias=[...new Set(data.map(function(d){return d.categoria||'—'}))].sort();
 
-  const closedByCat = c => closedWithSLA.filter(x=> x.d.categoria===c);
-  const valsPrazo = categorias.map(c=> closedByCat(c).filter(x=> new Date(x.d.prazo+'T23:59:59') >= new Date(x.closedAt)).length );
-  const valsVenc  = categorias.map(c=> closedByCat(c).filter(x=> new Date(x.d.prazo+'T23:59:59') <  new Date(x.closedAt)).length );
-  const ctx2 = document.getElementById('chartConcluidos').getContext('2d');
-  if(chartConcluidos) chartConcluidos.destroy();
-  chartConcluidos = new Chart(ctx2,{ type:'bar', data:{ labels:categorias, datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}] }, options:{ plugins:{legend:{position:'bottom'}}, scales:{y:{beginAtZero:true,ticks:{precision:0}}}} });
+  function porCat(c){return baseAbertos.filter(function(d){return d.categoria===c})}
+  var valsAberto=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Aberto'}).length});
+  var valsTrat=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Em tratativa'}).length});
+  var valsEnc=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Encerrado'}).length});
+
+  var ctx1=document.getElementById('chartAbertos').getContext('2d');
+  if(chartAbertos)chartAbertos.destroy();
+  chartAbertos=new Chart(ctx1,{type:'bar',data:{labels:categorias,datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Encerrado',data:valsEnc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+
+  function closedByCat(c){return closedWithSLA.filter(function(x){return x.d.categoria===c})}
+  var valsPrazo=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length});
+  var valsVenc=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')<new Date(x.closedAt)}).length});
+  var ctx2=document.getElementById('chartConcluidos').getContext('2d');
+  if(chartConcluidos)chartConcluidos.destroy();
+  chartConcluidos=new Chart(ctx2,{type:'bar',data:{labels:categorias,datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+
+  var baseTransp=baseAbertos.filter(function(d){return (d.transportadora||'').trim()!==''});
+  var mapa={}; baseTransp.forEach(function(d){var k=d.transportadora.trim(); mapa[k]=(mapa[k]||0)+1});
+  var transp=Object.keys(mapa).sort(function(a,b){return mapa[b]-mapa[a]});
+  var valsTransp=transp.map(function(t){return mapa[t]});
+  var ctx3=document.getElementById('chartTransp').getContext('2d');
+  if(chartTransp)chartTransp.destroy();
+  chartTransp=new Chart(ctx3,{type:'bar',data:{labels:transp,datasets:[{label:'Abertos',data:valsTransp}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
 }
 
-/* ========= Modal + Form ========= */
-function openModal(show = true) {
-  const m = qs('#modal');
-  if (!m) return;
-  if (show) { m.classList.add('show'); m.style.display = 'grid'; }
-  else { m.classList.remove('show'); m.style.display = 'none'; }
-}
+/* ===== Modal + Form ===== */
+function openModal(show){var m=qs('#modal'); if(!m)return; if(show){m.classList.add('show');m.style.display='grid'}else{m.classList.remove('show');m.style.display='none'}}
 function setEditable(edit){
-  const form=qs('#frm');
-  form.classList.toggle('readonly', !edit);
-  qsa('#frm input,#frm select,#frm textarea').forEach(el=>{
-    if(['ticketId'].includes(el.id)) return;
-    el.readOnly=!edit; el.disabled=!edit;
-  });
+  var form=qs('#frm'); form.classList.toggle('readonly',!edit);
+  qsa('#frm input,#frm select,#frm textarea').forEach(function(el){if(['ticketId'].indexOf(el.id)>-1)return; el.readOnly=!edit; el.disabled=!edit});
   qs('#solicitante').readOnly=true; qs('#solicitante').disabled=true;
 }
 function enablePriorityOnly(){
-  // bloqueia tudo…
-  qsa('#frm input, #frm select, #frm textarea').forEach(el=>{
-    if (['ticketId','prioridade'].includes(el.id)) return;
-    el.readOnly = true; el.disabled = true;
-  });
-  // …menos a prioridade (e remove o efeito da classe .readonly)
-  const p = qs('#prioridade');
-  p.disabled = false; p.readOnly = false;
-  p.style.pointerEvents = 'auto';
-  p.style.opacity = '1';
-
-  // mostra o botão Salvar para persistir a mudança
+  qsa('#frm input, #frm select, #frm textarea').forEach(function(el){ if(['ticketId','prioridade'].indexOf(el.id)>-1) return; el.readOnly=true; el.disabled=true });
+  var p=qs('#prioridade'); p.disabled=false; p.readOnly=false; p.style.pointerEvents='auto'; p.style.opacity='1';
   qs('#btnSave').classList.remove('hidden');
 }
-function toggleResponsavelByCategoria(){ qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK'); }
-function resetForm(){ qs('#ticketId').value=''; qs('#solicitante').value=currentUser()?.name||''; qs('#categoriaSel').value='Frota - Transportadora'; qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value=''; qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#prazo').value=''; qs('#codigo').value=''; qs('#chatHistory').innerHTML=''; qs('#chatText').value=''; qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none'; qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden'); setEditable(true); toggleResponsavelByCategoria(); }
-function renderChat(list){ const u=currentUser()?.name||''; qs('#chatHistory').innerHTML=(list||[]).slice().sort((a,b)=>a.at-b.at).map(h=>`<div class="bubble ${h.user===u?'me':'them'}">${escapeHtml(h.txt)}<time>${new Date(h.at).toLocaleString('pt-BR')} • ${escapeHtml(h.user||'')}</time></div>`).join(''); const div=qs('#chatHistory'); div.scrollTop=div.scrollHeight; }
-
-function setSelectValue(sel, value) {
-  if (!sel) return;
-  const has = [...sel.options].some(o => o.value === value);
-  if (value && !has) {
-    const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = value + ' (legado)';
-    sel.appendChild(opt);
-  }
-  sel.value = value || sel.value;
+function toggleResponsavelByCategoria(){
+  var frota = qs('#categoriaSel').value==='Frota - Transportadora';
+  qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK');
+  qs('#transportadoraWrap').classList.toggle('hidden', !frota);
 }
-
-function openNew(){ resetForm(); qs('#modalTitle').textContent='Nova solicitação'; openModal(true); }
-
+function resetForm(){
+  qs('#ticketId').value='';
+  qs('#solicitante').value=(currentUser()||{}).name||'';
+  qs('#categoriaSel').value='Frota - Transportadora';
+  qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value='';
+  qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#transportadora').value='';
+  qs('#prazo').value=''; qs('#codigo').value='';
+  qs('#chatHistory').innerHTML=''; qs('#chatText').value='';
+  qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
+  qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden');
+  setEditable(true); toggleResponsavelByCategoria();
+}
+function renderChat(list){
+  var u=(currentUser()||{}).name||'';
+  qs('#chatHistory').innerHTML=(list||[]).slice().sort(function(a,b){return a.at-b.at}).map(function(h){
+    return '<div class="bubble '+(h.user===u?'me':'them')+'">'+escapeHtml(h.txt)+'<time>'+new Date(h.at).toLocaleString('pt-BR')+' • '+escapeHtml(h.user||'')+'</time></div>';
+  }).join('');
+  var div=qs('#chatHistory'); div.scrollTop=div.scrollHeight;
+}
+function setSelectValue(sel,value){
+  if(!sel)return; var has=[].some.call(sel.options,function(o){return o.value===value});
+  if(value && !has){var o=document.createElement('option');o.value=value;o.textContent=value+' (legado)'; sel.appendChild(o)}
+  sel.value=value||sel.value;
+}
+function openNew(){resetForm();qs('#modalTitle').textContent='Nova solicitação';openModal(true)}
 async function openEdit(id){
-  const d = data.find(x=>x.id===id); if(!d) return;
-  resetForm();
-  qs('#modalTitle').textContent = `Solicitação ${d.id}`;
-  qs('#ticketId').value = d.id;
-  qs('#solicitante').value = d.solicitante||currentUser()?.name||'';
-  qs('#categoriaSel').value = d.categoria||'Frota - Transportadora';
-  setSelectValue(qs('#assunto'), d.assunto || '');
-  qs('#prioridade').value = d.prioridade||'Média';
-  qs('#descricao').value = d.descricao||'';
-  qs('#status').value = d.status||'Aberto';
-  qs('#responsavel').value = d.responsavel||'';
-  qs('#prazo').value = d.prazo || '';
-  qs('#codigo').value = d.codigo || '';
-  renderChat(d.historico||[]);
-  qs('#btnDelete').style.display = (currentUser()?.role==='admin')?'inline-flex':'none';
-  qs('#btnConfirm').disabled = d.status!=='Aberto';
-  setEditable(false); toggleResponsavelByCategoria();
-  enablePriorityOnly(); // permite editar só a prioridade, mesmo com .readonly
-
-  await supaMarkRead(d.id); render();
-  openModal(true);
+  var d=data.find(function(x){return x.id===id}); if(!d)return;
+  resetForm(); qs('#modalTitle').textContent='Solicitação '+d.id; qs('#ticketId').value=d.id;
+  qs('#solicitante').value=d.solicitante||((currentUser()||{}).name||'');
+  qs('#categoriaSel').value=d.categoria||'Frota - Transportadora';
+  setSelectValue(qs('#assunto'), d.assunto||''); qs('#prioridade').value=d.prioridade||'Média';
+  qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
+  qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
+  renderChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
+  qs('#btnConfirm').disabled=d.status!=='Aberto'; setEditable(false); toggleResponsavelByCategoria(); enablePriorityOnly();
+  await supaMarkRead(d.id); render(); openModal(true);
 }
-
 function collectForm(){
-  const id = qs('#ticketId').value || uid();
-  const now = Date.now(); const exists = data.find(x=>x.id===id); const abertoEm = exists ? exists.abertoEm : now;
-  let prazo = ensureSLA(qs('#prazo').value, qs('#prioridade').value, abertoEm);
-  const categoria = qs('#categoriaSel').value;
-  let responsavel = qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
+  var id=qs('#ticketId').value||uid(); var now=Date.now();
+  var exists=data.find(function(x){return x.id===id}); var abertoEm=exists?exists.abertoEm:now;
+  var prazo=ensureSLA(qs('#prazo').value,qs('#prioridade').value,abertoEm);
+  var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
   return {
-    id, abertoEm,
-    solicitante: qs('#solicitante').value.trim(),
-    categoria, assunto: qs('#assunto').value.trim(),
-    prioridade: qs('#prioridade').value, descricao: qs('#descricao').value.trim(),
-    status: qs('#status').value, responsavel, prazo, codigo: qs('#codigo').value.trim(),
-    historico: exists ? exists.historico : [{at:abertoEm, txt:`Ticket aberto por ${qs('#solicitante').value.trim()||'usuário'}`, user: qs('#solicitante').value.trim()||'usuário'}]
-  };
+    id:id, abertoEm:abertoEm,
+    solicitante:qs('#solicitante').value.trim(),
+    categoria:categoria, assunto:qs('#assunto').value.trim(),
+    prioridade:qs('#prioridade').value,
+    descricao:qs('#descricao').value.trim(),
+    status:qs('#status').value,
+    responsavel:responsavel,
+    prazo:prazo,
+    codigo:qs('#codigo').value.trim(),
+    transportadora:qs('#transportadora').value.trim(),
+    pendente: exists? !!exists.pendente : false,
+    retomar_em: exists? (exists.retomar_em||'') : '',
+    historico: exists? exists.historico : [{at:abertoEm,txt:'Ticket aberto por '+(qs('#solicitante').value.trim()||'usuário'),user:(qs('#solicitante').value.trim()||'usuário')}]
+  }
 }
-
 async function save(e){
-  e.preventDefault();
-  const rec = collectForm();
-  if(!rec.solicitante || !rec.assunto){ alert('Preencha Assunto. Solicitante vem do login.'); return; }
-  const i = data.findIndex(x=>x.id===rec.id);
-  if(i>=0) data[i] = {...data[i], ...rec}; else data.push(rec);
-  await supaUpsertTicket(rec);
-  render();
-  await addHistory(rec.id, `${i>=0?'Atualizado':'Criado'} por ${currentUser()?.name || 'sistema'}`);
-  openEdit(rec.id);
+  e.preventDefault(); var rec=collectForm();
+  if(!rec.solicitante || !rec.assunto){alert('Preencha Assunto. Solicitante vem do login.');return;}
+  var i=data.findIndex(function(x){return x.id===rec.id});
+  if(i>=0) data[i]=Object.assign({},data[i],rec); else data.push(rec);
+  await supaUpsertTicket(rec); render(); await addHistory(rec.id,(i>=0?'Atualizado':'Criado')+' por '+(((currentUser()||{}).name)||'sistema')); openEdit(rec.id);
 }
+async function addHistory(id,text){var d=data.find(function(x){return x.id===id}); if(!d)return; d.historico=d.historico||[]; d.historico.push({at:Date.now(),txt:text,user:((currentUser()||{}).name)||''}); renderChat(d.historico); await supaAddMessage(id,text)}
+async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(function(x){return x.id!==id}); await supaDeleteTicket(id); render(); openModal(false)}
 
-async function addHistory(id, text){
-  const d = data.find(x=>x.id===id); if(!d) return;
-  d.historico = d.historico || [];
-  d.historico.push({at:Date.now(), txt:text, user: currentUser()?.name || ''});
-  renderChat(d.historico);
-  await supaAddMessage(id, text);
+/* Pendência */
+async function snoozeTicket(id){
+  var d=data.find(function(x){return x.id===id}); if(!d)return;
+  function pad(n){n=String(n);return n.length<2?('0'+n):n}
+  var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
+  var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
+  d.pendente=true; d.retomar_em=val; await supaUpsertTicket(d); await addHistory(id,'Adiado para '+new Date(val).toLocaleDateString('pt-BR')); render();
 }
+async function resumeTicket(id){var d=data.find(function(x){return x.id===id}); if(!d)return; d.pendente=false; d.retomar_em=''; await supaUpsertTicket(d); await addHistory(id,'Retomado agora'); render()}
 
-async function removeTicket(id){
-  if((currentUser()?.role)!=='admin'){ alert('Apenas administradores podem excluir.'); return; }
-  if(!confirm('Deseja excluir esta solicitação?')) return;
-  data = data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false);
-}
-
-/* ========= Ações ========= */
+/* Ações */
 async function confirmTicket(id){
-  const d = data.find(x=>x.id===id); if(!d) return;
+  var d=data.find(function(x){return x.id===id}); if(!d)return;
   if(d.status==='Aberto'){
     d.status='Em tratativa';
-    // define responsável automaticamente para SAK e Frota
-    if (['SAK','Frota - Transportadora'].includes(d.categoria)) {
-      d.responsavel = currentUser()?.name || d.responsavel || '';
-      toast(`Responsável definido: ${d.responsavel}`);
-    }
-    await supaUpsertTicket(d);
-    await addHistory(id,'Ticket confirmado e movido para Em tratativa');
-    render();
+    if(d.categoria==='SAK' || d.categoria==='Frota - Transportadora'){ var me=(currentUser()||{}).name||''; d.responsavel= me || d.responsavel || '' ; toast('Responsável definido: '+d.responsavel) }
+    await supaUpsertTicket(d); await addHistory(id,'Ticket confirmado e movido para Em tratativa'); render();
   }
 }
 async function closeTicket(id){
-  const d = data.find(x=>x.id===id); if(!d) return;
-  if(d.status!=='Encerrado'){
-    const old = d.status; d.status='Encerrado';
-    await supaUpsertTicket(d);
-    await addHistory(id, `Status alterado: ${old} ➜ Encerrado`);
-    render();
-  }
+  var d=data.find(function(x){return x.id===id}); if(!d)return;
+  if(d.status!=='Encerrado'){var old=d.status; d.status='Encerrado'; await supaUpsertTicket(d); await addHistory(id,'Status alterado: '+old+' ➜ Encerrado'); render();}
 }
 
-/* ========= Bindings ========= */
-qs('#btnDelete').onclick = ()=> removeTicket(qs('#ticketId').value);
-qs('#btnConfirm').onclick = async ()=>{ const id=qs('#ticketId').value || (alert('Salve primeiro para confirmar.'), null); if(!id) return; await confirmTicket(id); await openEdit(id); };
-qs('#frm').addEventListener('submit', save);
-qs('#btnSave').addEventListener('click', save);
-qs('#closeModal').addEventListener('click', ()=>openModal(false));
-qs('#categoriaSel').addEventListener('change', toggleResponsavelByCategoria);
+/* Bindings */
+qs('#btnDelete').onclick=function(){removeTicket(qs('#ticketId').value)};
+qs('#btnConfirm').onclick=async function(){var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para confirmar.');return;} await confirmTicket(id); await openEdit(id)};
+qs('#frm').addEventListener('submit',save); qs('#btnSave').addEventListener('click',save);
+qs('#closeModal').addEventListener('click',function(){openModal(false)}); qs('#categoriaSel').addEventListener('change',toggleResponsavelByCategoria);
+qs('#btnNew').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openNew()});
 
-// botão Nova com fallback robusto
-qs('#btnNew').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openNew(); });
+qs('#fStatus').addEventListener('change',render); qs('#fPrio').addEventListener('change',render);
+qs('#fCategoria').addEventListener('change',render); qs('#fSLA').addEventListener('change',render);
+qs('#fPend').addEventListener('change',render); qs('#fMine').addEventListener('change',render);
+qs('#fSearch').addEventListener('input',debounce(render,200));
+qs('#btnClear').onclick=function(){qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';qs('#fPend').value='';qs('#fMine').checked=false;render()};
 
-// filtros em tempo real
-qs('#fStatus').addEventListener('change', render);
-qs('#fPrio').addEventListener('change', render);
-qs('#fCategoria').addEventListener('change', render);
-qs('#fSLA').addEventListener('change', render);
-qs('#fSearch').addEventListener('input', debounce(render, 200));
-// limpar filtros
-qs('#btnClear').onclick = () => {
-  qs('#fSearch').value = '';
-  qs('#fStatus').value = '';
-  qs('#fPrio').value = '';
-  qs('#fCategoria').value = '';
-  qs('#fSLA').value = '';
-  render();
-};
+async function sendChat(){var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para conversar.');return;} var txt=qs('#chatText').value.trim(); if(!txt)return; await addHistory(id,txt); qs('#chatText').value=''; await supaMarkRead(id); render()}
+qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendChat()}});
 
-async function sendChat(){
-  const id = qs('#ticketId').value || (alert('Salve primeiro para conversar.'), null); if(!id) return;
-  const txt = qs('#chatText').value.trim(); if(!txt) return;
-  await addHistory(id, txt); qs('#chatText').value='';
-  await supaMarkRead(id); render();
-}
-qs('#btnSendChat').onclick = sendChat;
-qs('#chatText').addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); sendChat(); }});
-
-/* ========= Export Excel ========= */
-function buildHistoricoString(hist){ return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>`${new Date(h.at).toLocaleString('pt-BR')} — ${h.user||''}: ${h.txt||''}`).join('\n'); }
+/* Export XLSX */
+function buildHistoricoString(hist){return (hist||[]).sort(function(a,b){return a.at-b.at}).map(function(h){return new Date(h.at).toLocaleString('pt-BR')+' — '+(h.user||'')+': '+(h.txt||'')}).join('\n')}
 function exportXLSX(){
-  const rows = data.slice()
-    .sort((a,b)=> prioRank(a.prioridade) - prioRank(b.prioridade) || b.abertoEm - a.abertoEm);
-  const header = ['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código/NF/DF','Histórico (chat)'];
-  const aoa = [header];
-  rows.forEach(r=> aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo? new Date(r.prazo+'T00:00:00'):'', r.codigo||'', buildHistoricoString(r.historico) ]));
-  const ws = XLSX.utils.aoa_to_sheet(aoa, {cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:12},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:60}];
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Tickets'); XLSX.writeFile(wb, `solicitacoes_${new Date().toISOString().slice(0,10)}.xlsx`);
+  var rows=data.slice().sort(function(a,b){var pr=function(p){return p==='Alta'?0:(p==='Média'?1:2)};return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm});
+  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código/NF/DF','Transportadora','Pendente','Retomar em','Histórico (chat)'];
+  var aoa=[header];
+  rows.forEach(function(r){
+    aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.pendente?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]);
+  });
+  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
+  var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Tickets'); XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
-qs('#btnExportXLSX').onclick = exportXLSX;
+qs('#btnExportXLSX').onclick=exportXLSX;
 
-/* ========= Navegação KPIs ========= */
-qs('#btnKPIs').onclick = ()=>{ qs('#listPage').classList.add('hidden'); qs('#kpiPage').classList.remove('hidden'); renderKPIs(); };
-qs('#btnBackList').onclick = ()=>{ qs('#kpiPage').classList.add('hidden'); qs('#listPage').classList.remove('hidden'); render(); };
-qs('#kpiMonth').addEventListener('input', renderKPIs);
+/* Navegação KPIs */
+qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs()};
+qs('#btnBackList').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');render()};
+qs('#kpiMonth').addEventListener('input',renderKPIs);
 
-/* ========= App Boot & Login ========= */
-function showLogin(){ qs('#loginSection').style.display='grid'; qs('#appSection').style.display='none'; }
-function showApp(){ qs('#loginSection').style.display='none'; qs('#appSection').style.display='block'; const u=currentUser(); qs('#whoami').textContent=`${u.name} • ${u.role}`; }
+/* Diagnóstico */
+function showDiag(){
+  var b=qs('#diagBar'); b.classList.remove('hidden');
+  var D=window.__APP_DIAG||{};
+  qs('#diagEnv').textContent   = 'Projeto: '+(D.envUrl||'N/D');
+  qs('#diagUser').textContent  = 'Usuário: '+(D.sessionUser||'sem sessão');
+  qs('#diagCount').textContent = 'Tickets retornados: '+(typeof D.rows==='number'? D.rows : 'N/D');
+  qs('#diagErr').textContent   = D.lastError?('Erro: '+D.lastError):'';
+}
+qs('#btnDiag').onclick=showDiag; qs('#diagClose').onclick=function(){qs('#diagBar').classList.add('hidden')};
+
+/* Boot & Login */
+function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
+function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
 
 async function boot(){
-  const u = currentUser();
-  if(!u){ showLogin(); return; }
-  showApp();
-  await loadFromSupabase(); render(); setupRealtime();
+  var u=currentUser(); if(!u){showLogin();return;}
+  showApp(); await loadFromSupabase(); render(); setupRealtime();
+  var vencidas=data.filter(function(d){return d.pendente && d.status!=='Encerrado' && d.retomar_em && startOfDay(d.retomar_em) < today0()}).length;
+  if(vencidas>0) toast('Você tem '+vencidas+' pendência(s) vencida(s). Use o filtro "Pendências".');
 }
 boot();
 
-qs('#btnLogout').onclick = async ()=>{ await supa.auth.signOut(); clearSession(); showLogin(); };
+qs('#btnLogout').onclick=async function(){await supa.auth.signOut(); clearSession(); showLogin()};
 
-qs('#btnLogin').onclick = async ()=>{
-  const login = qs('#loginUser').value.trim().toLowerCase();
-  const pass  = qs('#loginPass').value;
-  const email = login.includes('@') ? login : `${login}@${DEFAULT_EMAIL_DOMAIN}`;
+qs('#btnLogin').onclick=async function(){
+  var login=(qs('#loginUser').value||'').trim().toLowerCase();
+  var pass=qs('#loginPass').value;
+  var email=login.indexOf('@')>-1?login:(login+'@'+DEFAULT_EMAIL_DOMAIN);
+  if(!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY){alert('config.js não carregado ou chaves ausentes.');return;}
 
-  if (!window.ENV?.SUPABASE_URL || !window.ENV?.SUPABASE_ANON_KEY) {
-    alert('config.js não carregado ou chaves ausentes.');
-    console.error('ENV', window.ENV);
-    return;
+  var authResp=await supa.auth.signInWithPassword({email:email,password:pass});
+  if(authResp.error){console.error('Auth error:',authResp.error);alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
+
+  var profileResp=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).maybeSingle();
+  var profile=profileResp.data;
+  if(!profile){
+    var username=email.split('@')[0];
+    var display_name=username.replace(/[._-]+/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase()});
+    await supa.from('profiles').upsert({id:authResp.data.user.id,username:username,display_name:display_name,role:'operador'});
+    var pr2=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).single(); profile=pr2.data;
   }
-
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if (error){ console.error('Auth error:', error); alert(error.message || 'Usuário ou senha inválidos.'); return; }
-
-  let { data: profile } = await supa.from('profiles').select('*').eq('id', data.user.id).maybeSingle();
-  if (!profile) {
-    const username = email.split('@')[0];
-    const display_name = username.replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    await supa.from('profiles').upsert({ id: data.user.id, username, display_name, role: 'operador' });
-    ({ data: profile } = await supa.from('profiles').select('*').eq('id', data.user.id).single());
-  }
-
-  const user = { id:data.user.id, username:profile.username, name:profile.display_name, role:profile.role };
-  setSession(user);
-  await loadFromSupabase(); showApp(); render(); setupRealtime();
+  var user={id:authResp.data.user.id,username:profile.username,name:profile.display_name,role:profile.role};
+  setSession(user); await loadFromSupabase(); showApp(); render(); setupRealtime();
 };
 
-/* ========= Expose (console) ========= */
+/* expose debug */
 window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=confirmTicket;
+window.snoozeTicket=snoozeTicket; window.resumeTicket=resumeTicket;
 </script>
 </body>
 </html>
-
-
