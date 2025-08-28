@@ -40,7 +40,8 @@
   .btn-warning{background:var(--warning);color:#10151b}
   .btn-icon{padding:8px 10px;border-radius:10px;min-width:36px; display:inline-flex; align-items:center; justify-content:center; position:relative}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-  .filters{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr .8fr;gap:10px}
+  /* atualizamos para comportar mais filtros */
+  .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .8fr 1fr auto;gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1319;color:var(--text);outline:none;font-size:14px}
   .table-wrap{overflow:auto}
   table{width:100%;border-collapse:collapse}
@@ -59,6 +60,11 @@
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
   .frota-row{background-image: linear-gradient(to right, rgba(79,140,255,.06), transparent)}
   .frota-badge{background:#223348; color:#aeddff; border:1px solid #2f4e68}
+
+  /* Pendências */
+  .pending-row{background-image:linear-gradient(to right, rgba(255,191,71,.06), transparent)}
+  .badge-pendente{background:#473b1e; color:#ffd58a; border:1px solid #5a4b23}
+  .badge-pendente.badge-venc{background:#4a2222; color:#ffb0b0; border-color:#5a2a2a}
 
   /* Badge do chat não lido */
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
@@ -101,7 +107,7 @@
   .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
   @media (max-width:1100px){ .charts{grid-template-columns:1fr} }
 
-  /* Login: logo em cima e "Entrar" abaixo */
+  /* Login */
   .login-head{flex-direction:column;align-items:center;gap:6px}
   .login-head h2{margin:0}
 </style>
@@ -161,11 +167,13 @@
     <section class="panel">
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód. cliente..."/>
+          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód. cliente, transportadora, descrição..."/>
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
           <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (<=12h)</option><option value="late">Vencido</option></select>
+          <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
+          <label class="badge" style="gap:8px"><input type="checkbox" id="fMine"> Só meus</label>
         </div>
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
@@ -174,7 +182,7 @@
         <table id="tbl">
           <thead>
             <tr>
-              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código do cliente</th>
+              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
               <th>Categoria</th><th>Prioridade</th><th>Status</th><th>SLA</th><th>Resp.</th><th class="nowrap">Ações</th>
             </tr>
           </thead>
@@ -210,6 +218,13 @@
         <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPctPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
         <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiPctVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
         <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
+      </div>
+
+      <div class="space"></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><small>Pendentes (abertos no mês)</small><strong id="mKpiPend">0</strong></div>
+        <div class="kpi-card"><small>Pendentes vencidas (mês)</small><strong id="mKpiPendVenc">0</strong></div>
+        <div class="kpi-card" style="grid-column:1/-1"><small>Observação</small><div class="kpi-sub">Pendência = ticket adiado (ainda não encerrado). Vencida = data de retomada anterior a hoje.</div></div>
       </div>
 
       <div class="charts">
@@ -251,11 +266,9 @@
             <label>Assunto</label>
             <select id="assunto" required>
               <option value="">Selecione…</option>
-              <!-- novos -->
               <option>Cliente Ausente</option>
               <option>Solicitação contato</option>
               <option>End. não encontrado</option>
-              <!-- existentes -->
               <option>Arrependimento</option>
               <option>Atraso de entrega</option>
               <option>Mercado Fraude</option>
@@ -273,16 +286,16 @@
           <div><label>Código do Cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
-            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Reunidas"/>
+            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
             <datalist id="lstTransportadora">
-              <option value="Atual Transportes"></option>
-              <option value="Correios/Sedex"></option>
-              <option value="Reunidas"></option>
-              <option value="TJB"></option>
-              <option value="Rede Sul"></option>
-              <option value="Brasil Web"></option>
-              <option value="Zanotelli"></option>
-              <option value="UBER"></option>
+              <option value="Total Express"></option>
+              <option value="Correios / Sedex"></option>
+              <option value="Jadlog"></option>
+              <option value="Sequoia"></option>
+              <option value="Loggi"></option>
+              <option value="J&amp;T"></option>
+              <option value="Kangu"></option>
+              <option value="DHL"></option>
               <option value="Outros"></option>
             </datalist>
           </div>
@@ -362,14 +375,14 @@ async function loadFromSupabase(){
   window.__APP_DIAG.sessionUser = sess?.user?.id || null;
   window.__APP_DIAG.envUrl = window.ENV?.SUPABASE_URL || 'N/D';
 
-  // tenta com "transportadora"; se der erro de coluna, refaz sem ela
+  // tenta com todas as colunas; se der erro de coluna, refaz sem as novas
   let tks=null, error=null;
-  let sel = 'id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora';
+  let sel = 'id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em';
   let res = await supa.from('tickets').select(sel);
   tks = res.data; error = res.error;
 
-  if (error && /column .*transportadora|unknown column|42703/i.test(error.message||'')) {
-    console.warn('Coluna transportadora indisponível — fallback sem ela.');
+  if (error && /column .*transportadora|column .*pendente|column .*retomar_em|unknown column|42703/i.test(error.message||'')) {
+    console.warn('Alguma coluna nova indisponível — fallback sem elas.');
     sel = 'id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
     res = await supa.from('tickets').select(sel);
     tks = res.data; error = res.error;
@@ -425,6 +438,8 @@ async function loadFromSupabase(){
     prazo:t.prazo? new Date(t.prazo).toISOString().slice(0,10) : '',
     codigo:t.codigo||'',
     transportadora:t.transportadora||'',
+    pendente: !!t.pendente,
+    retomar_em: t.retomar_em ? new Date(t.retomar_em).toISOString().slice(0,10) : '',
     historico:msgsByTicket[t.id]||[]
   }));
 }
@@ -444,6 +459,8 @@ async function supaUpsertTicket(rec){
     prazo:rec.prazo||null,
     codigo:rec.codigo||null,
     transportadora:rec.transportadora||null,
+    pendente: !!rec.pendente,
+    retomar_em: rec.retomar_em || null,
     opened_by:currentUser()?.id||null,
     closed_at:rec.status==='Encerrado'?new Date().toISOString():null
   };
@@ -451,7 +468,7 @@ async function supaUpsertTicket(rec){
   if(error) console.error(error);
 }
 async function supaDeleteTicket(id){const { error } = await supa.from('tickets').delete().eq('id', id); if(error) console.error(error);}
-async function supaAddMessage(ticketId,text){const u=currentUser();const payload={ticket_id:ticketId,sender:u?.id,sender_name:u?.name,body:text};const { error }=await supa.from('messages').insert(payload); if(error) console.error(error);}
+async function supaAddMessage(ticketId,text){const u=currentUser();const payload={ticket_id:ticketId,sender:u?.id,sender_name=u?.name,body:text};const { error }=await supa.from('messages').insert(payload); if(error) console.error(error);}
 async function supaMarkRead(ticketId){const u=currentUser(); if(!u)return; const nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime();}
 
 /* ========= Realtime + fallback (2s fg / 10s bg) ========= */
@@ -491,16 +508,52 @@ window.addEventListener('online', ()=>{ setupRealtime(); refreshNow(); });
 /* ========= Render Lista ========= */
 const prioRank=p=>p==='Alta'?0:p==='Média'?1:2;
 function getUnreadCount(d){const last=lastReadMap[d.id]||0;const me=currentUser()?.name||'';return (d.historico||[]).filter(h=>h.at>last&&h.user!==me).length;}
+function startOfDay(dt){const d=new Date(dt); d.setHours(0,0,0,0); return d;}
+function today0(){const d=new Date(); d.setHours(0,0,0,0); return d;}
 
 function render(){
   const term=qs('#fSearch').value.toLowerCase().trim();
   const st=qs('#fStatus').value, pr=qs('#fPrio').value, cat=qs('#fCategoria').value, sla=qs('#fSLA').value;
+  const pend=qs('#fPend').value; const mine=qs('#fMine').checked;
 
   const rows=data.filter(d=>{
     const sLA=slaStatus(d.prazo).code;
     const searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
-    return(!term||searchable.includes(term))&&(!st||d.status===st)&&(!pr||d.prioridade===pr)&&(!cat||d.categoria===cat)&&(!sla||sLA===sla);
-  }).sort((a,b)=> prioRank(a.prioridade)-prioRank(b.prioridade) || b.abertoEm-a.abertoEm);
+
+    // pendência
+    const isPend = !!d.pendente && d.status!=='Encerrado';
+    const retoma = d.retomar_em ? startOfDay(d.retomar_em) : null;
+    const isPendDue = isPend && retoma && retoma < today0();
+
+    // filtros
+    if (term && !searchable.includes(term)) return false;
+    if (st && d.status!==st) return false;
+    if (pr && d.prioridade!==pr) return false;
+    if (cat && d.categoria!==cat) return false;
+    if (sla && sLA!==sla) return false;
+    if (pend==='pend' && !isPend) return false;
+    if (pend==='due'  && !isPendDue) return false;
+    if (mine){
+      const me=currentUser()?.name||'';
+      const souResp=(d.responsavel||'')===me;
+      const souSolic=(d.solicitante||'')===me;
+      if(!souResp && !souSolic) return false;
+    }
+    return true;
+  }).sort((a,b)=>{
+      // ranking pendência (vencida > hoje > demais)
+      const score=(x)=>{
+        const isP=!!x.pendente && x.status!=='Encerrado';
+        const r=x.retomar_em? startOfDay(x.retomar_em): null;
+        const t=today0();
+        const venc = isP && r && r < t ? 2 : 0;
+        const hoje = isP && r && r.getTime()===t.getTime() ? 1 : 0;
+        return (venc*100)+(hoje*10);
+      };
+      const s = score(b)-score(a);
+      if (s) return s;
+      return prioRank(a.prioridade)-prioRank(b.prioridade) || b.abertoEm-a.abertoEm;
+  });
 
   qs('#tbody').innerHTML = rows.map(d=>{
     const slaObj=slaStatus(d.prazo);
@@ -508,10 +561,23 @@ function render(){
     const showConfirm=d.status==='Aberto';
     const unread=d.status==='Em tratativa'?getUnreadCount(d):0;
     const unreadBadge=unread>0?`<span class="badge-unread" title="${unread} nova(s)">${unread}</span>`:'';
-    const rowCls = d.categoria==='SAK'?'sak-row' : d.categoria==='Frota - Transportadora'?'frota-row':'';
+
+    // pendências
+    const isPend = !!d.pendente && d.status!=='Encerrado';
+    const retoma = d.retomar_em ? startOfDay(d.retomar_em) : null;
+    const pendVenc = isPend && retoma && retoma < today0();
+    const pendBadge = isPend
+      ? `<span class="badge badge-pendente ${pendVenc?'badge-venc':''}" title="Retomar em ${d.retomar_em}">
+           ⏰ ${pendVenc?'Pendente (vencida)':'Pendente'} • ${d.retomar_em.split('-').reverse().join('/')}
+         </span>`
+      : '';
+
+    // categoria highlight
     const catCell = d.categoria==='SAK' ? `<span class="badge sak-badge">SAK</span>`
                  : d.categoria==='Frota - Transportadora' ? `<span class="badge frota-badge">Frota - Transportadora</span>`
                  : (d.categoria||'-');
+
+    const rowCls = (isPend ? 'pending-row ' : '') + (d.categoria==='SAK'?'sak-row' : d.categoria==='Frota - Transportadora'?'frota-row':'');
 
     return `<tr class="${rowCls}">
       <td class="nowrap"><strong>${d.id}</strong></td>
@@ -521,13 +587,15 @@ function render(){
       <td>${d.codigo||'<span class="muted">—</span>'}</td>
       <td>${catCell}</td>
       <td>${prioBadge(d.prioridade||'-')}</td>
-      <td>${statusBadge(d.status||'-')}</td>
+      <td>${statusBadge(d.status||'-')} ${pendBadge}</td>
       <td>${d.prazo? slaPill : '<span class="muted">—</span>'}</td>
       <td>${d.responsavel||'<span class="muted">—</span>'}</td>
       <td class="table-actions">
         ${showConfirm? `<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket('${d.id}')"><i class="fa fa-check-double"></i></button>`:''}
         <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit('${d.id}')"><i class="fa fa-pen-to-square"></i>${unreadBadge}</button>
         <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket('${d.id}')"><i class="fa fa-check"></i></button>
+        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket('${d.id}')"><i class="fa fa-clock"></i></button>
+        ${d.pendente ? `<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket('${d.id}')"><i class="fa fa-play"></i></button>`:''}
       </td>
     </tr>`;
   }).join('') || `<tr><td colspan="11" class="muted">Nenhum registro encontrado</td></tr>`;
@@ -561,6 +629,13 @@ function renderKPIs(){
   qs('#mKpiQtdPrazo').textContent=`${onTime} de ${denom}`;
   qs('#mKpiPctVenc').textContent=pctLate+'%';
   qs('#mKpiQtdVenc').textContent=`${denom-onTime} de ${denom}`;
+
+  // KPIs de pendência
+  const t0=today0();
+  const pendMes = baseAbertos.filter(d=> d.pendente && d.status!=='Encerrado');
+  const pendVencMes = pendMes.filter(d=> d.retomar_em && startOfDay(d.retomar_em) < t0);
+  qs('#mKpiPend').textContent = pendMes.length;
+  qs('#mKpiPendVenc').textContent = pendVencMes.length;
 
   // gráfico por categoria
   const categorias=[...new Set(data.map(d=>d.categoria||'—'))].sort();
@@ -670,6 +745,8 @@ function collectForm(){
     prazo,
     codigo:qs('#codigo').value.trim(),
     transportadora:qs('#transportadora').value.trim(),
+    pendente: exists? !!exists.pendente : false,
+    retomar_em: exists? (exists.retomar_em||'') : '',
     historico: exists? exists.historico : [{at:abertoEm,txt:`Ticket aberto por ${qs('#solicitante').value.trim()||'usuário'}`,user:qs('#solicitante').value.trim()||'usuário'}]
   };
 }
@@ -686,6 +763,28 @@ async function save(e){
 }
 async function addHistory(id,text){const d=data.find(x=>x.id===id); if(!d)return; d.historico=d.historico||[]; d.historico.push({at:Date.now(),txt:text,user:currentUser()?.name||''}); renderChat(d.historico); await supaAddMessage(id,text);}
 async function removeTicket(id){ if((currentUser()?.role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false);}
+
+/* ========= Pendência (Adiar/Retomar) ========= */
+async function snoozeTicket(id){
+  const d = data.find(x=>x.id===id); if(!d) return;
+  const pad = (n)=> String(n).padStart(2,'0');
+  const def = d.retomar_em || (()=>{const k=new Date(); k.setDate(k.getDate()+1); return `${k.getFullYear()}-${pad(k.getMonth()+1)}-${pad(k.getDate())}` })();
+  const val = prompt('Retomar em (AAAA-MM-DD):', def);
+  if(!val) return;
+  d.pendente = true;
+  d.retomar_em = val;
+  await supaUpsertTicket(d);
+  await addHistory(id, `Adiado para ${new Date(val).toLocaleDateString('pt-BR')}`);
+  render();
+}
+async function resumeTicket(id){
+  const d = data.find(x=>x.id===id); if(!d) return;
+  d.pendente = false;
+  d.retomar_em = '';
+  await supaUpsertTicket(d);
+  await addHistory(id, 'Retomado agora');
+  render();
+}
 
 /* ========= Ações ========= */
 async function confirmTicket(id){
@@ -724,8 +823,10 @@ qs('#fStatus').addEventListener('change',render);
 qs('#fPrio').addEventListener('change',render);
 qs('#fCategoria').addEventListener('change',render);
 qs('#fSLA').addEventListener('change',render);
+qs('#fPend').addEventListener('change',render);
+qs('#fMine').addEventListener('change',render);
 qs('#fSearch').addEventListener('input',debounce(render,200));
-qs('#btnClear').onclick=()=>{qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';render();};
+qs('#btnClear').onclick=()=>{qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';qs('#fPend').value='';qs('#fMine').checked=false;render();};
 
 // Chat
 async function sendChat(){const id=qs('#ticketId').value||(alert('Salve primeiro para conversar.'),null); if(!id)return; const txt=qs('#chatText').value.trim(); if(!txt)return; await addHistory(id,txt); qs('#chatText').value=''; await supaMarkRead(id); render();}
@@ -735,11 +836,21 @@ qs('#chatText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefa
 /* ========= Export Excel ========= */
 function buildHistoricoString(hist){return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>`${new Date(h.at).toLocaleString('pt-BR')} — ${h.user||''}: ${h.txt||''}`).join('\n');}
 function exportXLSX(){
-  const rows=data.slice().sort((a,b)=> prioRank(a.prioridade)-prioRank(b.prioridade) || b.abertoEm-a.abertoEm);
-  const header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código','Transportadora','Histórico (chat)'];
+  const rows=data.slice().sort((a,b)=>{
+    const pr=(p)=>p==='Alta'?0:p==='Média'?1:2;
+    return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm;
+  });
+  const header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Pendente','Retomar em','Histórico (chat)'];
   const aoa=[header];
-  rows.forEach(r=>aoa.push([ r.id,new Date(r.abertoEm),r.solicitante||'',r.categoria||'',r.assunto||'',r.prioridade||'',r.descricao||'',r.status||'',r.responsavel||'',r.prazo?new Date(r.prazo+'T00:00:00'):'',r.codigo||'', r.transportadora||'', buildHistoricoString(r.historico) ]));
-  const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:60}];
+  rows.forEach(r=>aoa.push([
+    r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'',
+    r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'',
+    r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'',
+    r.pendente?'Sim':'Não', r.retomar_em || '',
+    buildHistoricoString(r.historico)
+  ]));
+  const ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true});
+  ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Tickets'); XLSX.writeFile(wb,`solicitacoes_${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
@@ -768,6 +879,10 @@ function showApp(){qs('#loginSection').style.display='none';qs('#appSection').st
 async function boot(){
   const u=currentUser(); if(!u){showLogin();return;}
   showApp(); await loadFromSupabase(); render(); setupRealtime();
+
+  // aviso de pendências vencidas
+  const vencidas = data.filter(d=> d.pendente && d.status!=='Encerrado' && d.retomar_em && startOfDay(d.retomar_em) < today0()).length;
+  if (vencidas>0) toast(`Você tem ${vencidas} pendência(s) vencida(s). Use o filtro "Pendências".`);
 }
 boot();
 
@@ -795,11 +910,7 @@ qs('#btnLogin').onclick=async()=>{
 
 /* expose debug */
 window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=confirmTicket;
+window.snoozeTicket=snoozeTicket; window.resumeTicket=resumeTicket;
 </script>
 </body>
 </html>
-
-
-
-
-
