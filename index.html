@@ -152,7 +152,7 @@
     <section class="panel">
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód./NF/DF, transportadora, descrição..."/>
+          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, cód. cliente, transportadora, descrição..."/>
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
@@ -167,7 +167,7 @@
         <table id="tbl">
           <thead>
             <tr>
-              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código/NF/DF</th>
+              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
               <th>Categoria</th><th>Prioridade</th><th>Status</th><th>SLA</th><th>Resp.</th><th class="nowrap">Ações</th>
             </tr>
           </thead>
@@ -268,7 +268,7 @@
         </div>
 
         <div class="grid-3">
-          <div><label>Código do Cliente, NF ou DF</label><input id="codigo" placeholder="Ex.: 12345 / NF 98765 / DF 0001"/></div>
+          <div><label>Código do Cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
             <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
@@ -756,7 +756,7 @@ qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',
 function buildHistoricoString(hist){return (hist||[]).sort(function(a,b){return a.at-b.at}).map(function(h){return new Date(h.at).toLocaleString('pt-BR')+' — '+(h.user||'')+': '+(h.txt||'')}).join('\n')}
 function exportXLSX(){
   var rows=data.slice().sort(function(a,b){var pr=function(p){return p==='Alta'?0:(p==='Média'?1:2)};return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm});
-  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código/NF/DF','Transportadora','Pendente','Retomar em','Histórico (chat)'];
+  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Pendente','Retomar em','Histórico (chat)'];
   var aoa=[header];
   rows.forEach(function(r){
     aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.pendente?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]);
