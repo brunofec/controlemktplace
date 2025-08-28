@@ -47,7 +47,7 @@
   tbody tr:hover{background:#0f141a}
   .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--badge);font-size:12px}
   .status-aberto{background:#24324a;color:#9fc2ff} .status-tratativa{background:#243f34;color:#7eedc0}
-  .status-encerrado{background:#37313e;color:#e6b4ff}
+  .status-encerrado{background:#37313e;color:#e6b4ff} .status-pendente{background:#473b1e;color:#ffd58a}
   .prio-alta{border:1px solid var(--danger);color:#ff9f9f} .prio-media{border:1px solid var(--warning);color:#ffd58a} .prio-baixa{border:1px solid #6fb7ff;color:#a8d3ff}
   .table-actions{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
   .muted{color:var(--muted)} .nowrap{white-space:nowrap}
@@ -56,10 +56,6 @@
   .sak-badge{background:#402a14; color:#ffb26b; border:1px solid #5a3a1b}
   .frota-row{background-image: linear-gradient(to right, rgba(79,140,255,.06), transparent)}
   .frota-badge{background:#223348; color:#aeddff; border:1px solid #2f4e68}
-
-  .pending-row{background-image:linear-gradient(to right, rgba(255,191,71,.06), transparent)}
-  .badge-pendente{background:#473b1e; color:#ffd58a; border:1px solid #5a4b23}
-  .badge-pendente.badge-venc{background:#4a2222; color:#ffb0b0; border-color:#5a2a2a}
 
   .badge-unread{position:absolute; top:-6px; right:-6px; background:#ff5d5d; color:#fff; border-radius:999px; font-size:10px;
     min-width:16px; height:16px; padding:0 4px; display:grid; place-items:center; box-shadow:0 0 0 2px var(--panel)}
@@ -89,16 +85,6 @@
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
-
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
-  .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
-  .kpi-sub{font-size:12px;color:var(--muted);margin-top:6px}
-  .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-  @media (max-width:1100px){ .charts{grid-template-columns:1fr} }
-
-  .login-head{flex-direction:column;align-items:center;gap:6px}
-  .login-head h2{margin:0}
 </style>
 </head>
 <body>
@@ -106,8 +92,8 @@
 <!-- LOGIN -->
 <section id="loginSection" style="min-height:100vh;display:none;place-items:center;padding:20px">
   <div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
-    <div class="row login-head">
-      <img src="logo.png" class="logo-top" alt="Logo"><h2>Entrar</h2>
+    <div class="row" style="flex-direction:column;align-items:center;gap:6px">
+      <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
     </div>
     <p class="muted" style="font-size:12px">Seja Bem-Vindo!</p>
     <div class="space"></div>
@@ -126,7 +112,6 @@
       <div class="brand"><img src="logo.png" class="logo-top" alt="Logo"><h1>Controle Interno de Solicitações</h1></div>
       <div class="actions">
         <span id="whoami" class="pill"></span>
-        <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
         <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
@@ -153,7 +138,7 @@
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
           <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, código do cliente, transportadora, descrição..."/>
-          <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select>
+          <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
           <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (<=12h)</option><option value="late">Vencido</option></select>
@@ -175,51 +160,6 @@
         </table>
       </div>
       <div class="badge" style="margin-top:10px">SLA por prioridade: Alta 1 dia • Média 3 dias • Baixa 5 dias</div>
-    </section>
-  </main>
-
-  <!-- KPIs -->
-  <main id="kpiPage" class="wrap hidden">
-    <section class="panel">
-      <div class="row" style="align-items:center;gap:12px">
-        <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
-        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-          <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
-          <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
-        </div>
-      </div>
-      <div class="space"></div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card"><small>Aberto (abertos no mês)</small><strong id="mKpiAberto">0</strong></div>
-        <div class="kpi-card"><small>Em tratativa (abertos no mês)</small><strong id="mKpiTratativa">0</strong></div>
-        <div class="kpi-card"><small>Vencido (SLA) (abertos no mês)</small><strong id="mKpiVencido">0</strong></div>
-        <div class="kpi-card"><small>Encerrado (abertos no mês)</small><strong id="mKpiEncerrado">0</strong></div>
-      </div>
-
-      <div class="space"></div>
-      <div class="kpi-grid">
-        <div class="kpi-card"><small>Concluídos no mês</small><strong id="mKpiFechadosMes">0</strong><div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div></div>
-        <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPctPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
-        <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiPctVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
-        <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
-      </div>
-
-      <div class="space"></div>
-      <div class="kpi-grid">
-        <div class="kpi-card"><small>Pendentes (abertos no mês)</small><strong id="mKpiPend">0</strong></div>
-        <div class="kpi-card"><small>Pendentes vencidas (mês)</small><strong id="mKpiPendVenc">0</strong></div>
-        <div class="kpi-card" style="grid-column:1/-1"><small>Observação</small><div class="kpi-sub">Pendência = ticket adiado (ainda não encerrado). Vencida = data de retomada anterior a hoje.</div></div>
-      </div>
-
-      <div class="charts">
-        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
-        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
-        <div class="panel" style="grid-column:1/-1"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por transportadora</h3><canvas id="chartTransp"></canvas></div>
-      </div>
-
-      <div class="space"></div>
-      <div class="badge">Regras: KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês. Transportadora considera apenas tickets com campo preenchido.</div>
     </section>
   </main>
 
@@ -264,7 +204,7 @@
               <option>Barrar Entrega</option>
             </select>
           </div>
-          <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Encerrado</option></select></div>
+          <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select></div>
         </div>
 
         <div class="grid-3">
@@ -328,126 +268,72 @@ function toast(msg){var c=qs('#toast');var el=document.createElement('div');el.c
 function prioToDays(p){if(p==='Alta')return 1;if(p==='Média')return 3;return 5}
 function ensureSLA(prazo,prioridade,abertoEm){if(prazo)return prazo;var base=new Date(abertoEm||Date.now());base.setHours(0,0,0,0);base.setDate(base.getDate()+prioToDays(prioridade||'Média'));return base.toISOString().slice(0,10)}
 function slaStatus(dateStr){if(!dateStr)return{code:'',label:'—'};var today=new Date();today.setHours(23,59,59,999);var due=new Date(dateStr+'T23:59:59');var diffH=(due-today)/36e5;if(diffH<0)return{code:'late',label:'Vencido'};if(diffH<=12)return{code:'risk',label:'Risco'};return{code:'ok',label:'No prazo'}}
-function statusBadge(s){var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Encerrado':'status-encerrado'};return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'}
+function statusBadge(s){var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Pendente':'status-pendente','Encerrado':'status-encerrado'};return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'}
 function prioBadge(p){var cls=p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa';return '<span class="badge '+cls+'">'+p+'</span>'}
 function ym(d){return d.toISOString().slice(0,7)}
 function startOfDay(dt){var d=new Date(dt);d.setHours(0,0,0,0);return d}
 function today0(){var d=new Date();d.setHours(0,0,0,0);return d}
 var DEFAULT_EMAIL_DOMAIN="koerich.com.br";
 
-/* ===== Sessão + Supabase ===== */
+/* ===== Config + Supabase (à prova de falta de config.js) ===== */
+var SUPA_URL=(window.ENV&&window.ENV.SUPABASE_URL)||'';
+var SUPA_KEY=(window.ENV&&window.ENV.SUPABASE_ANON_KEY)||'';
+var supa=(SUPA_URL&&SUPA_KEY)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
+function supaReady(){return !!supa}
+
+/* ===== Sessão ===== */
 var SESSION_KEY='ticket_session_v1';
 function setSession(u){localStorage.setItem(SESSION_KEY,JSON.stringify(u))}
 function currentUser(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'')}catch(e){return null}}
 function clearSession(){localStorage.removeItem(SESSION_KEY)}
-var supa=supabase.createClient(window.ENV.SUPABASE_URL,window.ENV.SUPABASE_ANON_KEY);
 
 /* ===== Estado ===== */
 var data=[]; var lastReadMap={};
-var chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
-/* ===== Banco (robusto) ===== */
+/* ===== Banco (com guardas) ===== */
 async function loadFromSupabase(){
-  var sessRes=await supa.auth.getSession();
-  var sess = (sessRes && sessRes.data) ? sessRes.data.session : null;
-  window.__APP_DIAG=window.__APP_DIAG||{};
-  window.__APP_DIAG.sessionUser = (sess && sess.user)? sess.user.id : null;
-  window.__APP_DIAG.envUrl = (window.ENV && window.ENV.SUPABASE_URL) ? window.ENV.SUPABASE_URL : 'N/D';
-
+  if(!supaReady()){toast('Configuração do Supabase ausente.'); data=[]; render(); return;}
   var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em';
-  var resp=await supa.from('tickets').select(sel);
-  var tks=resp.data; var error=resp.error;
-
-  if(error && /column .*transportadora|column .*pendente|column .*retomar_em|unknown column|42703/i.test(error.message||'')){
+  var resp=await supa.from('tickets').select(sel); var tks=resp.data; var error=resp.error;
+  if(error && /42703|unknown column|column .*transportadora|pendente|retomar_em/i.test(error.message||'')){
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
-    resp=await supa.from('tickets').select(sel);
-    tks=resp.data; error=resp.error;
+    resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
-  if(error){
-    console.error('tickets error',error);
-    window.__APP_DIAG.lastError=error.message||String(error);
-    toast('Erro ao carregar tickets: '+(error.message||'ver console'));
-    data=[]; render(); return;
-  }
-
+  if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
   (tks||[]).sort(function(a,b){return new Date(b.aberto_em)-new Date(a.aberto_em)});
-  window.__APP_DIAG.rows = tks ? tks.length : 0;
 
-  var ids=(tks||[]).map(function(t){return t.id});
-  var msgsByTicket={};
+  // mensagens + last_reads (se disponíveis)
+  var ids=(tks||[]).map(function(t){return t.id}); var msgsByTicket={};
   if(ids.length){
-    var resp2=await supa.from('messages').select('ticket_id, body, sender_name, created_at').in('ticket_id',ids).order('created_at',{ascending:true});
-    if(!resp2.error){
-      (resp2.data||[]).forEach(function(m){
-        if(!msgsByTicket[m.ticket_id]) msgsByTicket[m.ticket_id]=[];
-        msgsByTicket[m.ticket_id].push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'});
-      });
-    }else{
-      console.warn('messages error',resp2.error); window.__APP_DIAG.msgsError=resp2.error.message||String(resp2.error);
-    }
+    var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
+    if(!r2.error){(r2.data||[]).forEach(function(m){(msgsByTicket[m.ticket_id]=msgsByTicket[m.ticket_id]||[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})})}
   }
-
   lastReadMap={};
-  var me=currentUser();
-  if(me){
-    var lrResp=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id);
-    (lrResp.data||[]).forEach(function(r){ lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime() })
-  }
+  var me=currentUser(); if(me){var lr=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id); (lr.data||[]).forEach(function(r){lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime()})}
 
-  data=(tks||[]).map(function(t){
-    return {
-      id:t.id,
-      abertoEm:new Date(t.aberto_em).getTime(),
-      solicitante:t.solicitante,
-      categoria:t.categoria,
-      assunto:t.assunto,
-      prioridade:t.prioridade,
-      descricao:t.descricao||'',
-      status:t.status,
-      responsavel:t.responsavel||'',
-      prazo:t.prazo? new Date(t.prazo).toISOString().slice(0,10) : '',
-      codigo:t.codigo||'',
-      transportadora:t.transportadora||'',
-      pendente: !!t.pendente,
-      retomar_em: t.retomar_em ? new Date(t.retomar_em).toISOString().slice(0,10) : '',
-      historico: msgsByTicket[t.id] || []
-    }
-  });
+  data=(tks||[]).map(function(t){return{
+    id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
+    prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
+    codigo:t.codigo||'', transportadora:t.transportadora||'', pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
+    historico:msgsByTicket[t.id]||[]
+  }});
 }
 
 /* ===== Upserts ===== */
-async function supaUpsertTicket(rec){
-  var payload={
-    id:rec.id,
-    aberto_em:new Date(rec.abertoEm).toISOString(),
-    solicitante:rec.solicitante,
-    categoria:rec.categoria,
-    assunto:rec.assunto,
-    prioridade:rec.prioridade,
-    descricao:rec.descricao||null,
-    status:rec.status,
-    responsavel:rec.responsavel||null,
-    prazo:rec.prazo||null,
-    codigo:rec.codigo||null,
-    transportadora:rec.transportadora||null,
-    pendente: !!rec.pendente,
-    retomar_em: rec.retomar_em || null,
-    opened_by:(currentUser()||{}).id||null,
-    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
-  };
-  var r=await supa.from('tickets').upsert(payload);
-  if(r.error) console.error(r.error);
+async function supaUpsertTicket(rec){ if(!supaReady())return;
+  var payload={ id:rec.id, aberto_em:new Date(rec.abertoEm).toISOString(), solicitante:rec.solicitante, categoria:rec.categoria,
+    assunto:rec.assunto, prioridade:rec.prioridade, descricao:rec.descricao||null, status:rec.status, responsavel:rec.responsavel||null,
+    prazo:rec.prazo||null, codigo:rec.codigo||null, transportadora:rec.transportadora||null, pendente:!!rec.pendente, retomar_em:rec.retomar_em||null,
+    opened_by:(currentUser()||{}).id||null, closed_at:rec.status==='Encerrado'?new Date().toISOString():null };
+  var r=await supa.from('tickets').upsert(payload); if(r.error)console.error(r.error);
 }
-async function supaDeleteTicket(id){var r=await supa.from('tickets').delete().eq('id',id); if(r.error) console.error(r.error)}
-async function supaAddMessage(ticketId,text){
-  var u=currentUser(); var payload={ticket_id:ticketId,sender:u?u.id:null,sender_name=u?u.name:null,body:text};
-  var r=await supa.from('messages').insert(payload); if(r.error) console.error(r.error)
+async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error)console.error(r.error)}
+async function supaAddMessage(ticketId,text){ if(!supaReady())return;
+  var u=currentUser(); var payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text};
+  var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)
 }
-async function supaMarkRead(ticketId){
-  var u=currentUser(); if(!u) return;
-  var nowIso=new Date().toISOString();
-  await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso});
-  lastReadMap[ticketId]=new Date(nowIso).getTime();
+async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return;
+  var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()
 }
 
 /* ===== Realtime + fallback ===== */
@@ -455,22 +341,18 @@ var __rtOK={messages:false,tickets:false}; var __pollId=null;
 async function refreshNow(){await loadFromSupabase(); render()}
 function setPollTimer(){ if(__pollId) clearInterval(__pollId); var ms=(document.visibilityState==='visible')?2000:10000; __pollId=setInterval(function(){ if(!__rtOK.messages||!__rtOK.tickets){refreshNow()} },ms)}
 function setupRealtime(){
+  if(!supaReady())return;
   supa.getChannels().forEach(function(ch){supa.removeChannel(ch)});
-  supa.channel('realtime-messages')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},function(payload){
-      var m=payload.new; var d=data.find(function(x){return x.id===m.ticket_id});
-      if(d){
-        d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
-        var me=(currentUser()||{}).name||''; if(me!==(m.sender_name||'')) toast('Nova mensagem no ticket '+m.ticket_id);
-      }
-    })
-    .subscribe(function(status){ __rtOK.messages=(status==='SUBSCRIBED') });
-
+  supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},function(payload){
+    var m=payload.new; var d=data.find(function(x){return x.id===m.ticket_id});
+    if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
+      var me=(currentUser()||{}).name||''; if(me!==(m.sender_name||'')) toast('Nova mensagem no ticket '+m.ticket_id);
+    }
+  }).subscribe(function(status){__rtOK.messages=(status==='SUBSCRIBED')});
   supa.channel('realtime-tickets')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},function(){ refreshNow() })
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},function(){ refreshNow() })
-    .subscribe(function(status){ __rtOK.tickets=(status==='SUBSCRIBED') });
-
+    .subscribe(function(status){__rtOK.tickets=(status==='SUBSCRIBED')});
   setPollTimer();
 }
 document.addEventListener('visibilitychange', setPollTimer);
@@ -490,7 +372,7 @@ function render(){
     var sLA=slaStatus(d.prazo).code;
     var searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
 
-    var isPend=!!d.pendente && d.status!=='Encerrado';
+    var isPend=(d.status==='Pendente');
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
     var isPendDue=isPend && retoma && retoma < today0();
 
@@ -510,7 +392,7 @@ function render(){
     return true;
   }).sort(function(a,b){
     function score(x){
-      var isP=!!x.pendente && x.status!=='Encerrado';
+      var isP=(x.status==='Pendente');
       var r=x.retomar_em? startOfDay(x.retomar_em):null;
       var t=today0();
       var venc = (isP && r && r < t)? 2 : 0;
@@ -531,18 +413,11 @@ function render(){
     var unread=d.status==='Em tratativa'?getUnreadCount(d):0;
     var unreadBadge=unread>0?'<span class="badge-unread" title="'+unread+' nova(s)">'+unread+'</span>':'';
 
-    var isPend=!!d.pendente && d.status!=='Encerrado';
-    var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
-    var pendVenc=isPend && retoma && retoma < today0();
-    var pendBadge=isPend?('<span class="badge badge-pendente '+(pendVenc?'badge-venc':'')+'" title="Retomar em '+d.retomar_em+'">⏰ '+(pendVenc?'Pendente (vencida)':'Pendente')+' • '+(d.retomar_em?d.retomar_em.split('-').reverse().join('/'):'')+'</span>'):'';
-
     var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
                : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                : (d.categoria||'-');
 
-    var rowCls=(isPend?'pending-row ':'') + (d.categoria==='SAK'?'sak-row':(d.categoria==='Frota - Transportadora'?'frota-row':''));
-
-    return '<tr class="'+rowCls+'">'+
+    return '<tr>'+
       '<td class="nowrap"><strong>'+d.id+'</strong></td>'+
       '<td>'+fmtDate(d.abertoEm)+'</td>'+
       '<td>'+ (d.solicitante||'-') +'</td>'+
@@ -550,7 +425,7 @@ function render(){
       '<td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>'+
       '<td>'+catCell+'</td>'+
       '<td>'+prioBadge(d.prioridade||'-')+'</td>'+
-      '<td>'+statusBadge(d.status||'-')+' '+pendBadge+'</td>'+
+      '<td>'+statusBadge(d.status||'-')+'</td>'+
       '<td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>'+
       '<td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>'+
       '<td class="table-actions">'+
@@ -558,72 +433,10 @@ function render(){
         '<button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>'+
         '<button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>'+
         '<button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>'+
-        (d.pendente?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+
+        (d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+
       '</td>'+
     '</tr>';
   }).join('');
-}
-
-/* ===== KPIs ===== */
-function getClosedAt(d){
-  var h=(d.historico||[]).slice().sort(function(a,b){return a.at-b.at});
-  for(var i=0;i<h.length;i++){ if((h[i].txt||'').toLowerCase().indexOf('encerrado')>-1) return h[i].at }
-  return null;
-}
-function renderKPIs(){
-  var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
-  var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
-
-  var baseAbertos=data.filter(function(d){return ym(new Date(d.abertoEm))===sel});
-  qs('#mKpiAberto').textContent    = baseAbertos.filter(function(d){return d.status==='Aberto'}).length;
-  qs('#mKpiTratativa').textContent = baseAbertos.filter(function(d){return d.status==='Em tratativa'}).length;
-  qs('#mKpiEncerrado').textContent = baseAbertos.filter(function(d){return d.status==='Encerrado'}).length;
-  qs('#mKpiVencido').textContent   = baseAbertos.filter(function(d){return slaStatus(d.prazo).code==='late' && d.status!=='Encerrado'}).length;
-
-  var closedThisMonth=data.map(function(d){return {d:d,closedAt:getClosedAt(d)}}).filter(function(x){return x.closedAt && ym(new Date(x.closedAt))===sel});
-  var closedWithSLA=closedThisMonth.filter(function(x){return !!x.d.prazo});
-  var denom=closedWithSLA.length;
-  var onTime=closedWithSLA.filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length;
-  var pctOn=denom?Math.round(onTime/denom*100):0;
-  var pctLate=denom?100-pctOn:0;
-  qs('#mKpiFechadosMes').textContent=closedThisMonth.length;
-  qs('#mKpiFechadosBase').textContent='com SLA: '+denom;
-  qs('#mKpiPctPrazo').textContent=pctOn+'%';
-  qs('#mKpiQtdPrazo').textContent=onTime+' de '+denom;
-  qs('#mKpiPctVenc').textContent=pctLate+'%';
-  qs('#mKpiQtdVenc').textContent=(denom-onTime)+' de '+denom;
-
-  var t0=today0();
-  var pendMes=baseAbertos.filter(function(d){return d.pendente && d.status!=='Encerrado'});
-  var pendVencMes=pendMes.filter(function(d){return d.retomar_em && startOfDay(d.retomar_em) < t0});
-  qs('#mKpiPend').textContent=pendMes.length;
-  qs('#mKpiPendVenc').textContent=pendVencMes.length;
-
-  var categorias=[...new Set(data.map(function(d){return d.categoria||'—'}))].sort();
-
-  function porCat(c){return baseAbertos.filter(function(d){return d.categoria===c})}
-  var valsAberto=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Aberto'}).length});
-  var valsTrat=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Em tratativa'}).length});
-  var valsEnc=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Encerrado'}).length});
-
-  var ctx1=document.getElementById('chartAbertos').getContext('2d');
-  if(chartAbertos)chartAbertos.destroy();
-  chartAbertos=new Chart(ctx1,{type:'bar',data:{labels:categorias,datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Encerrado',data:valsEnc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-
-  function closedByCat(c){return closedWithSLA.filter(function(x){return x.d.categoria===c})}
-  var valsPrazo=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length});
-  var valsVenc=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')<new Date(x.closedAt)}).length});
-  var ctx2=document.getElementById('chartConcluidos').getContext('2d');
-  if(chartConcluidos)chartConcluidos.destroy();
-  chartConcluidos=new Chart(ctx2,{type:'bar',data:{labels:categorias,datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-
-  var baseTransp=baseAbertos.filter(function(d){return (d.transportadora||'').trim()!==''});
-  var mapa={}; baseTransp.forEach(function(d){var k=d.transportadora.trim(); mapa[k]=(mapa[k]||0)+1});
-  var transp=Object.keys(mapa).sort(function(a,b){return mapa[b]-mapa[a]});
-  var valsTransp=transp.map(function(t){return mapa[t]});
-  var ctx3=document.getElementById('chartTransp').getContext('2d');
-  if(chartTransp)chartTransp.destroy();
-  chartTransp=new Chart(ctx3,{type:'bar',data:{labels:transp,datasets:[{label:'Abertos',data:valsTransp}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
 }
 
 /* ===== Modal + Form ===== */
@@ -696,7 +509,7 @@ function collectForm(){
     prazo:prazo,
     codigo:qs('#codigo').value.trim(),
     transportadora:qs('#transportadora').value.trim(),
-    pendente: exists? !!exists.pendente : false,
+    pendente: (exists? !!exists.pendente : false),
     retomar_em: exists? (exists.retomar_em||'') : '',
     historico: exists? exists.historico : [{at:abertoEm,txt:'Ticket aberto por '+(qs('#solicitante').value.trim()||'usuário'),user:(qs('#solicitante').value.trim()||'usuário')}]
   }
@@ -711,15 +524,20 @@ async function save(e){
 async function addHistory(id,text){var d=data.find(function(x){return x.id===id}); if(!d)return; d.historico=d.historico||[]; d.historico.push({at:Date.now(),txt:text,user:((currentUser()||{}).name)||''}); renderChat(d.historico); await supaAddMessage(id,text)}
 async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(function(x){return x.id!==id}); await supaDeleteTicket(id); render(); openModal(false)}
 
-/* Pendência */
+/* Pendência: vira status "Pendente"; ao retomar volta para "Em tratativa" */
 async function snoozeTicket(id){
   var d=data.find(function(x){return x.id===id}); if(!d)return;
   function pad(n){n=String(n);return n.length<2?('0'+n):n}
   var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
   var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
-  d.pendente=true; d.retomar_em=val; await supaUpsertTicket(d); await addHistory(id,'Adiado para '+new Date(val).toLocaleDateString('pt-BR')); render();
+  d.pendente=true; d.retomar_em=val; d.status='Pendente';
+  await supaUpsertTicket(d); await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR')); render();
 }
-async function resumeTicket(id){var d=data.find(function(x){return x.id===id}); if(!d)return; d.pendente=false; d.retomar_em=''; await supaUpsertTicket(d); await addHistory(id,'Retomado agora'); render()}
+async function resumeTicket(id){
+  var d=data.find(function(x){return x.id===id}); if(!d)return;
+  d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
+  await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
+}
 
 /* Ações */
 async function confirmTicket(id){
@@ -735,7 +553,7 @@ async function closeTicket(id){
   if(d.status!=='Encerrado'){var old=d.status; d.status='Encerrado'; await supaUpsertTicket(d); await addHistory(id,'Status alterado: '+old+' ➜ Encerrado'); render();}
 }
 
-/* Bindings */
+/* Filtros/bindings */
 qs('#btnDelete').onclick=function(){removeTicket(qs('#ticketId').value)};
 qs('#btnConfirm').onclick=async function(){var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para confirmar.');return;} await confirmTicket(id); await openEdit(id)};
 qs('#frm').addEventListener('submit',save); qs('#btnSave').addEventListener('click',save);
@@ -755,29 +573,24 @@ qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',
 function buildHistoricoString(hist){return (hist||[]).sort(function(a,b){return a.at-b.at}).map(function(h){return new Date(h.at).toLocaleString('pt-BR')+' — '+(h.user||'')+': '+(h.txt||'')}).join('\n')}
 function exportXLSX(){
   var rows=data.slice().sort(function(a,b){var pr=function(p){return p==='Alta'?0:(p==='Média'?1:2)};return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm});
-  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Pendente','Retomar em','Histórico (chat)'];
+  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Pendente?','Retomar em','Histórico (chat)'];
   var aoa=[header];
   rows.forEach(function(r){
-    aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.pendente?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]);
+    aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.status==='Pendente'?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]);
   });
   var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Tickets'); XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
 
-/* Navegação KPIs */
-qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs()};
-qs('#btnBackList').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');render()};
-qs('#kpiMonth').addEventListener('input',renderKPIs);
-
 /* Diagnóstico */
 function showDiag(){
   var b=qs('#diagBar'); b.classList.remove('hidden');
-  var D=window.__APP_DIAG||{};
-  qs('#diagEnv').textContent   = 'Projeto: '+(D.envUrl||'N/D');
-  qs('#diagUser').textContent  = 'Usuário: '+(D.sessionUser||'sem sessão');
-  qs('#diagCount').textContent = 'Tickets retornados: '+(typeof D.rows==='number'? D.rows : 'N/D');
-  qs('#diagErr').textContent   = D.lastError?('Erro: '+D.lastError):'';
+  qs('#diagEnv').textContent   = 'Projeto: '+(SUPA_URL||'N/D');
+  var cu=(currentUser()||{}).id||'sem sessão';
+  qs('#diagUser').textContent  = 'Usuário: '+cu;
+  qs('#diagCount').textContent = 'Tickets retornados: '+(data?data.length:0);
+  qs('#diagErr').textContent   = supaReady()? '' : 'config.js ausente/sem chaves';
 }
 qs('#btnDiag').onclick=showDiag; qs('#diagClose').onclick=function(){qs('#diagBar').classList.add('hidden')};
 
@@ -788,21 +601,19 @@ function showApp(){qs('#loginSection').style.display='none';qs('#appSection').st
 async function boot(){
   var u=currentUser(); if(!u){showLogin();return;}
   showApp(); await loadFromSupabase(); render(); setupRealtime();
-  var vencidas=data.filter(function(d){return d.pendente && d.status!=='Encerrado' && d.retomar_em && startOfDay(d.retomar_em) < today0()}).length;
-  if(vencidas>0) toast('Você tem '+vencidas+' pendência(s) vencida(s). Use o filtro "Pendências".');
 }
 boot();
 
-qs('#btnLogout').onclick=async function(){await supa.auth.signOut(); clearSession(); showLogin()};
+qs('#btnLogout').onclick=async function(){ if(supaReady()) await supa.auth.signOut(); clearSession(); showLogin()};
 
 qs('#btnLogin').onclick=async function(){
   var login=(qs('#loginUser').value||'').trim().toLowerCase();
   var pass=qs('#loginPass').value;
+  if(!supaReady()){alert('config.js não carregado ou incompleto (SUPABASE_URL/KEY).');return;}
   var email=login.indexOf('@')>-1?login:(login+'@'+DEFAULT_EMAIL_DOMAIN);
-  if(!window.ENV || !window.ENV.SUPABASE_URL || !window.ENV.SUPABASE_ANON_KEY){alert('config.js não carregado ou chaves ausentes.');return;}
 
   var authResp=await supa.auth.signInWithPassword({email:email,password:pass});
-  if(authResp.error){console.error('Auth error:',authResp.error);alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
+  if(authResp.error){alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
 
   var profileResp=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).maybeSingle();
   var profile=profileResp.data;
