@@ -20,29 +20,33 @@
     --bg:#0f1216; --panel:#151a21; --panel-2:#1b222b; --text:#e9eef5; --muted:#9aacbf;
     --primary:#4f8cff; --success:#21c38a; --warning:#ffbf47; --danger:#ff5d5d; --badge:#2a3442;
     --border:#263040; --shadow:0 10px 30px rgba(0,0,0,.35); --radius:16px;
+    --headH:96px; /* atualizado via JS */
   }
   *{box-sizing:border-box}
+  html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
-  .wrap{max-width:1600px;margin:0 auto;padding:20px}
+  .wrap{max-width:1600px;margin:0 auto;padding:16px}
   header{position:sticky;top:0;z-index:5;backdrop-filter:saturate(160%) blur(10px);
     background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)); border-bottom:1px solid var(--border)}
-  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-  .brand{display:flex;align-items:center;gap:10px}
-  .brand h1{font-size:22px;margin:0}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .brand{display:flex;align-items:center;gap:10px;min-width:240px}
+  .brand h1{font-size:22px;margin:0;white-space:nowrap}
   .logo-top{height:48px;object-fit:contain}
-  .actions{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   button{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;
     transition:.2s transform ease,.2s opacity ease,.2s box-shadow ease;box-shadow:0 8px 18px rgba(79,140,255,.25)}
   button:hover{transform:translateY(-1px)} .btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);box-shadow:none}
   .btn-danger{background:var(--danger);box-shadow:0 8px 18px rgba(255,93,93,.25)} .btn-success{background:var(--success)}
   .btn-warning{background:var(--warning);color:#10151b}
   .btn-icon{padding:8px 10px;border-radius:10px;min-width:36px; display:inline-flex; align-items:center; justify-content:center; position:relative}
+  .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+  .panel-fill{height:calc(100vh - var(--headH) - 24px); display:flex; flex-direction:column; min-height:520px}
   .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .8fr 1fr auto;gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1319;color:var(--text);outline:none;font-size:14px}
-  .table-wrap{overflow:auto}
+  .table-wrap{flex:1;min-height:240px;overflow:auto;border-radius:12px;border:1px solid var(--border);background:#0f1319}
   table{width:100%;border-collapse:collapse}
-  thead th{text-align:left;padding:12px;font-size:13px;letter-spacing:.02em;color:var(--muted);background:#0f1319;border-bottom:1px solid var(--border)}
+  thead th{text-align:left;padding:12px;font-size:13px;letter-spacing:.02em;color:var(--muted);background:#0f1319;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
   tbody td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:14px}
   tbody tr:hover{background:#0f141a}
   .badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--badge);font-size:12px}
@@ -85,6 +89,14 @@
   .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
   .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
   .toast .t.show{opacity:1;transform:translateY(0)}
+
+  /* KPIs */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .kpi-card{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:16px}
+  .kpi-card small{color:var(--muted)} .kpi-card strong{display:block;font-size:26px;margin-top:8px}
+  .kpi-sub{font-size:12px;color:var(--muted);margin-top:6px}
+  .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  @media (max-width:1100px){ .charts{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -112,6 +124,7 @@
       <div class="brand"><img src="logo.png" class="logo-top" alt="Logo"><h1>Controle Interno de Solicitações</h1></div>
       <div class="actions">
         <span id="whoami" class="pill"></span>
+        <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
         <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
@@ -121,7 +134,7 @@
   </header>
 
   <!-- Diagnóstico -->
-  <div id="diagBar" class="hidden" style="background:#13202e;color:#cde2ff;border-bottom:1px solid #213448">
+  <div id="diagBar" class="hidden" style="background:#13202e;color:#cde2ff;border-bottom:1px solid var(--border)">
     <div class="wrap" style="display:flex;gap:16px;align-items:center;padding:8px 0;font-size:13px">
       <strong>Diagnóstico</strong>
       <span id="diagEnv"></span>
@@ -134,7 +147,8 @@
 
   <!-- LISTA -->
   <main id="listPage" class="wrap">
-    <section class="panel">
+    <section class="panel panel-fill">
+      <!-- filtros -->
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
           <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, código do cliente, transportadora, descrição..."/>
@@ -148,6 +162,7 @@
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
 
+      <!-- tabela -->
       <div class="table-wrap">
         <table id="tbl">
           <thead>
@@ -160,6 +175,44 @@
         </table>
       </div>
       <div class="badge" style="margin-top:10px">SLA por prioridade: Alta 1 dia • Média 3 dias • Baixa 5 dias</div>
+    </section>
+  </main>
+
+  <!-- KPIs -->
+  <main id="kpiPage" class="wrap hidden">
+    <section class="panel">
+      <div class="row" style="align-items:center;gap:12px">
+        <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+          <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
+          <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
+        </div>
+      </div>
+      <div class="space"></div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card"><small>Aberto (abertos no mês)</small><strong id="mKpiAberto">0</strong></div>
+        <div class="kpi-card"><small>Em tratativa (abertos no mês)</small><strong id="mKpiTratativa">0</strong></div>
+        <div class="kpi-card"><small>Pendente (abertos no mês)</small><strong id="mKpiPendente">0</strong></div>
+        <div class="kpi-card"><small>Encerrado (abertos no mês)</small><strong id="mKpiEncerrado">0</strong></div>
+      </div>
+
+      <div class="space"></div>
+      <div class="kpi-grid">
+        <div class="kpi-card"><small>Concluídos no mês</small><strong id="mKpiFechadosMes">0</strong><div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div></div>
+        <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPctPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
+        <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiPctVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
+        <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
+      </div>
+
+      <div class="charts">
+        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
+        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
+        <div class="panel" style="grid-column:1/-1"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por transportadora</h3><canvas id="chartTransp"></canvas></div>
+      </div>
+
+      <div class="space"></div>
+      <div class="badge">KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês. Transportadora considera apenas tickets com campo preenchido.</div>
     </section>
   </main>
 
@@ -257,6 +310,15 @@
 <div id="toast" class="toast"></div>
 
 <script>
+/* ===== Layout: header height -> tabela full screen ===== */
+function setHeadH(){
+  var h=document.querySelector('header'); 
+  var v=h? h.getBoundingClientRect().height : 96;
+  document.documentElement.style.setProperty('--headH', Math.round(v)+'px');
+}
+window.addEventListener('load', setHeadH);
+window.addEventListener('resize', setHeadH);
+
 /* ===== Helpers ===== */
 function qs(s,el){return (el||document).querySelector(s)}
 function qsa(s,el){return Array.prototype.slice.call((el||document).querySelectorAll(s))}
@@ -275,7 +337,7 @@ function startOfDay(dt){var d=new Date(dt);d.setHours(0,0,0,0);return d}
 function today0(){var d=new Date();d.setHours(0,0,0,0);return d}
 var DEFAULT_EMAIL_DOMAIN="koerich.com.br";
 
-/* ===== Config + Supabase (à prova de falta de config.js) ===== */
+/* ===== Config + Supabase (sem travar sem config.js) ===== */
 var SUPA_URL=(window.ENV&&window.ENV.SUPABASE_URL)||'';
 var SUPA_KEY=(window.ENV&&window.ENV.SUPABASE_ANON_KEY)||'';
 var supa=(SUPA_URL&&SUPA_KEY)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
@@ -289,20 +351,23 @@ function clearSession(){localStorage.removeItem(SESSION_KEY)}
 
 /* ===== Estado ===== */
 var data=[]; var lastReadMap={};
+var chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
-/* ===== Banco (com guardas) ===== */
+/* ===== Banco ===== */
 async function loadFromSupabase(){
   if(!supaReady()){toast('Configuração do Supabase ausente.'); data=[]; render(); return;}
   var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em';
-  var resp=await supa.from('tickets').select(sel); var tks=resp.data; var error=resp.error;
+  var resp=await supa.from('tickets').select(sel);
+  var tks=resp.data; var error=resp.error;
   if(error && /42703|unknown column|column .*transportadora|pendente|retomar_em/i.test(error.message||'')){
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
   if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
+
   (tks||[]).sort(function(a,b){return new Date(b.aberto_em)-new Date(a.aberto_em)});
 
-  // mensagens + last_reads (se disponíveis)
+  // mensagens + last_reads
   var ids=(tks||[]).map(function(t){return t.id}); var msgsByTicket={};
   if(ids.length){
     var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
@@ -319,7 +384,7 @@ async function loadFromSupabase(){
   }});
 }
 
-/* ===== Upserts ===== */
+/* ===== Persistência ===== */
 async function supaUpsertTicket(rec){ if(!supaReady())return;
   var payload={ id:rec.id, aberto_em:new Date(rec.abertoEm).toISOString(), solicitante:rec.solicitante, categoria:rec.categoria,
     assunto:rec.assunto, prioridade:rec.prioridade, descricao:rec.descricao||null, status:rec.status, responsavel:rec.responsavel||null,
@@ -439,6 +504,63 @@ function render(){
   }).join('');
 }
 
+/* ===== KPIs ===== */
+function getClosedAt(d){
+  var h=(d.historico||[]).slice().sort(function(a,b){return a.at-b.at});
+  for(var i=0;i<h.length;i++){ if((h[i].txt||'').toLowerCase().indexOf('encerrado')>-1) return h[i].at }
+  return null;
+}
+function renderKPIs(){
+  var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
+  var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
+
+  var baseAbertos=data.filter(function(d){return ym(new Date(d.abertoEm))===sel});
+  qs('#mKpiAberto').textContent    = baseAbertos.filter(function(d){return d.status==='Aberto'}).length;
+  qs('#mKpiTratativa').textContent = baseAbertos.filter(function(d){return d.status==='Em tratativa'}).length;
+  qs('#mKpiPendente').textContent  = baseAbertos.filter(function(d){return d.status==='Pendente'}).length;
+  qs('#mKpiEncerrado').textContent = baseAbertos.filter(function(d){return d.status==='Encerrado'}).length;
+
+  var closedThisMonth=data.map(function(d){return {d:d,closedAt:getClosedAt(d)}}).filter(function(x){return x.closedAt && ym(new Date(x.closedAt))===sel});
+  var closedWithSLA=closedThisMonth.filter(function(x){return !!x.d.prazo});
+  var denom=closedWithSLA.length;
+  var onTime=closedWithSLA.filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length;
+  var pctOn=denom?Math.round(onTime/denom*100):0;
+  var pctLate=denom?100-pctOn:0;
+  qs('#mKpiFechadosMes').textContent=closedThisMonth.length;
+  qs('#mKpiFechadosBase').textContent='com SLA: '+denom;
+  qs('#mKpiPctPrazo').textContent=pctOn+'%';
+  qs('#mKpiQtdPrazo').textContent=onTime+' de '+denom;
+  qs('#mKpiPctVenc').textContent=pctLate+'%';
+  qs('#mKpiQtdVenc').textContent=(denom-onTime)+' de '+denom;
+
+  var categorias=[...new Set(data.map(function(d){return d.categoria||'—'}))].sort();
+
+  function porCat(c){return baseAbertos.filter(function(d){return d.categoria===c})}
+  var valsAberto=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Aberto'}).length});
+  var valsTrat=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Em tratativa'}).length});
+  var valsPend=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Pendente'}).length});
+  var valsEnc=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Encerrado'}).length});
+
+  var ctx1=document.getElementById('chartAbertos').getContext('2d');
+  if(chartAbertos)chartAbertos.destroy();
+  chartAbertos=new Chart(ctx1,{type:'bar',data:{labels:categorias,datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Pendente',data:valsPend},{label:'Encerrado',data:valsEnc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+
+  function closedByCat(c){return closedWithSLA.filter(function(x){return x.d.categoria===c})}
+  var valsPrazo=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length});
+  var valsVenc=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')<new Date(x.closedAt)}).length});
+  var ctx2=document.getElementById('chartConcluidos').getContext('2d');
+  if(chartConcluidos)chartConcluidos.destroy();
+  chartConcluidos=new Chart(ctx2,{type:'bar',data:{labels:categorias,datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+
+  var baseTransp=baseAbertos.filter(function(d){return (d.transportadora||'').trim()!==''});
+  var mapa={}; baseTransp.forEach(function(d){var k=d.transportadora.trim(); mapa[k]=(mapa[k]||0)+1});
+  var transp=Object.keys(mapa).sort(function(a,b){return mapa[b]-mapa[a]});
+  var valsTransp=transp.map(function(t){return mapa[t]});
+  var ctx3=document.getElementById('chartTransp').getContext('2d');
+  if(chartTransp)chartTransp.destroy();
+  chartTransp=new Chart(ctx3,{type:'bar',data:{labels:transp,datasets:[{label:'Abertos',data:valsTransp}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+}
+
 /* ===== Modal + Form ===== */
 function openModal(show){var m=qs('#modal'); if(!m)return; if(show){m.classList.add('show');m.style.display='grid'}else{m.classList.remove('show');m.style.display='none'}}
 function setEditable(edit){
@@ -524,7 +646,7 @@ async function save(e){
 async function addHistory(id,text){var d=data.find(function(x){return x.id===id}); if(!d)return; d.historico=d.historico||[]; d.historico.push({at:Date.now(),txt:text,user:((currentUser()||{}).name)||''}); renderChat(d.historico); await supaAddMessage(id,text)}
 async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(function(x){return x.id!==id}); await supaDeleteTicket(id); render(); openModal(false)}
 
-/* Pendência: vira status "Pendente"; ao retomar volta para "Em tratativa" */
+/* Pendência: vira status Pendente; ao retomar volta para Em tratativa */
 async function snoozeTicket(id){
   var d=data.find(function(x){return x.id===id}); if(!d)return;
   function pad(n){n=String(n);return n.length<2?('0'+n):n}
@@ -553,7 +675,7 @@ async function closeTicket(id){
   if(d.status!=='Encerrado'){var old=d.status; d.status='Encerrado'; await supaUpsertTicket(d); await addHistory(id,'Status alterado: '+old+' ➜ Encerrado'); render();}
 }
 
-/* Filtros/bindings */
+/* Bindings */
 qs('#btnDelete').onclick=function(){removeTicket(qs('#ticketId').value)};
 qs('#btnConfirm').onclick=async function(){var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para confirmar.');return;} await confirmTicket(id); await openEdit(id)};
 qs('#frm').addEventListener('submit',save); qs('#btnSave').addEventListener('click',save);
@@ -578,10 +700,15 @@ function exportXLSX(){
   rows.forEach(function(r){
     aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.status==='Pendente'?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]);
   });
-  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:10},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
+  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:22},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Tickets'); XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
+
+/* KPIs nav */
+qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs()};
+qs('#btnBackList').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
+qs('#kpiMonth').addEventListener('input',renderKPIs);
 
 /* Diagnóstico */
 function showDiag(){
@@ -597,11 +724,7 @@ qs('#btnDiag').onclick=showDiag; qs('#diagClose').onclick=function(){qs('#diagBa
 /* Boot & Login */
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
 function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
-
-async function boot(){
-  var u=currentUser(); if(!u){showLogin();return;}
-  showApp(); await loadFromSupabase(); render(); setupRealtime();
-}
+async function boot(){ var u=currentUser(); if(!u){showLogin();return;} showApp(); await loadFromSupabase(); render(); setupRealtime(); setHeadH(); }
 boot();
 
 qs('#btnLogout').onclick=async function(){ if(supaReady()) await supa.auth.signOut(); clearSession(); showLogin()};
@@ -624,7 +747,7 @@ qs('#btnLogin').onclick=async function(){
     var pr2=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).single(); profile=pr2.data;
   }
   var user={id:authResp.data.user.id,username:profile.username,name:profile.display_name,role:profile.role};
-  setSession(user); await loadFromSupabase(); showApp(); render(); setupRealtime();
+  setSession(user); await loadFromSupabase(); showApp(); render(); setupRealtime(); setHeadH();
 };
 
 /* expose debug */
