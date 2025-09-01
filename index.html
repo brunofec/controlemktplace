@@ -390,7 +390,7 @@ let dmCache=[];                 // [{id,sender,receiver,body,created_at}]
 let dmTarget=null;              // uuid selecionado
 let dmUnread=0;                 // badge
 const dmKey = (me,other)=>`dm_lastread_${me}_${other}`;
-let dmSeen = new Set();         // dedupe em broadcast + realtime
+let dmSeen = new Set();         // dedupe broadcast
 function markSeen(sig){ dmSeen.add(sig); setTimeout(()=>dmSeen.delete(sig),5000) }
 
 /* ===== Realtime broadcast (instantâneo) ===== */
@@ -458,7 +458,7 @@ function setupRealtime(){
   if(!supaReady())return;
   supa.getChannels().forEach(ch=>supa.removeChannel(ch));
 
-  // Realtime por tabela (fallback realtime do DB)
+  // Realtime por tabela
   supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
     const m=payload.new; const d=data.find(x=>x.id===m.ticket_id);
     if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
@@ -471,7 +471,6 @@ function setupRealtime(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},()=>refreshNow())
     .subscribe(status=>{__rtOK.tickets=(status==='SUBSCRIBED')});
 
-  // DM realtime por tabela (com dedupe)
   supa.channel('realtime-dm')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},(p)=>{onDmInsert(p.new)})
     .subscribe(status=>{__rtOK.dm=(status==='SUBSCRIBED')});
@@ -509,7 +508,7 @@ function render(){
 
     if(mine){
       const me = currentUser()||{};
-      const byOwner = d.openedBy && d.openedBy===me.id;    // robusto
+      const byOwner = d.openedBy && d.openedBy===me.id;
       const bySolic = (d.solicitante||'')===(me.name||'');
       const byResp  = (d.responsavel||'')===(me.name||'');
       if(!byOwner && !bySolic && !byResp) return false;
@@ -741,6 +740,17 @@ async function confirmTicket(id){
     await supaUpsertTicket(d); await addHistory(id,'Ticket confirmado e movido para Em tratativa'); render();
   }
 }
+/* >>>>>> CORREÇÃO: função closeTicket incluída <<<<<< */
+async function closeTicket(id){
+  const d=data.find(x=>x.id===id); if(!d)return;
+  if(d.status!=='Encerrado'){
+    const old=d.status;
+    d.status='Encerrado';
+    await supaUpsertTicket(d);
+    await addHistory(id,'Status alterado: '+old+' ➜ Encerrado');
+    render();
+  }
+}
 
 /* Bindings tickets */
 qs('#btnDelete').onclick=()=>removeTicket(qs('#ticketId').value);
@@ -834,7 +844,7 @@ async function loadDM(silent){
 }
 function onDmInsert(row){
   const sig = [row.sender,row.receiver,row.body].join('|');
-  if (dmSeen.has(sig)) return; // já recebido via broadcast
+  if (dmSeen.has(sig)) return;
   markSeen(sig);
   const me=currentUser(); if(!me) return;
   if(row.sender===me.id || row.receiver===me.id){
@@ -887,7 +897,6 @@ async function sendDM(){
   const room = dmRoomId(me.id, dmTarget);
   const ch = dmChannels.get(room);
   if (ch){
-    // sinaliza instantaneamente (com dedupe)
     const sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
     ch.send({ type:'broadcast', event:'dm', payload:{ sender:me.id, receiver:dmTarget, body:txt, id:uid() } });
   }
