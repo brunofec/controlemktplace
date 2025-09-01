@@ -245,7 +245,7 @@
         <input type="hidden" id="ticketId">
 
         <div class="grid-form">
-          <div><label>Solicitante</label><input id="solicitante" readonly/></div>
+          <div><label>Solicitante</label><input id="solicitante" /></div>
           <div><label>Categoria</label><select id="categoriaSel"><option>Frota - Transportadora</option><option>SAK</option></select></div>
           <div><label>Prioridade</label><select id="prioridade"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
         </div>
@@ -275,11 +275,11 @@
           <div><label>Código do cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
-            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
+            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Atual, Reunidas..."/>
             <datalist id="lstTransportadora">
-              <option value="Total Express"></option><option value="Correios / Sedex"></option><option value="Jadlog"></option>
-              <option value="Sequoia"></option><option value="Loggi"></option><option value="J&amp;T"></option>
-              <option value="Kangu"></option><option value="DHL"></option><option value="Outros"></option>
+              <option value="Atual"></option><option value="Correios / Sedex"></option><option value="Reunidas"></option>
+              <option value="TTJB"></option><option value="Rede Sul"></option><option value="Brasil Web"></option>
+              <option value="Zanotelli"></option><option value="Uber"></option><option value="Outros"></option>
             </datalist>
           </div>
           <div id="responsavelWrap"><label>Responsável</label>
@@ -390,7 +390,7 @@ let dmCache=[];                 // [{id,sender,receiver,body,created_at}]
 let dmTarget=null;              // uuid selecionado
 let dmUnread=0;                 // badge
 const dmKey = (me,other)=>`dm_lastread_${me}_${other}`;
-let dmSeen = new Set();         // dedupe broadcast
+let dmSeen = new Set();         // dedupe em broadcast + realtime
 function markSeen(sig){ dmSeen.add(sig); setTimeout(()=>dmSeen.delete(sig),5000) }
 
 /* ===== Realtime broadcast (instantâneo) ===== */
@@ -443,7 +443,7 @@ async function supaUpsertTicket(rec){
   const r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; const r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
-async function supaAddMessage(ticketId,text){ if(!supaReady())return; const u=currentUser(); const payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text}; const r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
+async function supaAddMessage(ticketId,text){ if(!supaReady())return; const u=currentUser(); const payload={ticket_id:ticketId,sender:u?u.id:null,sender_name=u?u.name:null,body:text}; const r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
 async function supaMarkRead(ticketId){ if(!supaReady())return; const u=currentUser(); if(!u)return; const nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 
 /* ========= Realtime + fallback ========= */
@@ -458,7 +458,7 @@ function setupRealtime(){
   if(!supaReady())return;
   supa.getChannels().forEach(ch=>supa.removeChannel(ch));
 
-  // Realtime por tabela
+  // Realtime por tabela (fallback realtime do DB)
   supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
     const m=payload.new; const d=data.find(x=>x.id===m.ticket_id);
     if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
@@ -471,6 +471,7 @@ function setupRealtime(){
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},()=>refreshNow())
     .subscribe(status=>{__rtOK.tickets=(status==='SUBSCRIBED')});
 
+  // DM realtime por tabela (com dedupe)
   supa.channel('realtime-dm')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},(p)=>{onDmInsert(p.new)})
     .subscribe(status=>{__rtOK.dm=(status==='SUBSCRIBED')});
@@ -508,7 +509,7 @@ function render(){
 
     if(mine){
       const me = currentUser()||{};
-      const byOwner = d.openedBy && d.openedBy===me.id;
+      const byOwner = d.openedBy && d.openedBy===me.id;    // robusto
       const bySolic = (d.solicitante||'')===(me.name||'');
       const byResp  = (d.responsavel||'')===(me.name||'');
       if(!byOwner && !bySolic && !byResp) return false;
@@ -613,11 +614,26 @@ function renderKPIs(){
 
 /* ========= Modal + Form (tickets) ========= */
 function openModal(show){const m=qs('#modal'); if(show){m.classList.add('show');m.style.display='grid'}else{m.classList.remove('show');m.style.display='none'}}
+
+/* >>>>>> ATUALIZAÇÃO: setEditable libera tudo para admin <<<<<< */
 function setEditable(edit){
-  const form=qs('#frm'); form.classList.toggle('readonly',!edit);
-  qsa('#frm input,#frm select,#frm textarea').forEach(el=>{if(['ticketId'].includes(el.id))return; el.readOnly=!edit; el.disabled=!edit});
-  qs('#solicitante').readOnly=true; qs('#solicitante').disabled=true;
+  const form=qs('#frm');
+  form.classList.toggle('readonly',!edit);
+
+  qsa('#frm input,#frm select,#frm textarea').forEach(el=>{
+    if(el.id==='ticketId') return;
+    el.readOnly = !edit;
+    el.disabled = !edit;
+  });
+
+  const me = currentUser()||{};
+  if(!(me.role==='admin')){
+    // Não-admin continua sem poder trocar "Solicitante"
+    qs('#solicitante').readOnly = true;
+    qs('#solicitante').disabled = true;
+  }
 }
+
 function enablePriorityOnly(){
   qsa('#frm input, #frm select, #frm textarea').forEach(el=>{ if(['ticketId','prioridade'].includes(el.id)) return; el.readOnly=true; el.disabled=true });
   const p=qs('#prioridade'); p.disabled=false; p.readOnly=false; p.style.pointerEvents='auto'; p.style.opacity='1';
@@ -678,7 +694,17 @@ async function openEdit(id){
   qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
   qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
   renderChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
-  qs('#btnConfirm').disabled=d.status!=='Aberto'; setEditable(false); toggleResponsavelByCategoria(); enablePriorityOnly();
+  qs('#btnConfirm').disabled=d.status!=='Aberto';
+
+  const isAdmin = ((currentUser()||{}).role === 'admin');
+  if(isAdmin){
+    setEditable(true);          // admin edita tudo
+  }else{
+    setEditable(false);         // não-admin
+    enablePriorityOnly();       // só Prioridade
+  }
+
+  toggleResponsavelByCategoria();
   await supaMarkRead(d.id); await subscribeTicketChannel(d.id); render(); openModal(true);
 }
 function collectForm(){
@@ -740,7 +766,6 @@ async function confirmTicket(id){
     await supaUpsertTicket(d); await addHistory(id,'Ticket confirmado e movido para Em tratativa'); render();
   }
 }
-/* >>>>>> CORREÇÃO: função closeTicket incluída <<<<<< */
 async function closeTicket(id){
   const d=data.find(x=>x.id===id); if(!d)return;
   if(d.status!=='Encerrado'){
@@ -844,7 +869,7 @@ async function loadDM(silent){
 }
 function onDmInsert(row){
   const sig = [row.sender,row.receiver,row.body].join('|');
-  if (dmSeen.has(sig)) return;
+  if (dmSeen.has(sig)) return; // já recebido via broadcast
   markSeen(sig);
   const me=currentUser(); if(!me) return;
   if(row.sender===me.id || row.receiver===me.id){
@@ -897,6 +922,7 @@ async function sendDM(){
   const room = dmRoomId(me.id, dmTarget);
   const ch = dmChannels.get(room);
   if (ch){
+    // sinaliza instantâneo (dedupe)
     const sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
     ch.send({ type:'broadcast', event:'dm', payload:{ sender:me.id, receiver:dmTarget, body:txt, id:uid() } });
   }
