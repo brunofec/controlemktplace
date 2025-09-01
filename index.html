@@ -41,7 +41,7 @@
   .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px}
   .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
   .panel-fill{height:calc(100vh - var(--headH) - 24px); display:flex; flex-direction:column; min-height:520px}
-  .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .8fr 1fr auto;gap:10px}
+  .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .8fr 1fr auto auto;gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1319;color:var(--text);outline:none;font-size:14px}
   .table-wrap{flex:1;min-height:240px;overflow:auto;border-radius:12px;border:1px solid var(--border);background:#0f1319}
   table{width:100%;border-collapse:collapse}
@@ -76,16 +76,16 @@
 
   .chat-box{display:flex;flex-direction:column;height:520px;border:1px solid var(--border);border-radius:12px;background:#0e1318}
   .chat-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
-  .bubble{max-width:88%;padding:10px 12px;border-radius:12px}
-  .me{align-self:flex-end;background:#1a2430;border:1px solid #203042}
+  .bubble{max-width:80%;padding:10px 12px;border-radius:16px;white-space:pre-wrap;word-break:break-word;line-height:1.35}
+  .me{align-self:flex-end;background:#1a2430;border:1px solid #27384b}
   .them{align-self:flex-start;background:#171321;border:1px solid #2a2538}
-  .bubble time{display:block;font-size:11px;color:#9aacbf;margin-top:6px}
+  .bubble.grouped{margin-top:2px;border-top-left-radius:12px;border-top-right-radius:12px}
+  .bubble time{display:block;font-size:11px;color:#9aacbf;margin-top:4px;text-align:right}
+  .sep{display:flex;align-items:center;gap:8px;margin:8px 0}
+  .sep::before,.sep::after{content:"";height:1px;background:var(--border);flex:1}
+  .sep span{font-size:11px;color:var(--muted)}
   .chat-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
   .chat-input input{flex:1}
-
-  .toast{position:fixed;right:14px;bottom:14px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-  .toast .t{background:var(--panel-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s}
-  .toast .t.show{opacity:1;transform:translateY(0)}
 
   /* KPIs */
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
@@ -99,18 +99,21 @@
   .dm-launcher{position:fixed;right:18px;bottom:18px;z-index:50}
   .dm-fab{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:20px;background:var(--primary);color:#fff;box-shadow:0 12px 24px rgba(79,140,255,.35)}
   .dm-fab .badge-unread{top:-4px;right:-4px}
-  .dm-panel{position:fixed;right:18px;bottom:86px;width:min(380px,92vw);height:520px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);display:none;flex-direction:column;z-index:50}
+  .dm-panel{position:fixed;right:18px;bottom:86px;width:min(380px,92vw);height:560px;background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);display:none;flex-direction:column;z-index:50;overflow:hidden}
   .dm-panel.show{display:flex}
-  .dm-head{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border)}
-  .dm-body{flex:1;display:grid;grid-template-columns:1fr;grid-template-rows:180px 1fr}
+  .dm-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)}
+  .dm-body{flex:1;display:grid;grid-template-rows:190px 1fr}
   .dm-users{overflow:auto;border-bottom:1px solid var(--border)}
-  .dm-users .item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px dashed rgba(255,255,255,.04);cursor:pointer}
+  .dm-users .item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px dashed rgba(255,255,255,.04);cursor:pointer}
   .dm-users .item:hover{background:#0f141a}
-  .dm-chat{display:flex;flex-direction:column}
-  .dm-history{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
-  .dm-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border)}
+  .dm-chat{display:flex;flex-direction:column;min-height:0}
+  .dm-history{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:#0f1318}
+  .dm-input{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);background:var(--panel)}
   .dm-input input{flex:1}
-  .small{font-size:12px}
+  .bubble.dm{max-width:80%}
+  .dm-sep{display:flex;align-items:center;gap:8px;margin:8px 0}
+  .dm-sep::before,.dm-sep::after{content:"";height:1px;background:var(--border);flex:1}
+  .dm-sep span{font-size:11px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -138,6 +141,7 @@
       <div class="brand"><img src="logo.png" class="logo-top" alt="Logo"><h1>Controle Interno de Solicitações</h1></div>
       <div class="actions">
         <span id="whoami" class="pill"></span>
+        <button id="btnClosed" class="btn-ghost"><i class="fa fa-archive"></i> Encerrados</button>
         <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
@@ -168,9 +172,10 @@
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
-          <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (<=12h)</option><option value="late">Vencido</option></select>
+          <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (≤12h)</option><option value="late">Vencido</option></select>
           <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
           <label class="badge" style="gap:8px"><input type="checkbox" id="fMine"> Só meus</label>
+          <label class="badge" style="gap:8px"><input type="checkbox" id="fHideClosed" checked> Ocultar encerrados</label>
         </div>
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
@@ -190,6 +195,30 @@
     </section>
   </main>
 
+  <!-- ENCERRADOS -->
+  <main id="closedPage" class="wrap hidden">
+    <section class="panel panel-fill">
+      <div class="row" style="align-items:center;margin-bottom:10px">
+        <h2 style="margin:0;font-size:18px">Solicitações Encerradas</h2>
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+          <input id="fClosed" placeholder="Buscar nas encerradas...">
+          <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
+              <th>Categoria</th><th>Prioridade</th><th>Status</th><th>Resp.</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyClosed"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
   <!-- KPIs -->
   <main id="kpiPage" class="wrap hidden">
     <section class="panel">
@@ -197,7 +226,7 @@
         <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
           <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
-          <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
+          <button id="btnBackList2" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
         </div>
       </div>
       <div class="space"></div>
@@ -275,11 +304,11 @@
           <div><label>Código do cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
-            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Atual, Reunidas...."/>
+            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
             <datalist id="lstTransportadora">
-              <option value="Atual"></option><option value="Correios / Sedex"></option><option value="Reunidas"></option>
-              <option value="TTJB"></option><option value="Rede Sul"></option><option value="Brasil Web"></option>
-              <option value="Zanotelli"></option><option value="Uber"></option><option value="Outros"></option>
+              <option value="Total Express"></option><option value="Correios / Sedex"></option><option value="Jadlog"></option>
+              <option value="Sequoia"></option><option value="Loggi"></option><option value="J&amp;T"></option>
+              <option value="Kangu"></option><option value="DHL"></option><option value="Outros"></option>
             </datalist>
           </div>
           <div id="responsavelWrap"><label>Responsável</label>
@@ -355,7 +384,7 @@ const qs=function(s,el){return (el||document).querySelector(s)};
 const qsa=function(s,el){return Array.prototype.slice.call((el||document).querySelectorAll(s))};
 const fmtDate=function(ts){return new Date(ts).toLocaleString('pt-BR')};
 const uid = function(){return Math.random().toString(36).slice(2,8).toUpperCase()};
-function escapeHtml(str){str=str||'';return str.replace(/[&<>\"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
+function escapeHtml(str){str=(str||'');return str.replace(/[&<>\"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]})}
 const debounce=function(fn,ms){ms=ms||150;var t;return function(){var a=arguments;clearTimeout(t);t=setTimeout(function(){fn.apply(null,a)},ms)}}
 function toast(msg){var c=qs('#toast');var el=document.createElement('div');el.className='t';el.textContent=msg;c.appendChild(el);requestAnimationFrame(function(){el.classList.add('show')});setTimeout(function(){el.classList.remove('show');setTimeout(function(){el.remove()},250)},3000)}
 function prioToDays(p){return p==='Alta'?1: p==='Média'?3:5}
@@ -385,18 +414,13 @@ var data=[]; var lastReadMap={};
 var chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
 /* ===== Perfis e DM ===== */
-var profiles=[];                // {id, display_name, role, username}
-var dmCache=[];                 // [{id,sender,receiver,body,created_at}]
-var dmTarget=null;              // uuid selecionado
-var dmUnread=0;                 // badge
+var profiles=[];  // {id, display_name, role, username}
+var dmCache=[];   // [{id,sender,receiver,body,created_at}]
+var dmTarget=null;
+var dmUnread=0;
 function dmKey(me,other){return 'dm_lastread_'+me+'_'+other}
 var dmSeen = new Set();
 function markSeen(sig){ dmSeen.add(sig); setTimeout(function(){dmSeen.delete(sig)},5000) }
-
-/* ===== Realtime broadcast (instantâneo) ===== */
-var ticketChannels = new Map();
-var dmChannels = new Map();
-function dmRoomId(a,b){return [a,b].sort().join('_')}
 
 /* ========= TICKETS: load ========= */
 async function loadFromSupabase(){
@@ -418,7 +442,7 @@ async function loadFromSupabase(){
     var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
     if(!r2.error){(r2.data||[]).forEach(function(m){(msgsByTicket[m.ticket_id]=msgsByTicket[m.ticket_id]||[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})})}
   }
-  // last_reads de ticket
+  // last_reads
   lastReadMap={};
   var me=currentUser(); if(me){var lr=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id); (lr.data||[]).forEach(function(r){lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime()})}
 
@@ -445,18 +469,7 @@ async function supaUpsertTicket(rec){
   var r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
-async function supaAddMessage(ticketId, text){
-  if (!supaReady()) return;
-  var u = currentUser();
-  var payload = {
-    ticket_id: ticketId,
-    sender: u ? u.id : null,
-    sender_name: u ? u.name : null,
-    body: text
-  };
-  var r = await supa.from('messages').insert(payload);
-  if (r.error) console.error(r.error);
-}
+async function supaAddMessage(ticketId,text){ if(!supaReady())return; var u=currentUser(); var payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text}; var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
 async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 
 /* ========= Realtime + fallback ========= */
@@ -471,7 +484,6 @@ function setupRealtime(){
   if(!supaReady())return;
   supa.getChannels().forEach(function(ch){supa.removeChannel(ch)});
 
-  // Realtime por tabela
   supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},function(payload){
     var m=payload.new; var d=data.find(function(x){return x.id===m.ticket_id});
     if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
@@ -501,7 +513,7 @@ function getUnreadCount(d){var last=lastReadMap[d.id]||0;var me=(currentUser()||
 function render(){
   var term=(qs('#fSearch').value||'').toLowerCase().trim();
   var st=qs('#fStatus').value, pr=qs('#fPrio').value, cat=qs('#fCategoria').value, sla=qs('#fSLA').value;
-  var pend=qs('#fPend').value; var mine=qs('#fMine').checked;
+  var pend=qs('#fPend').value; var mine=qs('#fMine').checked; var hideClosed=qs('#fHideClosed').checked;
 
   var rows=data.filter(function(d){
     var sLA=slaStatus(d.prazo).code;
@@ -512,6 +524,8 @@ function render(){
     var isPendDue=isPend && retoma && retoma < today0();
 
     if(term && searchable.indexOf(term)===-1) return false;
+    if(!term && hideClosed && d.status==='Encerrado') return false;
+
     if(st && d.status!==st) return false;
     if(pr && d.prioridade!==pr) return false;
     if(cat && d.categoria!==cat) return false;
@@ -573,6 +587,35 @@ function render(){
   }).join('');
 }
 
+/* ========= Render Encerrados ========= */
+function renderClosedPage(){
+  var term=(qs('#fClosed').value||'').toLowerCase().trim();
+  var rows=data.filter(function(d){ if(d.status!=='Encerrado')return false;
+    if(!term) return true;
+    var searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
+    return searchable.indexOf(term)>-1;
+  }).sort(function(a,b){return b.abertoEm-a.abertoEm});
+
+  var tbody=qs('#tbodyClosed');
+  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="muted">Nenhum encerrado encontrado</td></tr>';return;}
+  tbody.innerHTML=rows.map(function(d){
+    var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
+                 : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
+                 : (d.categoria||'-');
+    return '<tr>\
+      <td class="nowrap"><strong>'+d.id+'</strong></td>\
+      <td>'+fmtDate(d.abertoEm)+'</td>\
+      <td>'+ (d.solicitante||'-') +'</td>\
+      <td>'+ (d.assunto||'-') +'</td>\
+      <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
+      <td>'+catCell+'</td>\
+      <td>'+prioBadge(d.prioridade||'-')+'</td>\
+      <td>'+statusBadge(d.status||'-')+'</td>\
+      <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
+    </tr>';
+  }).join('');
+}
+
 /* ========= KPIs ========= */
 function getClosedAt(d){var h=(d.historico||[]).slice().sort(function(a,b){return a.at-b.at}); for(var i=0;i<h.length;i++){var it=h[i]; if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at} return null}
 function renderKPIs(){
@@ -598,8 +641,7 @@ function renderKPIs(){
   qs('#mKpiPctVenc').textContent=pctLate+'%';
   qs('#mKpiQtdVenc').textContent=(denom-onTime)+' de '+denom;
 
-  var categorias=[].sort.call(new Set(data.map(function(d){return d.categoria||'—'})));
-  categorias=[...new Set(data.map(function(d){return d.categoria||'—'}))].sort();
+  var categorias=[...new Set(data.map(function(d){return d.categoria||'—'}))].sort();
   function porCat(c){return baseAbertos.filter(function(d){return d.categoria===c})}
   var valsAberto=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Aberto'}).length});
   var valsTrat=categorias.map(function(c){return porCat(c).filter(function(d){return d.status==='Em tratativa'}).length});
@@ -609,7 +651,7 @@ function renderKPIs(){
   if(chartAbertos)chartAbertos.destroy();
   chartAbertos=new Chart(ctx1,{type:'bar',data:{labels:categorias,datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Pendente',data:valsPend},{label:'Encerrado',data:valsEnc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
 
-  function closedByCat(c){return closedWithSLA.filter(function(x){return x.d.categoria===c})}
+  function closedByCat(c){return closedThisMonth.filter(function(x){return x.d.categoria===c})}
   var valsPrazo=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)}).length});
   var valsVenc=categorias.map(function(c){return closedByCat(c).filter(function(x){return new Date(x.d.prazo+'T23:59:59')< new Date(x.closedAt)}).length});
   var ctx2=document.getElementById('chartConcluidos').getContext('2d');
@@ -645,7 +687,6 @@ function setEditable(edit){
     qs('#solicitante').disabled = true;
   }
 }
-
 function enablePriorityOnly(){
   qsa('#frm input, #frm select, #frm textarea').forEach(function(el){ if(['ticketId','prioridade'].includes(el.id)) return; el.readOnly=true; el.disabled=true });
   var p=qs('#prioridade'); p.disabled=false; p.readOnly=false; p.style.pointerEvents='auto'; p.style.opacity='1';
@@ -668,10 +709,19 @@ function resetForm(){
   qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden');
   setEditable(true); toggleResponsavelByCategoria();
 }
-function renderChat(list){
+function renderTicketChat(list){
   var u=(currentUser()||{}).name||'';
-  qs('#chatHistory').innerHTML=(list||[]).slice().sort(function(a,b){return a.at-b.at}).map(function(h){
-    return '<div class="bubble '+(h.user===u?'me':'them')+'">'+escapeHtml(h.txt)+'<time>'+new Date(h.at).toLocaleString('pt-BR')+' • '+escapeHtml(h.user||'')+'</time></div>';
+  // agrupa
+  var chunks=[]; var lastDay=null,lastWho=null;
+  (list||[]).slice().sort(function(a,b){return a.at-b.at}).forEach(function(h){
+    var d=new Date(h.at), day=d.toISOString().slice(0,10), who=(h.user===u?'me':'them');
+    if(day!==lastDay){chunks.push({t:'sep',label:d.toLocaleDateString('pt-BR')}); lastDay=day; lastWho=null}
+    chunks.push({t:'msg',who:who,txt:h.txt||'',time:d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),grouped:(who===lastWho)});
+    lastWho=who;
+  });
+  qs('#chatHistory').innerHTML=chunks.map(function(c){
+    if(c.t==='sep') return '<div class="sep"><span>'+c.label+'</span></div>';
+    return '<div class="bubble '+c.who+(c.grouped?' grouped':'')+'">'+escapeHtml(c.txt)+'<time>'+c.time+'</time></div>';
   }).join('');
   var div=qs('#chatHistory'); div.scrollTop=div.scrollHeight;
 }
@@ -693,13 +743,14 @@ async function subscribeTicketChannel(ticketId){
     var exists = (d.historico||[]).some(function(h){return h.at===at && h.txt===txt && h.user===user});
     if (!exists){
       d.historico.push({ at: at, txt: txt, user: user });
-      if (qs('#ticketId').value === ticketId) renderChat(d.historico);
+      if (qs('#ticketId').value === ticketId) renderTicketChat(d.historico);
       render();
     }
   });
   await ch.subscribe();
   ticketChannels.set(ticketId, ch);
 }
+var ticketChannels = new Map();
 async function openEdit(id){
   var d=data.find(function(x){return x.id===id}); if(!d)return;
   resetForm(); qs('#modalTitle').textContent='Solicitação '+d.id; qs('#ticketId').value=d.id;
@@ -708,16 +759,11 @@ async function openEdit(id){
   setSelectValue(qs('#assunto'), d.assunto||''); qs('#prioridade').value=d.prioridade||'Média';
   qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
   qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
-  renderChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
+  renderTicketChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled=d.status!=='Aberto';
 
   var isAdmin = ((currentUser()||{}).role === 'admin');
-  if(isAdmin){
-    setEditable(true);
-  }else{
-    setEditable(false);
-    enablePriorityOnly();
-  }
+  if(isAdmin){ setEditable(true); } else { setEditable(false); enablePriorityOnly(); }
 
   toggleResponsavelByCategoria();
   await supaMarkRead(d.id); await subscribeTicketChannel(d.id); render(); openModal(true);
@@ -755,7 +801,7 @@ async function addHistory(id,text,ts){
   var d=data.find(function(x){return x.id===id}); if(!d)return;
   var stamp = ts || Date.now();
   d.historico=d.historico||[]; d.historico.push({at:stamp,txt:text,user:((currentUser()||{}).name)||''});
-  renderChat(d.historico);
+  renderTicketChat(d.historico);
   await supaAddMessage(id,text);
 }
 async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(function(x){return x.id!==id}); await supaDeleteTicket(id); render(); openModal(false)}
@@ -802,13 +848,14 @@ qs('#btnNew').addEventListener('click',function(e){e.preventDefault();e.stopProp
 qs('#fStatus').addEventListener('change',render); qs('#fPrio').addEventListener('change',render);
 qs('#fCategoria').addEventListener('change',render); qs('#fSLA').addEventListener('change',render);
 qs('#fPend').addEventListener('change',render); qs('#fMine').addEventListener('change',render);
+qs('#fHideClosed').addEventListener('change',render);
 qs('#fSearch').addEventListener('input',debounce(render,200));
-qs('#btnClear').onclick=function(){qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';qs('#fPend').value='';qs('#fMine').checked=false;render()};
+qs('#btnClear').onclick=function(){qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';qs('#fPend').value='';qs('#fMine').checked=false;qs('#fHideClosed').checked=true;render()};
 
 /* Chat do ticket (instant) */
 async function sendChat(){
   var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para conversar.');return;}
-  var txt=qs('#chatText').value.trim(); if(!txt)return;
+  var txt=qs('#chatText').value.trimEnd(); if(!txt)return;
   var ts = Date.now();
   await addHistory(id, txt, ts); qs('#chatText').value='';
   await supaMarkRead(id); render();
@@ -833,10 +880,12 @@ function exportXLSX(){
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
 
-/* KPIs nav */
-qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs()};
-qs('#btnBackList').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
-qs('#kpiMonth').addEventListener('input',renderKPIs);
+/* Navegação: KPIs / Encerrados */
+qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#closedPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs();setHeadH()};
+qs('#btnClosed').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.add('hidden');qs('#closedPage').classList.remove('hidden');renderClosedPage();setHeadH()};
+qs('#btnBackList').onclick=function(){qs('#closedPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
+qs('#btnBackList2').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
+qs('#fClosed').addEventListener('input',debounce(renderClosedPage,200));
 
 /* Diagnóstico */
 function showDiag(){
@@ -897,7 +946,7 @@ function onDmInsert(row){
 async function subscribeDmChannel(otherId){
   if (!supa) return;
   var me = currentUser(); if (!me) return;
-  var room = dmRoomId(me.id, otherId);
+  var room = [me.id, otherId].sort().join('_');
   if (dmChannels.has(room)) return;
 
   var ch = supa.channel('dm-'+room);
@@ -913,6 +962,7 @@ async function subscribeDmChannel(otherId){
   await ch.subscribe();
   dmChannels.set(room, ch);
 }
+var dmChannels = new Map();
 function openDm(userId){
   dmTarget=userId;
   var user=profiles.find(function(p){return p.id===userId});
@@ -921,25 +971,59 @@ function openDm(userId){
   renderDmChat(userId); subscribeDmChannel(userId); markDmRead(userId);
 }
 function renderDmChat(userId){
-  var me=currentUser(); var list=msgsWith(userId);
-  qs('#dmHistory').innerHTML=list.map(function(m){
-    var side = m.sender===me.id? 'me' : 'them';
-    return '<div class="bubble '+side+'">'+escapeHtml(m.body||'')+'<time>'+new Date(m.created_at).toLocaleString('pt-BR')+'</time></div>';
-  }).join('') || '<div class="muted small" style="padding:10px">Sem mensagens. Inicie a conversa.</div>';
-  var div=qs('#dmHistory'); div.scrollTop=div.scrollHeight;
+  const me = currentUser();
+  const hist = qs('#dmHistory');
+  const list = msgsWith(userId).sort((a,b)=> new Date(a.created_at)-new Date(b.created_at));
+
+  const chunks = [];
+  let lastDay = null, lastWho = null;
+  list.forEach(m=>{
+    const d = new Date(m.created_at);
+    const dayKey = d.toISOString().slice(0,10);
+    if(dayKey !== lastDay){
+      chunks.push({type:'sep', label: d.toLocaleDateString('pt-BR')});
+      lastDay = dayKey;
+      lastWho = null;
+    }
+    const who = (m.sender===me.id) ? 'me' : 'them';
+    const grouped = (who === lastWho);
+    const time = d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    chunks.push({type:'msg', who: who, body: (m.body||''), time: time, grouped: grouped});
+    lastWho = who;
+  });
+
+  hist.innerHTML = chunks.length ? chunks.map(c=>{
+    if(c.type==='sep'){
+      return `<div class="dm-sep"><span>${c.label}</span></div>`;
+    }
+    const cls = `bubble ${c.who} dm${c.grouped ? ' grouped':''}`;
+    const txt = escapeHtml(c.body).replace(/\r?\n/g,'\n');
+    return `<div class="${cls}"><div>${txt}</div><time>${c.time}</time></div>`;
+  }).join('') : '<div class="muted small" style="padding:10px">Sem mensagens. Inicie a conversa.</div>';
+
+  requestAnimationFrame(()=>{
+    const nearBottom = (hist.scrollHeight - hist.clientHeight - hist.scrollTop) < 120;
+    if(nearBottom) hist.scrollTop = hist.scrollHeight;
+  });
 }
 async function sendDM(){
-  var txt=(qs('#dmText').value||'').trim(); if(!txt || !dmTarget) return;
-  var me=currentUser(); var payload={sender:me.id,receiver:dmTarget,body:txt};
-  var r=await supa.from('dm_messages').insert(payload);
+  const txt = (qs('#dmText').value||'').trimEnd();
+  if(!txt || !dmTarget) return;
+
+  const me=currentUser();
+  const payload={sender:me.id,receiver:dmTarget,body:txt};
+  const r=await supa.from('dm_messages').insert(payload);
   if(r.error){toast('Não foi possível enviar DM (policies/estrutura).');return;}
+
   qs('#dmText').value='';
-  var room = dmRoomId(me.id, dmTarget);
-  var ch = dmChannels.get(room);
+  const room = [me.id, dmTarget].sort().join('_');
+  const ch = dmChannels.get(room);
   if (ch){
-    var sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
+    const sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
     ch.send({ type:'broadcast', event:'dm', payload:{ sender: me.id, receiver: dmTarget, body: txt, id: uid() } });
   }
+  const hist = qs('#dmHistory');
+  requestAnimationFrame(()=>{ hist.scrollTop = hist.scrollHeight; });
 }
 
 /* DM bindings */
@@ -984,4 +1068,3 @@ window.openDm=openDm;
 </script>
 </body>
 </html>
-
