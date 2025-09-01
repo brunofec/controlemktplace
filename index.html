@@ -275,11 +275,11 @@
           <div><label>Código do cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
-            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Reunidas, TTJB"/>
+            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Total Express"/>
             <datalist id="lstTransportadora">
-              <option value="Atual"></option><option value="Correios / Sedex"></option><option value="Reunidas"></option>
-              <option value="TTJB"></option><option value="Rede Sul"></option><option value="Brasil Web"></option>
-              <option value="Zanotelli"></option><option value="Uber"></option><option value="Outros"></option>
+              <option value="Total Express"></option><option value="Correios / Sedex"></option><option value="Jadlog"></option>
+              <option value="Sequoia"></option><option value="Loggi"></option><option value="J&amp;T"></option>
+              <option value="Kangu"></option><option value="DHL"></option><option value="Outros"></option>
             </datalist>
           </div>
           <div id="responsavelWrap"><label>Responsável</label>
@@ -346,8 +346,8 @@
 <div id="toast" class="toast"></div>
 
 <script>
-/* ===== Layout (tabela full-viewport) ===== */
-function setHeadH(){var h=document.querySelector('header');var v=h? h.getBoundingClientRect().height : 96;document.documentElement.style.setProperty('--headH', Math.round(v)+'px')}
+/* ===== Layout ===== */
+function setHeadH(){const h=document.querySelector('header');const v=h? h.getBoundingClientRect().height : 96;document.documentElement.style.setProperty('--headH', Math.round(v)+'px')}
 window.addEventListener('load', setHeadH); window.addEventListener('resize', setHeadH);
 
 /* ===== Helpers ===== */
@@ -356,7 +356,7 @@ const qsa=(s,el)=> Array.prototype.slice.call((el||document).querySelectorAll(s)
 const fmtDate=(ts)=> new Date(ts).toLocaleString('pt-BR');
 const uid = ()=> Math.random().toString(36).slice(2,8).toUpperCase();
 function escapeHtml(str){str=str||'';return str.replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[m])}
-const debounce=(fn,ms=150)=>{let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
+const debounce=(fn,ms=150)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 function toast(msg){const c=qs('#toast');const el=document.createElement('div');el.className='t';el.textContent=msg;c.appendChild(el);requestAnimationFrame(()=>el.classList.add('show'));setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),250)},3000)}
 const prioToDays=(p)=> p==='Alta'?1: p==='Média'?3:5;
 function ensureSLA(prazo,prioridade,abertoEm){if(prazo)return prazo;const base=new Date(abertoEm||Date.now());base.setHours(0,0,0,0);base.setDate(base.getDate()+prioToDays(prioridade||'Média'));return base.toISOString().slice(0,10)}
@@ -384,12 +384,19 @@ const clearSession=()=>localStorage.removeItem(SESSION_KEY);
 let data=[]; let lastReadMap={};
 let chartAbertos=null, chartConcluidos=null, chartTransp=null;
 
-/* ===== Perfis para DM ===== */
+/* ===== Perfis e DM ===== */
 let profiles=[];                // {id, display_name, role, username}
 let dmCache=[];                 // [{id,sender,receiver,body,created_at}]
 let dmTarget=null;              // uuid selecionado
-let dmUnread=0;                 // contador para badge
+let dmUnread=0;                 // badge
 const dmKey = (me,other)=>`dm_lastread_${me}_${other}`;
+let dmSeen = new Set();         // dedupe em broadcast + realtime
+function markSeen(sig){ dmSeen.add(sig); setTimeout(()=>dmSeen.delete(sig),5000) }
+
+/* ===== Realtime broadcast (instantâneo) ===== */
+const ticketChannels = new Map();                // ticketId -> channel
+const dmChannels = new Map();                    // roomId -> channel
+const dmRoomId = (a,b)=> [a,b].sort().join('_'); // sala estável entre dois users
 
 /* ========= TICKETS: load ========= */
 async function loadFromSupabase(){
@@ -397,7 +404,7 @@ async function loadFromSupabase(){
   let sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by';
   let resp=await supa.from('tickets').select(sel);
   let tks=resp.data; let error=resp.error;
-  if(error){ // fallback se colunas não existirem
+  if(error){
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
@@ -433,31 +440,38 @@ async function supaUpsertTicket(rec){
     prazo:rec.prazo||null, codigo:rec.codigo||null, transportadora:rec.transportadora||null, pendente:!!rec.pendente, retomar_em:rec.retomar_em||null,
     opened_by: me? me.id : rec.openedBy || null, closed_at:rec.status==='Encerrado'?new Date().toISOString():null
   };
-  const r=await supa.from('tickets').upsert(payload); if(r.error)console.error(r.error);
+  const r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
-async function supaDeleteTicket(id){ if(!supaReady())return; const r=await supa.from('tickets').delete().eq('id',id); if(r.error)console.error(r.error)}
+async function supaDeleteTicket(id){ if(!supaReady())return; const r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
 async function supaAddMessage(ticketId,text){ if(!supaReady())return; const u=currentUser(); const payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text}; const r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
 async function supaMarkRead(ticketId){ if(!supaReady())return; const u=currentUser(); if(!u)return; const nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 
 /* ========= Realtime + fallback ========= */
 let __rtOK={messages:false,tickets:false,dm:false}; let __pollId=null;
 async function refreshNow(){await loadFromSupabase(); render()}
-function setPollTimer(){ if(__pollId) clearInterval(__pollId); const ms=(document.visibilityState==='visible')?2000:10000; __pollId=setInterval(()=>{ if(!__rtOK.messages||!__rtOK.tickets||!__rtOK.dm){refreshNow(); loadDM(true)} },ms)}
+function setPollTimer(){
+  if(__pollId) clearInterval(__pollId);
+  const ms=(document.visibilityState==='visible')?800:8000;   // 0.8s no foco
+  __pollId=setInterval(()=>{ if(!__rtOK.messages||!__rtOK.tickets||!__rtOK.dm){refreshNow(); loadDM(true)} },ms)
+}
 function setupRealtime(){
   if(!supaReady())return;
   supa.getChannels().forEach(ch=>supa.removeChannel(ch));
+
+  // Realtime por tabela (fallback realtime do DB)
   supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
     const m=payload.new; const d=data.find(x=>x.id===m.ticket_id);
     if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
       const me=(currentUser()||{}).name||''; if(me!==(m.sender_name||'')) toast('Nova mensagem no ticket '+m.ticket_id);
     }
   }).subscribe(status=>{__rtOK.messages=(status==='SUBSCRIBED')});
+
   supa.channel('realtime-tickets')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},()=>refreshNow())
     .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},()=>refreshNow())
     .subscribe(status=>{__rtOK.tickets=(status==='SUBSCRIBED')});
 
-  // DM realtime (se tabela existir)
+  // DM realtime por tabela (com dedupe)
   supa.channel('realtime-dm')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},(p)=>{onDmInsert(p.new)})
     .subscribe(status=>{__rtOK.dm=(status==='SUBSCRIBED')});
@@ -495,7 +509,7 @@ function render(){
 
     if(mine){
       const me = currentUser()||{};
-      const byOwner = d.openedBy && d.openedBy===me.id;              // << novo (robusto)
+      const byOwner = d.openedBy && d.openedBy===me.id;    // robusto
       const bySolic = (d.solicitante||'')===(me.name||'');
       const byResp  = (d.responsavel||'')===(me.name||'');
       if(!byOwner && !bySolic && !byResp) return false;
@@ -638,6 +652,24 @@ function setSelectValue(sel,value){
   sel.value=value||sel.value;
 }
 function openNew(){resetForm();qs('#modalTitle').textContent='Nova solicitação';openModal(true)}
+async function subscribeTicketChannel(ticketId){
+  if (!supa) return;
+  if (ticketChannels.has(ticketId)) return;
+  const ch = supa.channel('ticket-'+ticketId);
+  ch.on('broadcast', { event: 'chat' }, (payload) => {
+    const d = data.find(x => x.id === ticketId);
+    if (!d) return;
+    const { at, txt, user } = payload.payload || {};
+    const exists = (d.historico||[]).some(h => h.at===at && h.txt===txt && h.user===user);
+    if (!exists){
+      d.historico.push({ at, txt, user });
+      if (qs('#ticketId').value === ticketId) renderChat(d.historico);
+      render();
+    }
+  });
+  await ch.subscribe();
+  ticketChannels.set(ticketId, ch);
+}
 async function openEdit(id){
   const d=data.find(x=>x.id===id); if(!d)return;
   resetForm(); qs('#modalTitle').textContent='Solicitação '+d.id; qs('#ticketId').value=d.id;
@@ -648,7 +680,7 @@ async function openEdit(id){
   qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
   renderChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled=d.status!=='Aberto'; setEditable(false); toggleResponsavelByCategoria(); enablePriorityOnly();
-  await supaMarkRead(d.id); render(); openModal(true);
+  await supaMarkRead(d.id); await subscribeTicketChannel(d.id); render(); openModal(true);
 }
 function collectForm(){
   const id=qs('#ticketId').value||uid(); const now=Date.now();
@@ -679,7 +711,13 @@ async function save(e){
   if(i>=0) data[i]=Object.assign({},data[i],rec); else data.push(rec);
   await supaUpsertTicket(rec); render(); await addHistory(rec.id,(i>=0?'Atualizado':'Criado')+' por '+(((currentUser()||{}).name)||'sistema')); openEdit(rec.id);
 }
-async function addHistory(id,text){const d=data.find(x=>x.id===id); if(!d)return; d.historico=d.historico||[]; d.historico.push({at:Date.now(),txt:text,user:((currentUser()||{}).name)||''}); renderChat(d.historico); await supaAddMessage(id,text)}
+async function addHistory(id,text,ts){
+  const d=data.find(x=>x.id===id); if(!d)return;
+  const stamp = ts || Date.now();
+  d.historico=d.historico||[]; d.historico.push({at:stamp,txt:text,user:((currentUser()||{}).name)||''});
+  renderChat(d.historico);
+  await supaAddMessage(id,text);
+}
 async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false)}
 
 async function snoozeTicket(id){
@@ -703,12 +741,8 @@ async function confirmTicket(id){
     await supaUpsertTicket(d); await addHistory(id,'Ticket confirmado e movido para Em tratativa'); render();
   }
 }
-async function closeTicket(id){
-  const d=data.find(x=>x.id===id); if(!d)return;
-  if(d.status!=='Encerrado'){const old=d.status; d.status='Encerrado'; await supaUpsertTicket(d); await addHistory(id,'Status alterado: '+old+' ➜ Encerrado'); render();}
-}
 
-/* Bindings */
+/* Bindings tickets */
 qs('#btnDelete').onclick=()=>removeTicket(qs('#ticketId').value);
 qs('#btnConfirm').onclick=async ()=>{const id=qs('#ticketId').value; if(!id){alert('Salve primeiro para confirmar.');return;} await confirmTicket(id); await openEdit(id)};
 qs('#frm').addEventListener('submit',save); qs('#btnSave').addEventListener('click',save);
@@ -721,7 +755,20 @@ qs('#fPend').addEventListener('change',render); qs('#fMine').addEventListener('c
 qs('#fSearch').addEventListener('input',debounce(render,200));
 qs('#btnClear').onclick=()=>{qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';qs('#fSLA').value='';qs('#fPend').value='';qs('#fMine').checked=false;render()};
 
-async function sendChat(){const id=qs('#ticketId').value; if(!id){alert('Salve primeiro para conversar.');return;} const txt=qs('#chatText').value.trim(); if(!txt)return; await addHistory(id,txt); qs('#chatText').value=''; await supaMarkRead(id); render()}
+/* Chat do ticket (instant) */
+async function sendChat(){
+  const id=qs('#ticketId').value; if(!id){alert('Salve primeiro para conversar.');return;}
+  const txt=qs('#chatText').value.trim(); if(!txt)return;
+  const ts = Date.now();
+  await addHistory(id, txt, ts); qs('#chatText').value='';
+  await supaMarkRead(id); render();
+  const ch = ticketChannels.get(id);
+  if (ch){
+    ch.send({ type:'broadcast', event:'chat',
+      payload:{ at:ts, txt, user:(currentUser()||{}).name||'' }
+    });
+  }
+}
 qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat()}});
 
 /* Export XLSX */
@@ -752,7 +799,7 @@ function showDiag(){
 }
 qs('#btnDiag').onclick=showDiag; qs('#diagClose').onclick=()=>qs('#diagBar').classList.add('hidden');
 
-/* ========= DM (chat usuários) ========= */
+/* ========= Perfis / DM ========= */
 async function loadProfiles(){
   if(!supaReady())return;
   const r=await supa.from('profiles').select('id,display_name,role,username').order('display_name');
@@ -786,6 +833,9 @@ async function loadDM(silent){
   setDmBadge(); renderDmUsers(); if(dmTarget) renderDmChat(dmTarget);
 }
 function onDmInsert(row){
+  const sig = [row.sender,row.receiver,row.body].join('|');
+  if (dmSeen.has(sig)) return; // já recebido via broadcast
+  markSeen(sig);
   const me=currentUser(); if(!me) return;
   if(row.sender===me.id || row.receiver===me.id){
     dmCache.push(row);
@@ -794,12 +844,31 @@ function onDmInsert(row){
     if(row.receiver===me.id && (!dmTarget || dmTarget!==row.sender)) toast('Nova mensagem de usuário');
   }
 }
+async function subscribeDmChannel(otherId){
+  if (!supa) return;
+  const me = currentUser(); if (!me) return;
+  const room = dmRoomId(me.id, otherId);
+  if (dmChannels.has(room)) return;
+
+  const ch = supa.channel('dm-'+room);
+  ch.on('broadcast', { event:'dm' }, (payload)=>{
+    const m = payload.payload || {};
+    const sig = [m.sender,m.receiver,m.body].join('|');
+    if (dmSeen.has(sig)) return;
+    markSeen(sig);
+    dmCache.push({ id:m.id||uid(), sender:m.sender, receiver:m.receiver, body:m.body, created_at:new Date().toISOString() });
+    if (dmTarget && (m.sender===dmTarget || m.receiver===dmTarget)) renderDmChat(dmTarget);
+    setDmBadge(); renderDmUsers();
+  });
+  await ch.subscribe();
+  dmChannels.set(room, ch);
+}
 function openDm(userId){
   dmTarget=userId;
   const user=profiles.find(p=>p.id===userId);
   qs('#dmHeader').textContent='Conversando com: ' + (user? (user.display_name||user.username||user.id) : userId);
   qs('#dmText').disabled=false; qs('#dmSend').disabled=false;
-  renderDmChat(userId); markDmRead(userId);
+  renderDmChat(userId); subscribeDmChannel(userId); markDmRead(userId);
 }
 function renderDmChat(userId){
   const me=currentUser(); const list=msgsWith(userId);
@@ -813,9 +882,18 @@ async function sendDM(){
   const txt=(qs('#dmText').value||'').trim(); if(!txt || !dmTarget) return;
   const me=currentUser(); const payload={sender:me.id,receiver:dmTarget,body:txt};
   const r=await supa.from('dm_messages').insert(payload);
-  if(r.error){toast('Não foi possível enviar DM (verifique policies/estrutura).');return;}
-  qs('#dmText').value=''; // inserção aparecerá pelo realtime/fallback
+  if(r.error){toast('Não foi possível enviar DM (policies/estrutura).');return;}
+  qs('#dmText').value='';
+  const room = dmRoomId(me.id, dmTarget);
+  const ch = dmChannels.get(room);
+  if (ch){
+    // sinaliza instantaneamente (com dedupe)
+    const sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
+    ch.send({ type:'broadcast', event:'dm', payload:{ sender:me.id, receiver:dmTarget, body:txt, id:uid() } });
+  }
 }
+
+/* DM bindings */
 qs('#dmSend').onclick=sendDM; qs('#dmText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendDM()}});
 qs('#dmFab').onclick=()=>{qs('#dmPanel').classList.toggle('show'); renderDmUsers(); if(dmTarget) markDmRead(dmTarget)};
 qs('#dmClose').onclick=()=>qs('#dmPanel').classList.remove('show');
@@ -835,7 +913,7 @@ qs('#btnLogin').onclick=async function(){
   if(!supaReady()){alert('config.js não carregado ou incompleto (SUPABASE_URL/KEY).');return;}
   const email=login.includes('@')?login:(login+'@'+DEFAULT_EMAIL_DOMAIN);
 
-  const authResp=await supa.auth.signInWithPassword({email,password:pass});
+  const authResp=await supa.auth.signInWithPassword({email:email,password:pass});
   if(authResp.error){alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
 
   let profileResp=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).maybeSingle();
@@ -857,5 +935,3 @@ window.openDm=openDm;
 </script>
 </body>
 </html>
-
-
