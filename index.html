@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Controle Interno de Solicitações</title>
+<title>Controle Interno de Solicações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,6 +46,8 @@
   .filters{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr .9fr 1fr auto auto;gap:10px}
   input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1319;color:var(--text);outline:none;font-size:14px}
   .table-wrap{flex:1;min-height:240px;overflow:auto;border-radius:12px;border:1px solid var(--border);background:#0f1319}
+  /* expansor até a margem do card/painel */
+  .table-wrap.edge{margin:0 -16px;border-left:none;border-right:none;border-radius:0}
   table{width:100%;border-collapse:collapse}
   thead th{text-align:left;padding:12px;font-size:13px;letter-spacing:.02em;color:var(--muted);background:#0f1319;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:1}
   tbody td{padding:12px;border-bottom:1px solid var(--border);vertical-align:middle;font-size:14px}
@@ -76,6 +78,7 @@
   .grid-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
   .grid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
 
   .chat-box{display:flex;flex-direction:column;height:520px;border:1px solid var(--border);border-radius:12px;background:#0e1318}
   .chat-history{flex:1;overflow:auto;overscroll-behavior:contain;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -174,14 +177,14 @@
     <section class="panel panel-fill">
       <div class="row" style="align-items:center;margin-bottom:10px">
         <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por ID, assunto, solicitante, código do cliente, transportadora, descrição..."/>
+          <!-- removi "ID" do placeholder -->
+          <input id="fSearch" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
           <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
           <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
           <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (≤12h)</option><option value="late">Vencido</option></select>
           <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
 
-          <!-- checkboxes ficam escondidos e os botões controlam o estado -->
           <input type="checkbox" id="fMine" class="hidden-input">
           <input type="checkbox" id="fHideClosed" class="hidden-input" checked>
 
@@ -194,12 +197,14 @@
         <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
       </div>
 
-      <div class="table-wrap">
+      <!-- tabela expandida até a margem -->
+      <div class="table-wrap edge">
         <table id="tbl">
           <thead>
             <tr>
-              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
-              <th>Categoria</th><th>Prioridade</th><th>Status</th><th>SLA</th><th>Resp.</th><th class="nowrap">Ações</th>
+              <!-- ID removido da UI -->
+              <th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
+              <th>Categoria</th><th>Canal</th><th>Prioridade</th><th>Status</th><th>SLA</th><th>Resp.</th><th class="nowrap">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -219,12 +224,13 @@
           <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
         </div>
       </div>
-      <div class="table-wrap">
+      <div class="table-wrap edge">
         <table>
           <thead>
             <tr>
-              <th>ID</th><th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
-              <th>Categoria</th><th>Prioridade</th><th>Status</th><th>Resp.</th>
+              <!-- ID removido -->
+              <th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
+              <th>Categoria</th><th>Canal</th><th>Prioridade</th><th>Status</th><th>Resp.</th>
             </tr>
           </thead>
           <tbody id="tbodyClosed"></tbody>
@@ -263,6 +269,8 @@
       <div class="charts">
         <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
         <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
+        <!-- NOVO gráfico -->
+        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — Shopee x Mercado Livre</h3><canvas id="chartCanal"></canvas></div>
         <div class="panel" style="grid-column:1/-1"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por transportadora</h3><canvas id="chartTransp"></canvas></div>
       </div>
       <div class="space"></div>
@@ -277,6 +285,7 @@
 <div class="modal" id="modal">
   <div class="card">
     <div class="row" style="align-items:center">
+      <!-- título sem exibir ID -->
       <h2 id="modalTitle" style="margin:0;font-size:18px">Nova solicitação</h2>
       <div class="actions" style="margin-left:auto"><button class="btn-ghost" id="closeModal"><i class="fa fa-xmark"></i></button></div>
     </div>
@@ -285,6 +294,7 @@
     <div class="grid-2">
       <!-- FORM -->
       <form id="frm" autocomplete="off" style="display:flex;flex-direction:column;gap:12px">
+        <!-- ID permanece oculto para controle interno/Supabase -->
         <input type="hidden" id="ticketId">
 
         <div class="grid-form">
@@ -309,13 +319,14 @@
               <option>Erro cadastro</option>
               <option>Solicitar Coleta</option>
               <option>Barrar Entrega</option>
-              <option>Outras informações</option>
+              <option>Outras Informações</option>
             </select>
           </div>
           <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select></div>
         </div>
 
-        <div class="grid-3">
+        <!-- troquei para grid-4 e acrescentei Canal -->
+        <div class="grid-4">
           <div><label>Código do cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
           <div id="transportadoraWrap">
             <label>Transportadora</label>
@@ -328,6 +339,14 @@
           </div>
           <div id="responsavelWrap"><label>Responsável</label>
             <select id="responsavel"><option></option><option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option></select>
+          </div>
+          <!-- NOVO CAMPO: Canal -->
+          <div><label>Canal</label>
+            <select id="canalSel">
+              <option value=""></option>
+              <option>Mercado Livre</option>
+              <option>Shopee</option>
+            </select>
           </div>
         </div>
 
@@ -418,6 +437,9 @@ var SUPA_KEY=(window.ENV&&window.ENV.SUPABASE_ANON_KEY)||'';
 var supa=(SUPA_URL&&SUPA_KEY)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
 const supaReady=()=>!!supa;
 
+/* ===== Flag de coluna CANAL ===== */
+var HAS_CANAL=false;
+
 /* ===== Sessão ===== */
 const SESSION_KEY='ticket_session_v1';
 const setSession=u=>localStorage.setItem(SESSION_KEY,JSON.stringify(u));
@@ -426,7 +448,7 @@ const clearSession=()=>localStorage.removeItem(SESSION_KEY);
 
 /* ===== Estado ===== */
 var data=[]; var lastReadMap={};
-var chartAbertos=null, chartConcluidos=null, chartTransp=null;
+var chartAbertos=null, chartConcluidos=null, chartTransp=null, chartCanal=null;
 
 /* ===== Perfis e DM ===== */
 var profiles=[];  // {id, display_name, role, username}
@@ -440,10 +462,21 @@ function markSeen(sig){dmSeen.add(sig);setTimeout(()=>dmSeen.delete(sig),5000)}
 /* ========= TICKETS: load ========= */
 async function loadFromSupabase(){
   if(!supaReady()){toast('Config Supabase ausente.'); data=[]; render(); return;}
-  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by';
+
+  // tenta com a coluna 'canal'
+  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by';
   var resp=await supa.from('tickets').select(sel);
   var tks=resp.data; var error=resp.error;
+  if(!error){ HAS_CANAL=true; }
   if(error){
+    // fallback sem 'canal'
+    HAS_CANAL=false;
+    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by';
+    resp=await supa.from('tickets').select(sel);
+    tks=resp.data; error=resp.error;
+  }
+  if(error){
+    // fallback mínimo
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
@@ -464,7 +497,7 @@ async function loadFromSupabase(){
   data=tks.map(t=>({
     id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
     prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
-    codigo:t.codigo||'', transportadora:t.transportadora||'', pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
+    codigo:t.codigo||'', transportadora:t.transportadora||'', canal: (t.canal||''), pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
     openedBy:t.opened_by||null, historico:msgsByTicket[t.id]||[]
   }));
 }
@@ -479,6 +512,7 @@ async function supaUpsertTicket(rec){
     prazo:rec.prazo||null, codigo:rec.codigo||null, transportadora:rec.transportadora||null, pendente:!!rec.pendente, retomar_em:rec.retomar_em||null,
     opened_by: me? me.id : rec.openedBy || null, closed_at:rec.status==='Encerrado'?new Date().toISOString():null
   };
+  if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
   var r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
@@ -530,7 +564,8 @@ function render(){
 
   var rows=data.filter(d=>{
     var sLA=slaStatus(d.prazo).code;
-    var searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
+    // removi o ID do campo pesquisável e acrescentei canal
+    var searchable=[d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora,d.canal].join(' ').toLowerCase();
 
     var isPend=(d.status==='Pendente');
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
@@ -579,12 +614,12 @@ function render(){
                  : (d.categoria||'-');
 
     return '<tr>\
-      <td class="nowrap"><strong>'+d.id+'</strong></td>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
       <td>'+ (d.assunto||'-') +'</td>\
       <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
       <td>'+catCell+'</td>\
+      <td>'+ (d.canal||'<span class="muted">—</span>') +'</td>\
       <td>'+prioBadge(d.prioridade||'-')+'</td>\
       <td>'+statusBadge(d.status||'-')+'</td>\
       <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
@@ -605,7 +640,7 @@ function renderClosedPage(){
   var term=(qs('#fClosed').value||'').toLowerCase().trim();
   var rows=data.filter(d=>{ if(d.status!=='Encerrado')return false;
     if(!term) return true;
-    var searchable=[d.id,d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora].join(' ').toLowerCase();
+    var searchable=[d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora,d.canal].join(' ').toLowerCase();
     return searchable.indexOf(term)>-1;
   }).sort((a,b)=>b.abertoEm-a.abertoEm);
 
@@ -616,12 +651,12 @@ function renderClosedPage(){
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
     return '<tr>\
-      <td class="nowrap"><strong>'+d.id+'</strong></td>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
       <td>'+ (d.assunto||'-') +'</td>\
       <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
       <td>'+catCell+'</td>\
+      <td>'+ (d.canal||'<span class="muted">—</span>') +'</td>\
       <td>'+prioBadge(d.prioridade||'-')+'</td>\
       <td>'+statusBadge(d.status||'-')+'</td>\
       <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
@@ -671,6 +706,13 @@ function renderKPIs(){
   if(chartConcluidos)chartConcluidos.destroy();
   chartConcluidos=new Chart(ctx2,{type:'bar',data:{labels:categorias,datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
 
+  // NOVO: Shopee x Mercado Livre
+  var qtdShopee = baseAbertos.filter(d=>(d.canal||'')==='Shopee').length;
+  var qtdMeli   = baseAbertos.filter(d=>(d.canal||'')==='Mercado Livre').length;
+  var ctxC=document.getElementById('chartCanal').getContext('2d');
+  if(chartCanal) chartCanal.destroy();
+  chartCanal=new Chart(ctxC,{type:'bar',data:{labels:['Mercado Livre','Shopee'],datasets:[{label:'Abertos',data:[qtdMeli,qtdShopee]}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+
   var baseTransp=baseAbertos.filter(d=>(d.transportadora||'').trim()!=='');
   var mapa={}; baseTransp.forEach(d=>{var k=d.transportadora.trim(); mapa[k]=(mapa[k]||0)+1});
   var transp=Object.keys(mapa).sort((a,b)=>mapa[b]-mapa[a]);
@@ -710,7 +752,7 @@ function resetForm(){
   qs('#categoriaSel').value='Frota - Transportadora';
   qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value='';
   qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#transportadora').value='';
-  qs('#prazo').value=''; qs('#codigo').value='';
+  qs('#prazo').value=''; qs('#codigo').value=''; qs('#canalSel').value='';
   qs('#chatHistory').innerHTML=''; qs('#chatText').value='';
   qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden');
@@ -759,12 +801,13 @@ async function subscribeTicketChannel(ticketId){
 var ticketChannels = new Map();
 async function openEdit(id){
   var d=data.find(x=>x.id===id); if(!d)return;
-  resetForm(); qs('#modalTitle').textContent='Solicitação '+d.id; qs('#ticketId').value=d.id;
+  resetForm(); qs('#modalTitle').textContent='Editar solicitação'; qs('#ticketId').value=d.id;
   qs('#solicitante').value=d.solicitante||((currentUser()||{}).name||'');
   qs('#categoriaSel').value=d.categoria||'Frota - Transportadora';
   setSelectValue(qs('#assunto'), d.assunto||''); qs('#prioridade').value=d.prioridade||'Média';
   qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
   qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
+  qs('#canalSel').value=d.canal||'';
   renderTicketChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled=d.status!=='Aberto';
 
@@ -790,6 +833,7 @@ function collectForm(){
     prazo:prazo,
     codigo:qs('#codigo').value.trim(),
     transportadora:qs('#transportadora').value.trim(),
+    canal: qs('#canalSel').value.trim(),
     pendente: exists? !!exists.pendente : false,
     retomar_em: exists? (exists.retomar_em||'') : '',
     openedBy: exists? exists.openedBy : ((currentUser()||{}).id || null),
@@ -876,14 +920,14 @@ async function sendChat(){
 }
 qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat()}});
 
-/* Export XLSX */
+/* Export XLSX (mantive ID no export, útil para auditoria) */
 function buildHistoricoString(hist){return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>new Date(h.at).toLocaleString('pt-BR')+' — '+(h.user||'')+': '+(h.txt||'')).join('\n')}
 function exportXLSX(){
   var rows=data.slice().sort((a,b)=>{const pr=p=>p==='Alta'?0:(p==='Média'?1:2); return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm});
-  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Pendente?','Retomar em','Histórico (chat)'];
+  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Canal','Pendente?','Retomar em','Histórico (chat)'];
   var aoa=[header];
-  rows.forEach(r=>aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.status==='Pendente'?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]));
-  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:22},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:12},{wch:60}];
+  rows.forEach(r=>aoa.push([ r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'', r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.canal||'', r.status==='Pendente'?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico) ]));
+  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); ws['!cols']=[{wch:8},{wch:19},{wch:14},{wch:22},{wch:24},{wch:22},{wch:28},{wch:14},{wch:12},{wch:12},{wch:16},{wch:18},{wch:10},{wch:10},{wch:12},{wch:60}];
   var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Tickets'); XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
@@ -1044,7 +1088,6 @@ qs('#dmSearch').addEventListener('input',debounce(renderDmUsers,150));
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
 function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
 async function boot(){ var u=currentUser(); if(!u){showLogin();return;} showApp(); await loadProfiles(); await loadFromSupabase(); await loadDM(true); render(); setupRealtime(); setHeadH();
-  // sincroniza estado visual dos toggles ao iniciar
   qs('#tgMine').classList.toggle('active', qs('#fMine').checked);
   qs('#tgHideClosed').classList.toggle('active', qs('#fHideClosed').checked);
 }
@@ -1080,5 +1123,3 @@ window.openDm=openDm;
 </script>
 </body>
 </html>
-
-
