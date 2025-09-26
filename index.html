@@ -1170,10 +1170,6 @@ qs('#btnLogin').onclick=async function(){
 window.openEdit=openEdit; window.closeTicket=closeTicket; window.confirmTicket=confirmTicket;
 window.snoozeTicket=snoozeTicket; window.resumeTicket=resumeTicket;
 window.openDm=openDm;
-</script>
-</body>
-</html>
-
 
 async function loadTicketChat(ticketId){
   if (!supa) return;
@@ -1202,4 +1198,6 @@ async function loadTicketChat(ticketId){
   if (d) d.historico = list;
   renderTicketChat(list);
 }
-
+</script>
+</body>
+</html>
