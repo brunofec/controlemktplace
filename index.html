@@ -758,45 +758,69 @@ function resetForm(){
   qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden');
   setEditable(true); toggleResponsavelByCategoria();
 }
+
 function renderTicketChat(list){
-  var u=(currentUser()||{}).name||'';
-  var chunks=[]; var lastDay=null,lastWho=null;
+  const u = (currentUser()||{}).name || '';
+  const chunks = [];
+  let lastDay = null, lastWho = null;
+
   (list||[]).slice().sort((a,b)=>a.at-b.at).forEach(h=>{
-    var d=new Date(h.at), day=d.toISOString().slice(0,10), who=(h.user===u?'me':'them');
-    if(day!==lastDay){chunks.push({t:'sep',label:d.toLocaleDateString('pt-BR')}); lastDay=day; lastWho=null}
-    chunks.push({t:'msg',who:who,txt:h.txt||'',time:d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),grouped:(who===lastWho)});
-    lastWho=who;
+    const d   = new Date(h.at);
+    const day = d.toISOString().slice(0,10);
+    const who = (h.user===u ? 'me' : 'them');
+
+    if (day !== lastDay){
+      chunks.push({ t:'sep', label: d.toLocaleDateString('pt-BR') });
+      lastDay = day; lastWho = null;
+    }
+    chunks.push({
+      t:'msg',
+      who,
+      txt: (h.txt||''),
+      time: d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+      grouped: (who===lastWho)
+    });
+    lastWho = who;
   });
-  qs('#chatHistory').innerHTML=chunks.map(c=>{
-    if(c.t==='sep') return '<div class="sep"><span>'+c.label+'</span></div>';
-    return '<div class="bubble '+c.who+(c.grouped?' grouped':'')+'">'+escapeHtml(c.txt)+'<time>'+c.time+'</time></div>';
+
+  qs('#chatHistory').innerHTML = chunks.map(c=>{
+    if (c.t==='sep') return `<div class="sep"><span>${c.label}</span></div>`;
+    return `<div class="bubble ${c.who}${c.grouped?' grouped':''}">${escapeHtml(c.txt)}<time>${c.time}</time></div>`;
   }).join('');
-  var divEl=qs('#chatHistory'); divEl.scrollTop=divEl.scrollHeight;
+
+  const div = qs('#chatHistory');
+  if (div) div.scrollTop = div.scrollHeight;
 }
 
 async function loadTicketChat(ticketId){
-  try{
-    if(typeof supa === 'undefined' || !supa) return;
-    const r = await supa
-      .from('messages')
-      .select('ticket_id, body, sender_name, created_at')
-      .eq('ticket_id', (ticketId+""))
-      .order('created_at', { ascending: true });
-    if(r.error){ console.error('loadTicketChat error:', r.error); renderTicketChat([]); return; }
-    const list = (r.data || []).map(m => ({
-      at: new Date(m.created_at).getTime(),
-      txt: m.body,
-      who: (m.sender_name || '—')
-    }));
-    // cache in the in-memory data if present
-    if (typeof data !== 'undefined' && Array.isArray(data)){
-      const d = data.find(x => x.id === ticketId);
-      if (d) d.historico = list;
-    }
-    renderTicketChat(list);
-  }catch(err){
-    console.error('loadTicketChat exception:', err);
+  if (!supa) return;
+
+  // aceita uuid (tickets.id) e código curto (tickets.codigo) gravados em messages.ticket_id (text)
+  const d    = Array.isArray(data) ? data.find(x => x.id === ticketId) : null;
+  const key1 = (ticketId + "");
+  const key2 = d && d.codigo ? (d.codigo + "") : null;
+  const keys = (key2 && key2 !== key1) ? [key1, key2] : [key1];
+
+  const r = await supa
+    .from('messages')
+    .select('ticket_id, body, sender_name, created_at')
+    .in('ticket_id', keys)
+    .order('created_at', { ascending: true });
+
+  if (r.error){
+    console.error('loadTicketChat error:', r.error);
+    await loadTicketChat(d.id);
+    return;
   }
+
+  const list = (r.data || []).map(m => ({
+    at:  new Date(m.created_at).getTime(),
+    txt: m.body,
+    user: (m.sender_name || '—')
+  }));
+
+  if (d) d.historico = list;
+  renderTicketChat(list);
 }
 
 function setSelectValue(sel,value){
@@ -817,7 +841,7 @@ async function subscribeTicketChannel(ticketId){
     var exists = (d.historico||[]).some(h=>h.at===at && h.txt===txt && h.user===user);
     if (!exists){
       d.historico.push({ at: at, txt: txt, user: user });
-      if (qs('#ticketId').value === ticketId) renderTicketChat(d.historico);
+      if (qs('#ticketId').value === ticketId) loadTicketChat(ticketId);
       render();
     }
   });
@@ -877,7 +901,7 @@ async function addHistory(id,text,ts){
   var d=data.find(x=>x.id===id); if(!d)return;
   var stamp = ts || Date.now();
   d.historico=d.historico||[]; d.historico.push({at:stamp,txt:text,user:((currentUser()||{}).name)||''});
-  renderTicketChat(d.historico);
+  await loadTicketChat(d.id);
   await supaAddMessage(id,text);
 }
 async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false)}
@@ -1149,3 +1173,33 @@ window.openDm=openDm;
 </script>
 </body>
 </html>
+
+
+async function loadTicketChat(ticketId){
+  if (!supa) return;
+  const d = (typeof data !== 'undefined' && Array.isArray(data)) ? data.find(x => x.id === ticketId) : null;
+  const key1 = (ticketId + "");
+  const key2 = d && d.codigo ? (d.codigo + "") : null;
+  const keys = (key2 && key2 !== key1) ? [key1, key2] : [key1];
+
+  const r = await supa
+    .from('messages')
+    .select('ticket_id, body, sender_name, created_at')
+    .in('ticket_id', keys)
+    .order('created_at', { ascending: true });
+
+  if (r.error) {
+    console.error('loadTicketChat error:', r.error);
+    renderTicketChat([]);
+    return;
+  }
+  const rows = r.data || [];
+  const list = rows.map(m => ({
+    at: new Date(m.created_at).getTime(),
+    txt: m.body,
+    who: (m.sender_name || '—')
+  }));
+  if (d) d.historico = list;
+  renderTicketChat(list);
+}
+
