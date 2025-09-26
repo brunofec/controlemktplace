@@ -516,8 +516,8 @@ async function supaUpsertTicket(rec){
   var r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
-async function supaAddMessage(ticketId,text){ if(!supaReady())return; var u=currentUser(); var payload={ticket_id:String(ticketId),sender:u?u.id:null,sender_name:u?u.name:null,body:text}; var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
-async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:String(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
+async function supaAddMessage(ticketId,text){ if(!supaReady())return; var u=currentUser(); var payload={ticket_id:(ticketId+""),sender:u?u.id:null,sender_name:u?u.name:null,body:text}; var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
+async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 
 /* ========= Realtime + fallback ========= */
 var __rtOK={messages:false,tickets:false,dm:false}; var __pollId=null;
@@ -780,7 +780,7 @@ async function loadTicketChat(ticketId){
     const r = await supa
       .from('messages')
       .select('ticket_id, body, sender_name, created_at')
-      .eq('ticket_id', String(ticketId))
+      .eq('ticket_id', (ticketId+""))
       .order('created_at', { ascending: true });
     if(r.error){ console.error('loadTicketChat error:', r.error); renderTicketChat([]); return; }
     const list = (r.data || []).map(m => ({
