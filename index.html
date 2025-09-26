@@ -516,8 +516,8 @@ async function supaUpsertTicket(rec){
   var r=await supa.from('tickets').upsert(payload); if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
-async function supaAddMessage(ticketId,text){ if(!supaReady())return; var u=currentUser(); var payload={ticket_id:ticketId,sender:u?u.id:null,sender_name:u?u.name:null,body:text}; var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
-async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:ticketId,user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
+async function supaAddMessage(ticketId,text){ if(!supaReady())return; var u=currentUser(); var payload={ticket_id:String(ticketId),sender:u?u.id:null,sender_name:u?u.name:null,body:text}; var r=await supa.from('messages').insert(payload); if(r.error)console.error(r.error)}
+async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:String(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 
 /* ========= Realtime + fallback ========= */
 var __rtOK={messages:false,tickets:false,dm:false}; var __pollId=null;
@@ -771,8 +771,34 @@ function renderTicketChat(list){
     if(c.t==='sep') return '<div class="sep"><span>'+c.label+'</span></div>';
     return '<div class="bubble '+c.who+(c.grouped?' grouped':'')+'">'+escapeHtml(c.txt)+'<time>'+c.time+'</time></div>';
   }).join('');
-  var div=qs('#chatHistory'); div.scrollTop=div.scrollHeight;
+  var divEl=qs('#chatHistory'); divEl.scrollTop=divEl.scrollHeight;
 }
+
+async function loadTicketChat(ticketId){
+  try{
+    if(typeof supa === 'undefined' || !supa) return;
+    const r = await supa
+      .from('messages')
+      .select('ticket_id, body, sender_name, created_at')
+      .eq('ticket_id', String(ticketId))
+      .order('created_at', { ascending: true });
+    if(r.error){ console.error('loadTicketChat error:', r.error); renderTicketChat([]); return; }
+    const list = (r.data || []).map(m => ({
+      at: new Date(m.created_at).getTime(),
+      txt: m.body,
+      who: (m.sender_name || '—')
+    }));
+    // cache in the in-memory data if present
+    if (typeof data !== 'undefined' && Array.isArray(data)){
+      const d = data.find(x => x.id === ticketId);
+      if (d) d.historico = list;
+    }
+    renderTicketChat(list);
+  }catch(err){
+    console.error('loadTicketChat exception:', err);
+  }
+}
+
 function setSelectValue(sel,value){
   if(!sel)return; var has=[].some.call(sel.options,o=>o.value===value);
   if(value && !has){var o=document.createElement('option');o.value=value;o.textContent=value+' (legado)'; sel.appendChild(o)}
@@ -808,7 +834,7 @@ async function openEdit(id){
   qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
   qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
   qs('#canalSel').value=d.canal||'';
-  renderTicketChat(d.historico||[]); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
+  await loadTicketChat(d.id); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
   qs('#btnConfirm').disabled=d.status!=='Aberto';
 
   var isAdmin = ((currentUser()||{}).role === 'admin');
@@ -916,7 +942,7 @@ async function sendChat(){
       payload:{ at: ts, txt: txt, user: ((currentUser()||{}).name||'') }
     });
   }
-  var div=qs('#chatHistory'); div.scrollTop=div.scrollHeight;
+  var divEl=qs('#chatHistory'); divEl.scrollTop=divEl.scrollHeight;
 }
 qs('#btnSendChat').onclick=sendChat; qs('#chatText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendChat()}});
 
