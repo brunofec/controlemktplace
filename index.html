@@ -487,7 +487,7 @@ async function loadFromSupabase(){
   // mensagens do ticket
   var ids=tks.map(t=>t.id); var msgsByTicket={};
   if(ids.length){
-    var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
+    var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id', ids /* disabled mass fetch */).order('created_at',{ascending:true});
     if(!r2.error){(r2.data||[]).forEach(m=>((msgsByTicket[m.ticket_id]=msgsByTicket[m.ticket_id]||[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})))}
   }
   // last_reads
