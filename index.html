@@ -671,28 +671,55 @@ function ensureSLA(prazo,prioridade,abertoEm){
   var dt=addBusinessDays(base,dias);
   return dt.toISOString().slice(0,10)
 }
-function slaStatus(dateStr){
+function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
-  var today=new Date();today.setHours(23,59,59,999);
   var due=new Date(dateStr+'T23:59:59');
+
+  // Se estiver encerrado, trava o SLA na data de encerramento
+  if(d && d.status==='Encerrado'){
+    var closedAt=getClosedAt(d)||d.closedAt||d.abertoEm||new Date();
+    var diffH=(due-new Date(closedAt))/36e5;
+    if(diffH<0)return{code:'late',label:'Vencido'};
+    return{code:'ok',label:'No prazo'};
+  }
+
+  // Em aberto: usa hoje como referência (contador correndo)
+  var today=new Date();today.setHours(23,59,59,999);
   var diffH=(due-today)/36e5;
   if(diffH<0)return{code:'late',label:'Vencido'};
   if(diffH<=12)return{code:'risk',label:'Risco'};
-  return{code:'ok',label:'No prazo'}
+  return{code:'ok',label:'No prazo'};
 }
 
 /* tooltip SLA */
-function slaTooltip(dateStr){
+function slaTooltip(dateStr,d){
   if(!dateStr) return '';
   var due = new Date(dateStr+'T23:59:59');
+  var dataPrazo = new Date(dateStr).toLocaleDateString('pt-BR');
+
+  // Encerrado: não continua contando, trava no momento do fechamento
+  if(d && d.status==='Encerrado'){
+    var closedAt = getClosedAt(d) || d.closedAt || d.abertoEm || new Date();
+    var closedDt = new Date(closedAt);
+    var diffH = Math.round((closedDt - due)/36e5); // >0 = fechou depois do prazo
+    var dataFech = closedDt.toLocaleDateString('pt-BR');
+
+    if(diffH<=0){
+      return 'Encerrado em '+dataFech+' — dentro do prazo (SLA '+dataPrazo+')';
+    }else{
+      return 'Encerrado em '+dataFech+' — '+diffH+'h após o vencimento (SLA '+dataPrazo+')';
+    }
+  }
+
+  // Em aberto: contador correndo
   var now = new Date();
   var diffMs = due - now;
   var diffH = Math.round(diffMs/36e5);
-  var dataFmt = new Date(dateStr).toLocaleDateString('pt-BR');
+
   if(diffH>=0){
-    return 'Vence em '+dataFmt+' — faltam '+diffH+'h';
+    return 'Vence em '+dataPrazo+' — faltam '+diffH+'h';
   }else{
-    return 'Venceu em '+dataFmt+' — há '+Math.abs(diffH)+'h';
+    return 'Venceu em '+dataPrazo+' — há '+Math.abs(diffH)+'h';
   }
 }
 
@@ -1047,8 +1074,8 @@ function render(){
   var pageRows = rows.slice(start,end);
 
   tbody.innerHTML=pageRows.map(d=>{
-    var slaObj=slaStatus(d.prazo);
-    var tooltip = slaTooltip(d.prazo);
+    var slaObj=slaStatus(d.prazo,d);
+    var tooltip = slaTooltip(d.prazo,d);
     var slaPill='<span class="badge" title="'+(tooltip || d.prazo || '')+'">'+slaObj.label+'</span>';
     var showConfirm=d.status==='Aberto';
     var unread=d.status==='Em tratativa'?getUnreadCount(d):0;
