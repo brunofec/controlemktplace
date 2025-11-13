@@ -1381,11 +1381,55 @@ function collectForm(){
   }
 }
 async function save(e){
-  e.preventDefault(); var rec=collectForm();
-  if(!rec.solicitante || !rec.assunto){alert('Preencha Assunto. Solicitante vem do login.');return;}
-  var i=data.findIndex(x=>x.id===rec.id);
-  if(i>=0) data[i]=Object.assign({},data[i],rec); else data.push(rec);
-  await supaUpsertTicket(rec); render(); await addHistory(rec.id,(i>=0?'Atualizado':'Criado')+' por '+(((currentUser()||{}).name)||'sistema')); openEdit(rec.id);
+  e.preventDefault();
+
+  var solicitante    = qs('#solicitante').value.trim();
+  var categoria      = qs('#categoriaSel').value;
+  var prioridade     = qs('#prioridade').value;
+  var assunto        = qs('#assunto').value.trim();
+  var status         = qs('#status').value;
+  var codigo         = qs('#codigo').value.trim();
+  var canal          = qs('#canalSel').value.trim();
+  var descricao      = qs('#descricao').value.trim();
+  var transportadora = qs('#transportadora').value.trim();
+  var isFrota        = (categoria === 'Frota - Transportadora');
+
+  // validação dos campos obrigatórios
+  if (
+    !solicitante ||
+    !categoria ||
+    !prioridade ||
+    !assunto ||
+    !status ||
+    !codigo ||
+    !canal ||
+    !descricao ||
+    (isFrota && !transportadora)
+  ){
+    alert('Preencha todos os campos obrigatórios antes de salvar. Para categoria "Frota - Transportadora", Transportadora também é obrigatória.');
+    return;
+  }
+
+  // Responsável pode ficar em branco (será definido no Confirmar)
+
+  var rec = collectForm();
+
+  var i = data.findIndex(x => x.id === rec.id);
+  if (i >= 0) {
+    data[i] = Object.assign({}, data[i], rec);
+  } else {
+    data.push(rec);
+  }
+
+  await supaUpsertTicket(rec);
+
+  await addHistory(
+    rec.id,
+    (i >= 0 ? 'Atualizado' : 'Criado') + ' por ' + (((currentUser() || {}).name) || 'sistema')
+  );
+
+  render();
+  openEdit(rec.id);
 }
 async function addHistory(id,text,ts){
   var d=data.find(x=>x.id===id); if(!d)return;
@@ -1410,22 +1454,37 @@ async function resumeTicket(id){
   await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
 }
 async function confirmTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  if(d.status==='Aberto'){
-    d.status='Em tratativa';
-    if(d.categoria==='SAK' || d.categoria==='Frota - Transportadora'){ var me=(currentUser()||{}).name||''; d.responsavel= me || d.responsavel || '' ; toast('Responsável definido: '+d.responsavel) }
-    await supaUpsertTicket(d); await addHistory(id,'Ticket confirmado e movido para Em tratativa'); render();
+  var d = data.find(x => x.id === id);
+  if (!d) return;
+
+  // só faz sentido confirmar se ainda está em Aberto
+  if (d.status !== 'Aberto') {
+    toast('Ticket já não está em Aberto.');
+    return;
   }
-}
-async function closeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  if(d.status!=='Encerrado'){
-    var old=d.status;
-    d.status='Encerrado';
-    await supaUpsertTicket(d);
-    await addHistory(id,'Status alterado: '+old+' ➜ Encerrado');
-    render();
+
+  var me     = currentUser() || {};
+  var meName = me.name || 'usuário';
+  var oldStatus = d.status;
+
+  // define responsável automaticamente para quem confirmou
+  if (d.categoria === 'SAK' || d.categoria === 'Frota - Transportadora') {
+    d.responsavel = meName;
+    toast('Responsável definido: ' + d.responsavel);
   }
+
+  d.status = 'Em tratativa';
+
+  await supaUpsertTicket(d);
+
+  await addHistory(
+    id,
+    'Confirmado por ' + meName +
+    ' — responsável definido para ' + (d.responsavel || 'não definido') +
+    ' (status ' + oldStatus + ' ➜ Em tratativa)'
+  );
+
+  render();
 }
 
 /* Bindings tickets */
@@ -1493,7 +1552,7 @@ async function sendChat(){
 
   var ts = Date.now();
 
-  // Só registra a mensagem no histórico/chat. Não mexe em status.
+  // Só registra a mensagem no histórico/chat. NÃO muda status.
   await addHistory(id, txt.trimEnd(), ts);
   qs('#chatText').value = '';
 
@@ -1516,6 +1575,7 @@ async function sendChat(){
   var divEl = qs('#chatHistory');
   if (divEl) divEl.scrollTop = divEl.scrollHeight;
 }
+  
 qs('#btnSendChat').onclick=sendChat; 
 qs('#chatText').addEventListener('keydown',e=>{
   if(e.key==='Enter'){
@@ -1773,4 +1833,5 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
+
 
