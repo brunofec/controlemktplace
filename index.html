@@ -1159,12 +1159,22 @@ function renderClosedPage(){
 
 /* ========= KPIs ========= */
 function getClosedAt(d){
+  // se no futuro trouxermos closedAt direto do banco, usa primeiro
+  if (d.closedAt) {
+    return d.closedAt;
+  }
+  // tenta achar no histórico a primeira entrada que contenha "encerrado"
   var h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
   for(var i=0;i<h.length;i++){
     var it=h[i]; 
-    if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at
+    if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
   }
-  return null
+  // fallback: se está encerrado mas não tem histórico marcado,
+  // usa data de abertura só para não "sumir" dos KPIs
+  if (d.status === 'Encerrado') {
+    return d.abertoEm;
+  }
+  return null;
 }
 function renderKPIs(){
   var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
@@ -1452,6 +1462,34 @@ async function resumeTicket(id){
   var d=data.find(x=>x.id===id); if(!d)return;
   d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
   await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
+}
+
+async function closeTicket(id){
+  var d=data.find(x=>x.id===id); if(!d)return;
+  if(d.status==='Encerrado'){
+    toast('Esta solicitação já está encerrada.');
+    return;
+  }
+  if(!confirm('Deseja encerrar esta solicitação?')) return;
+
+  var me=currentUser()||{};
+  var meName=me.name||'usuário';
+
+  // garante responsável definido
+  if(!d.responsavel){
+    d.responsavel = meName;
+  }
+  // garante SLA definido
+  d.prazo = ensureSLA(d.prazo, d.prioridade, d.abertoEm);
+
+  // remove pendência/retomada e marca como encerrado
+  d.pendente = false;
+  d.retomar_em = '';
+  d.status = 'Encerrado';
+
+  await supaUpsertTicket(d);
+  await addHistory(id,'Encerrado por '+meName);
+  render();
 }
 async function confirmTicket(id){
   var d = data.find(x => x.id === id);
@@ -1833,5 +1871,3 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
-
-
