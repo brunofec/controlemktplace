@@ -322,6 +322,39 @@
     opacity:.4;cursor:default
   }
   .pager-pages{display:flex;gap:6px;align-items:center}
+
+/* Toast / notificações */
+#toast{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  pointer-events:none;
+}
+#toast .t{
+  background:var(--panel);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.5);
+  font-size:13px;
+  opacity:0;
+  transform:translateY(10px);
+  transition:opacity .2s ease, transform .2s ease;
+  pointer-events:auto;
+}
+html[data-theme='light'] #toast .t{
+  background:var(--panel-2);
+  color:var(--text);
+}
+#toast .t.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
 </style>
 </head>
 <body>
@@ -649,6 +682,38 @@ function toast(msg){
   var el=document.createElement('div');el.className='t';el.textContent=msg;c.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('show'));
   setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),250)},3000)
+
+
+function canUseNativeNotif(){
+  return typeof window!=='undefined' && 'Notification' in window;
+}
+function askNotifyPermission(){
+  try{
+    if(!canUseNativeNotif()) return;
+    if(Notification.permission==='default'){
+      Notification.requestPermission().catch(()=>{});
+    }
+  }catch(e){}
+}
+function showNativeNotification(title,opts){
+  try{
+    if(!canUseNativeNotif()) return;
+    if(Notification.permission==='granted'){
+      var n=new Notification(title||'',opts||{});
+      if(opts && (opts.onClickTicketId||opts.ticketId)){
+        var tid=opts.onClickTicketId||opts.ticketId;
+        n.onclick=function(){
+          try{ window.focus(); }catch(e){}
+          this.close();
+        };
+      }
+    }else if(Notification.permission==='default'){
+      Notification.requestPermission().then(function(p){
+        if(p==='granted') showNativeNotification(title,opts);
+      }).catch(()=>{});
+    }
+  }catch(e){}
+}
 }
 function prioToDays(p){return p==='Alta'?1: p==='Média'?3:5}
 
@@ -937,8 +1002,20 @@ function setupRealtime(){
 
   supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
     var m=payload.new; var d=data.find(x=>x.id===m.ticket_id);
-    if(d){ d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); render();
-      var me=(currentUser()||{}).name||''; if(me!==(m.sender_name||'')) toast('Nova mensagem no ticket '+m.ticket_id);
+    if(d){ 
+      d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); 
+      render();
+      var me=(currentUser()||{}).name||''; 
+      if(me!==(m.sender_name||'')){
+        var title='Nova mensagem no ticket '+m.ticket_id;
+        toast(title);
+        if(document.visibilityState!=='visible'){
+          showNativeNotification('Nova mensagem',{
+            body:'Ticket '+m.ticket_id+' — '+(m.body||'').slice(0,80),
+            tag:'ticket-'+m.ticket_id
+          });
+        }
+      }
     }
   }).subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
 
@@ -1737,7 +1814,15 @@ function onDmInsert(row){
     dmCache.push(row);
     if(dmTarget && (row.sender===dmTarget || row.receiver===dmTarget)) renderDmChat(dmTarget);
     setDmBadge(); renderDmUsers();
-    if(row.receiver===me.id && (!dmTarget || dmTarget!==row.sender)) toast('Nova mensagem de usuário');
+    if(row.receiver===me.id && (!dmTarget || dmTarget!==row.sender)){
+      toast('Nova mensagem de usuário');
+      if(document.visibilityState!=='visible'){
+        showNativeNotification('Nova mensagem direta',{
+          body:(row.body||'').slice(0,80),
+          tag:'dm-'+row.sender
+        });
+      }
+    }
   }
 }
 async function subscribeDmChannel(otherId){
@@ -1884,6 +1969,7 @@ qs('#btnLogin').onclick=async function(){
   render(); 
   setupRealtime(); 
   setHeadH();
+  askNotifyPermission();
 };
 
 /* expose debug/global */
