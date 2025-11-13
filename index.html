@@ -1482,30 +1482,39 @@ qs('#tgHideClosed').onclick=function(){
 
 /* Chat do ticket (instant) */
 async function sendChat(){
-  var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para conversar.');return;}
-  var txt=qs('#chatText').value; 
-  if(!txt || !txt.trim())return;
+  var id = qs('#ticketId').value;
+  if (!id) {
+    alert('Salve primeiro para conversar.');
+    return;
+  }
+
+  var txt = qs('#chatText').value;
+  if (!txt || !txt.trim()) return;
+
   var ts = Date.now();
 
-  /* se estava Aberto, mandar mensagem já leva para Em tratativa */
-  var d=data.find(x=>x.id===id);
-  if(d && d.status==='Aberto'){
-    d.status='Em tratativa';
-    await supaUpsertTicket(d);
-    await addHistory(id,'Status alterado automaticamente para Em tratativa ao enviar mensagem',ts-1);
-  }
+  // Só registra a mensagem no histórico/chat. Não mexe em status.
+  await addHistory(id, txt.trimEnd(), ts);
+  qs('#chatText').value = '';
 
-  await addHistory(id, txt.trimEnd(), ts); 
-  qs('#chatText').value='';
-  await supaMarkRead(id); 
+  await supaMarkRead(id);
   render();
+
   var ch = ticketChannels.get(id);
-  if (ch){
-    ch.send({ type:'broadcast', event:'chat',
-      payload:{ at: ts, txt: txt.trimEnd(), user: ((currentUser()||{}).name||'') }
+  if (ch) {
+    ch.send({
+      type: 'broadcast',
+      event: 'chat',
+      payload: {
+        at: ts,
+        txt: txt.trimEnd(),
+        user: ((currentUser() || {}).name || '')
+      }
     });
   }
-  var divEl=qs('#chatHistory'); divEl.scrollTop=divEl.scrollHeight;
+
+  var divEl = qs('#chatHistory');
+  if (divEl) divEl.scrollTop = divEl.scrollHeight;
 }
 qs('#btnSendChat').onclick=sendChat; 
 qs('#chatText').addEventListener('keydown',e=>{
@@ -1764,3 +1773,4 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
+
