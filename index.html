@@ -48,24 +48,6 @@
     --border:#d1d5db;
     --shadow:0 10px 30px rgba(15,23,42,.08);
   }
-  /* ===== Melhor contraste no TEMA CLARO para Prioridade ===== */
-  body.theme-light .prio-alta{
-    border-color:#dc2626 !important;  /* vermelho forte */
-    color:#b91c1c !important;
-    background:#fee2e2;               /* leve rosa claro */
-  }
-
-  body.theme-light .prio-media{
-    border-color:#f59e0b !important;  /* amarelo forte */
-    color:#b45309 !important;
-    background:#fef3c7;               /* leve amarelo claro */
-  }
-
-  body.theme-light .prio-baixa{
-    border-color:#3b82f6 !important;  /* azul forte */
-    color:#1d4ed8 !important;
-    background:#dbeafe;               /* leve azul claro */
-  }
 
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -402,7 +384,6 @@ html[data-theme='light'] #toast .t{
         <span id="whoami" class="pill"></span>
         <!-- Toggle de tema -->
         <button id="btnTheme" class="btn-ghost btn-icon" title="Alternar tema"><i id="themeIcon" class="fa fa-moon"></i></button>
-        <button id="btnNotify" class="btn-ghost"><i class="fa fa-bell"></i> <span id="notifyLabel">Ativar notificações</span></button>
         <button id="btnClosed" class="btn-ghost"><i class="fa fa-archive"></i> Encerrados</button>
         <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
@@ -693,7 +674,6 @@ function escapeHtml(str){
   return str.replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))
 }
 const debounce=(fn,ms=150)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
-
 function toast(msg){
   var c=document.getElementById('toast');
   if(!c){
@@ -730,19 +710,6 @@ function showNativeNotification(title,opts){
       var n=new Notification(title||'',opts||{});
       n.onclick=function(){
         try{ window.focus(); }catch(e){}
-        // se tivermos ticket ou DM no payload, navega pra lá
-        if(opts){
-          if(opts.ticketId && typeof window.openEdit==='function'){
-            try{ window.openEdit(String(opts.ticketId)); }catch(e){}
-          }
-          if(opts.dmUserId && typeof window.openDm==='function'){
-            try{
-              var panel=document.getElementById('dmPanel');
-              if(panel) panel.classList.add('show');
-              window.openDm(String(opts.dmUserId));
-            }catch(e){}
-          }
-        }
         this.close();
       };
     }else if(Notification.permission==='default'){
@@ -753,7 +720,6 @@ function showNativeNotification(title,opts){
   }catch(e){}
 }
 
-function prioToDays(p){return p==='Alta'?1: p==='Média'?3:5}
 function prioToDays(p){return p==='Alta'?1: p==='Média'?3:5}
 
 /* dias úteis */
@@ -930,25 +896,6 @@ function initTheme(){
   applyTheme(saved);
 }
 
-function updateNotifyButton(){
-  var btn=document.getElementById('btnNotify');
-  var lbl=document.getElementById('notifyLabel');
-  if(!btn||!lbl) return;
-  if(!canUseNativeNotif()){
-    btn.disabled=true;
-    lbl.textContent='Notificações não suportadas';
-    return;
-  }
-  var perm=Notification.permission;
-  if(perm==='granted'){
-    lbl.textContent='Notificações ativas';
-  }else if(perm==='denied'){
-    lbl.textContent='Notificações bloqueadas';
-  }else{
-    lbl.textContent='Ativar notificações';
-  }
-}
-
 /* ========= TICKETS: load ========= */
 async function loadFromSupabase(){
   if(!supaReady()){toast('Config Supabase ausente.'); data=[]; render(); return;}
@@ -1070,8 +1017,7 @@ function setupRealtime(){
         if(document.visibilityState!=='visible'){
           showNativeNotification('Nova mensagem',{
             body:'Ticket '+m.ticket_id+' — '+(m.body||'').slice(0,80),
-            tag:'ticket-'+m.ticket_id,
-            ticketId: m.ticket_id
+            tag:'ticket-'+m.ticket_id
           });
         }
       }
@@ -1878,8 +1824,7 @@ function onDmInsert(row){
       if(document.visibilityState!=='visible'){
         showNativeNotification('Nova mensagem direta',{
           body:(row.body||'').slice(0,80),
-          tag:'dm-'+row.sender,
-          dmUserId: row.sender
+          tag:'dm-'+row.sender
         });
       }
     }
@@ -1981,37 +1926,6 @@ qs('#btnTheme').onclick=function(){
   applyTheme(current==='light'?'dark':'light');
 };
 
-/* Notificações: botão no header */
-var btnNotify=document.getElementById('btnNotify');
-if(btnNotify){
-  btnNotify.onclick=function(){
-    if(!canUseNativeNotif()){
-      alert('Seu navegador não suporta notificações.');
-      return;
-    }
-    if(Notification.permission==='granted'){
-      toast('Notificações já estão ativas.');
-      updateNotifyButton();
-      return;
-    }
-    if(Notification.permission==='denied'){
-      alert('Notificações estão bloqueadas no navegador. Libere nas configurações do site para ativar.');
-      updateNotifyButton();
-      return;
-    }
-    Notification.requestPermission().then(function(p){
-      if(p==='granted'){
-        toast('Notificações ativadas.');
-      }else{
-        toast('Notificações não foram ativadas.');
-      }
-      updateNotifyButton();
-    }).catch(function(){ updateNotifyButton(); });
-  };
-  // estado inicial
-  updateNotifyButton();
-}
-
 /* ========= Boot & Login ========= */
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
 function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
@@ -2028,8 +1942,6 @@ async function boot(){
   render(); 
   setupRealtime(); 
   setHeadH();
-  askNotifyPermission();
-  updateNotifyButton();
 }
 boot();
 
@@ -2063,7 +1975,6 @@ qs('#btnLogin').onclick=async function(){
   setupRealtime(); 
   setHeadH();
   askNotifyPermission();
-  updateNotifyButton();
 };
 
 /* expose debug/global */
