@@ -748,8 +748,9 @@ function slaStatus(dateStr,d){
   // Se estiver encerrado, trava o SLA na data de encerramento
   if(d && d.status==='Encerrado'){
     var closedAt=getClosedAt(d)||d.closedAt||d.abertoEm||new Date();
-    var diffH=(due-new Date(closedAt))/36e5;
-    if(diffH<0)return{code:'late',label:'Vencido'};
+    // positivo => fechou depois do prazo (vencido)
+    var diffH=(new Date(closedAt)-due)/36e5;
+    if(diffH>0)return{code:'late',label:'Vencido'};
     return{code:'ok',label:'No prazo'};
   }
 
@@ -1005,24 +1006,43 @@ function setupRealtime(){
   if(!supaReady())return;
   supa.getChannels().forEach(ch=>supa.removeChannel(ch));
 
-  supa.channel('realtime-messages').on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
-    var m=payload.new; var d=data.find(x=>x.id===m.ticket_id);
-    if(d){ 
-      d.historico.push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'}); 
+  supa.channel('realtime-messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
+      var m   = payload.new;
+      var tid = String(m.ticket_id);
+
+      // Garante que comparamos sempre como string
+      var d = data.find(x => String(x.id) === tid);
+
+      // Se ainda não temos o ticket em memória, força um refresh completo
+      if(!d){
+        refreshNow();
+        return;
+      }
+
+      d.historico = d.historico || [];
+      d.historico.push({
+        at:  new Date(m.created_at).getTime(),
+        txt: m.body,
+        user: m.sender_name || '—'
+      });
+
       render();
-      var me=(currentUser()||{}).name||''; 
-      if(me!==(m.sender_name||'')){
-        var title='Nova mensagem no ticket '+m.ticket_id;
+
+      var me = (currentUser()||{}).name || '';
+      if(me !== (m.sender_name||'')){
+        var title = 'Nova mensagem no ticket '+tid;
         toast(title);
         if(document.visibilityState!=='visible'){
           showNativeNotification('Nova mensagem',{
-            body:'Ticket '+m.ticket_id+' — '+(m.body||'').slice(0,80),
-            tag:'ticket-'+m.ticket_id
+            body: 'Ticket '+tid+' — '+(m.body||'').slice(0,80),
+            tag: 'ticket-'+tid,
+            ticketId: tid
           });
         }
       }
-    }
-  }).subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
+    })
+    .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
 
   supa.channel('realtime-tickets')
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},()=>refreshNow())
@@ -1989,3 +2009,4 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
+
