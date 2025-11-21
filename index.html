@@ -104,10 +104,30 @@
     height:calc(100vh - var(--headH) - 24px);
     display:flex;flex-direction:column;min-height:520px
   }
-  .filters{
+.filters{
     display:grid;
     grid-template-columns:1.2fr 1fr 1fr 1fr .9fr 1fr auto auto;
     gap:10px
+  }
+
+  /* responsividade filtros */
+  @media (max-width: 1200px){
+    .filters{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+  }
+  @media (max-width: 900px){
+    .filters{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+  }
+  @media (max-width: 600px){
+    .filters{
+      grid-template-columns:1fr;
+    }
+    .filters > *{
+      min-width:0;
+    }
   }
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:12px;
@@ -139,12 +159,28 @@
     padding:12px;border-bottom:1px solid var(--border);
     vertical-align:middle;font-size:14px
   }
-  tbody tr:hover{
-    background:rgba(255,255,255,.02)
-  }
-  body.theme-light tbody tr:hover{
+tbody tr:hover{
+    background:rgba(255,93,93,.06);
+}
+body.theme-light tbody tr:hover{
     background:rgba(15,23,42,.04)
-  }
+}
+
+/* destaque pendências */
+.row-pendente-vencida{
+    border-left:4px solid var(--danger);
+    background:rgba(255,93,93,.06);
+}
+.row-pendente-hoje{
+    border-left:4px solid var(--warning);
+    background:rgba(255,191,71,.06);
+}
+body.theme-light .row-pendente-vencida{
+    background:rgba(255,93,93,.10);
+}
+body.theme-light .row-pendente-hoje{
+    background:rgba(255,191,71,.14);
+}
 
   .badge{
     display:inline-flex;align-items:center;gap:6px;
@@ -1186,7 +1222,17 @@ function render(){
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
 
-    return '<tr>\
+    // destaque visual para pendências
+    var rowClass='';
+    var isPend=(d.status==='Pendente');
+    var r=d.retomar_em? startOfDay(d.retomar_em):null;
+    var t=today0();
+    if(isPend && r){
+      if(r < t) rowClass='row-pendente-vencida';
+      else if(r.getTime()===t.getTime()) rowClass='row-pendente-hoje';
+    }
+
+    return '<tr'+(rowClass? ' class="'+rowClass+'"':'')+'>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
       <td>'+ (d.assunto||'-') +'</td>\
@@ -1198,10 +1244,10 @@ function render(){
       <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
       <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
       <td class="table-actions">\
-        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
+        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar recebimento" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
         <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>\
         <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>\
-        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
+        <button class="btn-ghost btn-icon" title="Adiar (definir pendência)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
         '+(d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+'\
       </td>\
     </tr>';
