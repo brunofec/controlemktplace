@@ -32,83 +32,142 @@
     --radius:16px;
     --headH:96px;
   }
-
-  /* TEMA CLARO: override de variáveis */
   body.theme-light{
     --bg:#f3f4f6;
     --panel:#ffffff;
     --panel-2:#f9fafb;
     --text:#111827;
     --muted:#6b7280;
-    --primary:#2563eb;
-    --success:#16a34a;
-    --warning:#f59e0b;
-    --danger:#dc2626;
     --badge:#e5e7eb;
     --border:#d1d5db;
-    --shadow:0 10px 30px rgba(15,23,42,.08);
   }
-
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box;margin:0;padding:0}
   body{
     margin:0;
-    background:var(--bg);
+    font-family:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:radial-gradient(circle at top left,#1f2937,#020617);
     color:var(--text);
-    font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif
+    min-height:100vh;
   }
-  .wrap{max-width:1600px;margin:0 auto;padding:16px}
+  body.theme-light{
+    background:radial-gradient(circle at top left,#e5e7eb,#ffffff);
+  }
   header{
-    position:sticky;top:0;z-index:5;
-    backdrop-filter:saturate(160%) blur(10px);
-    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0));
-    border-bottom:1px solid var(--border)
+    position:fixed;top:0;left:0;right:0;z-index:20;
+    backdrop-filter:blur(14px);
+    background:linear-gradient(90deg,rgba(15,23,42,.95),rgba(15,23,42,.85));
+    border-bottom:1px solid rgba(148,163,184,.3);
   }
-  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .brand{display:flex;align-items:center;gap:10px;min-width:240px}
-  .brand h1{font-size:22px;margin:0;white-space:nowrap}
-  .logo-top{height:48px;object-fit:contain}
-  .actions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  button{
-    background:var(--primary);color:#fff;border:none;
-    padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;
-    transition:.2s transform ease,.2s opacity ease,.2s box-shadow ease;
-    box-shadow:0 8px 18px rgba(79,140,255,.25)
+  body.theme-light header{
+    background:linear-gradient(90deg,rgba(243,244,246,.98),rgba(249,250,251,.94));
+    border-bottom-color:rgba(209,213,219,.8);
   }
-  button:hover{transform:translateY(-1px)}
-  .btn-ghost{
-    background:transparent;
-    border:1px solid var(--border);
-    color:var(--text);
-    box-shadow:none
+  header .inner{
+    max-width:1280px;margin:0 auto;padding:16px 20px;
+    display:flex;align-items:center;gap:14px;
   }
-  .btn-danger{background:var(--danger)} 
-  .btn-success{background:var(--success)} 
-  .btn-warning{background:var(--warning);color:#10151b}
-  .btn-icon{
-    padding:8px 10px;border-radius:10px;min-width:36px;
-    display:inline-flex;align-items:center;justify-content:center;position:relative
+  h1{
+    font-size:18px;letter-spacing:.02em;
   }
-  .btn-icon.active{
-    border-color:var(--primary);
-    box-shadow:0 0 0 2px rgba(79,140,255,.18) inset
+  .tagline{
+    font-size:12px;color:var(--muted)
   }
-  .pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px}
+  .logo-circle{
+    width:40px;height:40px;border-radius:999px;
+    display:grid;place-items:center;
+    background:radial-gradient(circle at 30% 30%,#4f46e5,#0ea5e9);
+    box-shadow:0 10px 25px rgba(59,130,246,.5);
+    color:#fff;font-weight:700;font-size:18px;
+  }
+  .head-right{
+    margin-left:auto;display:flex;align-items:center;gap:10px;
+  }
+  .theme-toggle{
+    border:1px solid rgba(148,163,184,.5);
+    background:rgba(15,23,42,.4);
+    border-radius:999px;
+    padding:6px 10px;
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;color:var(--muted);cursor:pointer;
+  }
+  body.theme-light .theme-toggle{
+    background:rgba(255,255,255,.9);
+  }
+  .user-pill{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 10px;border-radius:999px;
+    background:rgba(15,23,42,.8);
+    border:1px solid rgba(148,163,184,.5);
+    font-size:12px;
+  }
+  body.theme-light .user-pill{
+    background:#ffffff;border-color:#e5e7eb;
+  }
+  .user-pill img{
+    width:26px;height:26px;border-radius:50%;
+    object-fit:cover;border:2px solid rgba(148,163,184,.7);
+  }
+  .user-pill span{max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  main{
+    max-width:1280px;margin:0 auto;padding:calc(var(--headH) + 16px) 20px 24px;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .wrap{
+    display:flex;gap:16px;align-items:flex-start;
+  }
+  .col-main{flex:3;display:flex;flex-direction:column;gap:16px}
+  .col-side{flex:2;display:flex;flex-direction:column;gap:16px}
   .panel{
-    background:var(--panel);
-    border:1px solid var(--border);
+    background:linear-gradient(135deg,rgba(15,23,42,.96),rgba(15,23,42,.88));
     border-radius:var(--radius);
-    padding:16px;box-shadow:var(--shadow)
+    border:1px solid rgba(148,163,184,.3);
+    box-shadow:var(--shadow);
+    padding:16px;
   }
-  .panel-fill{
-    height:calc(100vh - var(--headH) - 24px);
-    display:flex;flex-direction:column;min-height:520px
+  body.theme-light .panel{
+    background:linear-gradient(135deg,#ffffff,#f9fafb);
+    border-color:#e5e7eb;
   }
+  .panel-fill{min-height:220px}
+  .panel-header{
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+  }
+  .panel-header h2{
+    font-size:16px;display:flex;align-items:center;gap:8px;
+  }
+  .panel-header h2 i{
+    font-size:14px;color:var(--primary);
+  }
+  .panel-header small{color:var(--muted);font-size:12px}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .row-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:4px}
   .filters{
     display:grid;
     grid-template-columns:1.2fr 1fr 1fr 1fr .9fr 1fr auto auto;
     gap:10px
   }
+
+/* responsividade filtros */
+@media (max-width: 1200px){
+  .filters{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
+@media (max-width: 900px){
+  .filters{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media (max-width: 600px){
+  .filters{
+    grid-template-columns:1fr;
+  }
+  .filters > *{
+    min-width:0;
+  }
+}
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:12px;
     border:1px solid var(--border);background:#0f1319;color:var(--text);
@@ -130,10 +189,18 @@
   table{width:100%;border-collapse:collapse}
   thead th{
     text-align:left;padding:12px;font-size:13px;
-    letter-spacing:.02em;color:var(--muted);
-    background:var(--panel-2);
-    border-bottom:1px solid var(--border);
-    position:sticky;top:0;z-index:1
+    letter-spacing:.02em;text-transform:uppercase;
+    color:var(--muted);border-bottom:1px solid var(--border);
+    background:rgba(15,23,42,.9);position:sticky;top:0;z-index:1
+  }
+  body.theme-light thead th{
+    background:#f3f4f6;
+  }
+  thead th .th-label{
+    display:flex;align-items:center;gap:4px;cursor:pointer;
+  }
+  thead th .sort-icon{
+    font-size:11px;opacity:.4;
   }
   tbody td{
     padding:12px;border-bottom:1px solid var(--border);
@@ -146,105 +213,129 @@
     background:rgba(15,23,42,.04)
   }
 
+  /* destaque visual para pendências com retomar_em */
+  .row-pendente-vencida{
+    border-left:4px solid var(--danger);
+    background:rgba(255,93,93,.06);
+  }
+  .row-pendente-hoje{
+    border-left:4px solid var(--warning);
+    background:rgba(255,191,71,.06);
+  }
+  body.theme-light .row-pendente-vencida{
+    background:rgba(255,93,93,.10);
+  }
+  body.theme-light .row-pendente-hoje{
+    background:rgba(255,191,71,.14);
+  }
+
   .badge{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 10px;border-radius:999px;
-    background:var(--badge);font-size:12px
+    background:var(--badge);color:var(--muted);
+    font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   }
-  .status-aberto{background:#24324a;color:#9fc2ff} 
-  .status-tratativa{background:#243f34;color:#7eedc0}
-  .status-encerrado{background:#37313e;color:#e6b4ff} 
-  .status-pendente{background:#473b1e;color:#ffd58a}
-  .prio-alta{border:1px solid var(--danger);color:#ff9f9f} 
-  .prio-media{border:1px solid var(--warning);color:#ffd58a} 
-  .prio-baixa{border:1px solid #6fb7ff;color:#a8d3ff}
-  .table-actions{display:flex;gap:8px;flex-wrap:nowrap;white-space:nowrap}
-  .muted{color:var(--muted)} 
-  .nowrap{white-space:nowrap}
+  .badge i{font-size:10px}
+  .badge.sla-ok{color:var(--success);background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4)}
+  .badge.sla-risk{color:var(--warning);background:rgba(234,179,8,.18);border:1px solid rgba(234,179,8,.5)}
+  .badge.sla-late{color:var(--danger);background:rgba(248,113,113,.18);border:1px solid rgba(248,113,113,.5)}
+  body.theme-light .badge{
+    background:#e5e7eb;color:#4b5563;
+  }
+  .badge.prio-alta{background:rgba(248,113,113,.16);color:#fecaca;border:1px solid rgba(248,113,113,.6)}
+  .badge.prio-media{background:rgba(251,191,36,.18);color:#facc15;border:1px solid rgba(251,191,36,.6)}
+  .badge.prio-baixa{background:rgba(52,211,153,.16);color:#6ee7b7;border:1px solid rgba(52,211,153,.6)}
+  .badge.status-aberto{background:rgba(56,189,248,.14);color:#7dd3fc;border:1px solid rgba(56,189,248,.7)}
+  .badge.status-tratativa{background:rgba(129,140,248,.16);color:#a5b4fc;border:1px solid rgba(129,140,248,.7)}
+  .badge.status-pendente{background:rgba(251,191,36,.16);color:#fcd34d;border:1px solid rgba(251,191,36,.7)}
+  .badge.status-encerrado{background:rgba(34,197,94,.16);color:#bbf7d0;border:1px solid rgba(34,197,94,.7)}
 
-  .sak-badge{background:#402a14;color:#ffb26b;border:1px solid #5a3a1b}
-  .frota-badge{background:#223348;color:#aeddff;border:1px solid #2f4e68}
+  .badge.sak-badge{
+    background:linear-gradient(135deg,rgba(124,58,237,.16),rgba(59,130,246,.16));
+    border:1px solid rgba(129,140,248,.8);
+    color:#e0e7ff;font-weight:500;
+  }
+  .badge.frota-badge{
+    background:linear-gradient(135deg,rgba(34,197,94,.16),rgba(52,211,153,.18));
+    border:1px solid rgba(16,185,129,.7);
+    color:#bbf7d0;font-weight:500;
+  }
 
+  .btn{
+    border:none;border-radius:999px;
+    padding:8px 14px;font-size:13px;
+    background:rgba(148,163,184,.2);color:var(--text);
+    display:inline-flex;align-items:center;gap:6px;
+    cursor:pointer;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,#4f46e5,#2563eb);
+    color:#fff;font-weight:500;
+    box-shadow:0 10px 25px rgba(37,99,235,.5);
+  }
+  .btn-primary-outline{
+    background:transparent;border:1px solid rgba(148,163,184,.6);
+    color:var(--muted)
+  }
+  .btn-ghost{
+    border-radius:999px;border:1px solid rgba(148,163,184,.4);
+    background:transparent;color:var(--muted);
+    padding:6px 10px;font-size:12px;
+  }
+  .btn-ghost i{font-size:12px}
+  .btn-danger{
+    background:rgba(248,113,113,.12);color:#fecaca;
+    border:1px solid rgba(248,113,113,.7);
+  }
+  .btn-warning{
+    background:rgba(251,191,36,.18);color:#facc15;
+    border:1px solid rgba(251,191,36,.7);
+  }
+  .btn-icon{
+    padding:6px;border-radius:999px;
+    width:28px;height:28px;display:grid;place-items:center;
+  }
+
+  .spacer{flex:1}
+  .muted{color:var(--muted);font-size:12px}
+  .badge-pill{
+    border-radius:999px;padding:4px 8px;font-size:11px;
+    border:1px solid rgba(148,163,184,.4);
+    color:var(--muted);
+  }
+  .pill-danger{border-color:rgba(248,113,113,.6);color:#fecaca}
+  .pill-warning{border-color:rgba(234,179,8,.6);color:#facc15}
+  .pill-ok{border-color:rgba(34,197,94,.6);color:#bbf7d0}
+
+  .table-actions{white-space:nowrap;display:flex;gap:6px;align-items:center}
   .badge-unread{
-    position:absolute;top:-6px;right:-6px;
-    background:#ff5d5d;color:#fff;border-radius:999px;font-size:10px;
-    min-width:16px;height:16px;padding:0 4px;
-    display:grid;place-items:center;
-    box-shadow:0 0 0 2px var(--panel)
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:18px;height:18px;border-radius:999px;
+    background:#f97316;color:#fff;font-size:11px;font-weight:600;
+    margin-left:4px;
   }
 
-  .watermark{
-    position:fixed;left:50%;transform:translateX(-50%);
-    bottom:8px;color:#7a8596;font-size:12px;
-    opacity:.65;pointer-events:none
+  .kpi-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
   }
-  .space{height:14px}
-  .hidden{display:none !important}
-  .hidden-input{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
-  .readonly input,.readonly select,.readonly textarea{pointer-events:none;opacity:.8}
-
-  .modal{
-    position:fixed;inset:0;display:none;place-items:center;
-    background:rgba(0,0,0,.45);z-index:20
+  @media (max-width:960px){
+    .wrap{flex-direction:column}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
   }
-  .modal.show{display:grid}
-  .modal .card{
-    width:min(980px,96vw);max-height:92vh;overflow:auto;
-    background:var(--panel);border:1px solid var(--border);
-    border-radius:16px;box-shadow:var(--shadow);padding:16px
+  @media (max-width:640px){
+    .kpi-grid{grid-template-columns:1fr}
   }
-  .grid-2{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
-  .grid-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .grid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
-
-  .chat-box{
-    display:flex;flex-direction:column;height:520px;
-    border:1px solid var(--border);
-    border-radius:12px;background:var(--panel-2)
-  }
-  .chat-history{
-    flex:1;overflow:auto;overscroll-behavior:contain;
-    padding:12px;display:flex;flex-direction:column;gap:8px
-  }
-  .bubble{
-    max-width:80%;padding:10px 12px;border-radius:16px;
-    white-space:pre-wrap;word-break:break-word;line-height:1.35
-  }
-  .me{
-    align-self:flex-end;background:#1a2430;border:1px solid #27384b
-  }
-  .them{
-    align-self:flex-start;background:#171321;border:1px solid #2a2538
-  }
-  body.theme-light .me{
-    background:#e5f0ff;border-color:#bfd3ff
-  }
-  body.theme-light .them{
-    background:#f3e8ff;border-color:#ddc3ff
-  }
-  .bubble time{
-    display:block;font-size:11px;color:#9aacbf;
-    margin-top:4px;text-align:right
-  }
-  .sep{display:flex;align-items:center;gap:8px;margin:8px 0}
-  .sep::before,.sep::after{
-    content:"";height:1px;background:var(--border);flex:1
-  }
-  .sep span{font-size:11px;color:var(--muted)}
-  .chat-input{
-    display:flex;gap:8px;padding:10px;
-    border-top:1px solid var(--border)
-  }
-  .chat-input input{flex:1}
-
-  /* KPIs */
-  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
   .kpi-card{
-    background:var(--panel-2);
-    border:1px solid var(--border);
-    border-radius:14px;padding:16px
+    padding:12px 14px;border-radius:14px;
+    background:radial-gradient(circle at top left,rgba(15,23,42,.9),rgba(15,23,42,.96));
+    border:1px solid rgba(148,163,184,.3);
+    box-shadow:0 8px 20px rgba(15,23,42,.7);
+    font-size:13px;
+  }
+  body.theme-light .kpi-card{
+    background:radial-gradient(circle at top left,#ffffff,#f9fafb);
+    border-color:#e5e7eb;
+    box-shadow:0 8px 20px rgba(15,23,42,.08);
   }
   .kpi-card small{color:var(--muted)} 
   .kpi-card strong{display:block;font-size:26px;margin-top:8px}
@@ -260,193 +351,247 @@
     background:var(--primary);color:#fff;
     box-shadow:0 12px 24px rgba(79,140,255,.35)
   }
-  .dm-fab .badge-unread{top:-4px;right:-4px}
+  .dm-fab .badge-unread
+  {position:absolute;top:-4px;right:-4px}
   .dm-panel{
-    position:fixed;right:18px;bottom:86px;width:min(380px,92vw);
-    height:min(560px,calc(100vh - 120px));max-height:calc(100vh - 120px);
-    background:var(--panel);border:1px solid var(--border);
-    border-radius:16px;box-shadow:var(--shadow);
-    display:none;flex-direction:column;z-index:60;overflow:hidden
+    position:fixed;right:18px;bottom:86px;
+    width:340px;max-height:520px;
+    background:var(--panel);border-radius:16px;
+    border:1px solid rgba(148,163,184,.4);
+    box-shadow:0 18px 45px rgba(15,23,42,.9);
+    display:flex;flex-direction:column;overflow:hidden;
+    z-index:49;
   }
-  .dm-panel.show{display:flex}
-  .dm-head{
-    display:flex;align-items:center;gap:10px;
-    padding:10px 12px;border-bottom:1px solid var(--border)
-  }
-  .dm-body{
-    flex:1;min-height:0;
-    display:grid;grid-template-rows:190px 1fr
-  }
-  .dm-users{overflow:auto;border-bottom:1px solid var(--border)}
-  .dm-users .item{
+  .dm-header{
+    padding:10px 12px;border-bottom:1px solid var(--border);
     display:flex;align-items:center;gap:8px;
-    padding:8px 12px;border-bottom:1px dashed rgba(255,255,255,.04);
-    cursor:pointer
   }
-  .dm-users .item:hover{background:#0f141a}
-  body.theme-light .dm-users .item:hover{background:#edf2ff}
-  .dm-chat{display:flex;flex-direction:column;min-height:0}
-  .dm-history{
-    flex:1;overflow:auto;overscroll-behavior:contain;
-    padding:12px;display:flex;flex-direction:column;gap:6px;
-    background:var(--panel-2)
+  .dm-header h3{font-size:14px;margin:0}
+  .dm-body{display:flex;flex:1;min-height:260px}
+  .dm-users{
+    width:38%;border-right:1px solid var(--border);
+    padding:6px;overflow:auto;font-size:13px;
   }
+  .dm-user{
+    padding:6px 8px;border-radius:10px;
+    display:flex;align-items:center;gap:6px;
+    cursor:pointer;font-size:13px;
+  }
+  .dm-user:hover{background:rgba(148,163,184,.14)}
+  .dm-user.active{background:rgba(59,130,246,.18);color:#bfdbfe}
+  .dm-user span{
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex:1;
+  }
+  .dm-chat{
+    flex:1;display:flex;flex-direction:column;
+  }
+  .dm-messages{
+    flex:1;overflow:auto;padding:8px 10px;
+    font-size:13px;
+  }
+  .dm-bubble{
+    max-width:80%;padding:7px 10px;border-radius:12px;
+    margin-bottom:6px;
+  }
+  .dm-bubble.me{
+    margin-left:auto;
+    background:rgba(59,130,246,.2);
+    border:1px solid rgba(59,130,246,.5);
+  }
+  .dm-bubble.other{
+    background:rgba(15,23,42,.8);
+    border:1px solid rgba(148,163,184,.4);
+  }
+  body.theme-light .dm-bubble.other{
+    background:#f3f4f6;border-color:#d1d5db;
+  }
+  .dm-meta{font-size:11px;color:var(--muted);margin-top:2px}
   .dm-input{
-    display:flex;gap:8px;padding:10px;
-    border-top:1px solid var(--border);background:var(--panel)
+    border-top:1px solid var(--border);
+    padding:8px;
+    display:flex;gap:6px;
   }
-  .dm-input input{flex:1}
-  .bubble.dm{max-width:80%}
-  .dm-sep{display:flex;align-items:center;gap:8px;margin:8px 0}
-  .dm-sep::before,.dm-sep::after{
-    content:"";height:1px;background:var(--border);flex:1
-  }
-  .dm-sep span{font-size:11px;color:var(--muted)}
-
-  /* Sort + paginação */
-  .sortable{cursor:pointer;user-select:none}
-  .sortable .sort-icon{
-    margin-left:4px;font-size:10px;opacity:.7
-  }
-  .pager-btn{
-    padding:4px 8px;
-    font-size:12px;
+  .dm-input input{
+    flex:1;
     border-radius:999px;
-    background:transparent;
-    border:1px solid var(--border);
-    color:var(--text);
-    cursor:pointer;
-    min-width:28px;
   }
-  .pager-btn[disabled]{
-    opacity:.4;cursor:default
+  .dm-input button{
+    border-radius:999px;
   }
-  .pager-pages{display:flex;gap:6px;align-items:center}
 
-/* Toast / notificações */
-#toast{
-  position:fixed;
-  right:16px;
-  bottom:16px;
-  z-index:9999;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  pointer-events:none;
-}
-#toast .t{
-  background:var(--panel);
-  color:#fff;
-  padding:10px 14px;
-  border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,.5);
-  font-size:13px;
-  opacity:0;
-  transform:translateY(10px);
-  transition:opacity .2s ease, transform .2s ease;
-  pointer-events:auto;
-}
-html[data-theme='light'] #toast .t{
-  background:var(--panel-2);
-  color:var(--text);
-}
-#toast .t.show{
-  opacity:1;
-  transform:translateY(0);
-}
+  .hidden{display:none !important}
+  .space{height:8px}
+  .divider{
+    height:1px;background:linear-gradient(90deg,transparent,rgba(148,163,184,.4),transparent);
+    margin:10px 0;
+  }
+  .chip-group{
+    display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;
+  }
+  .chip{
+    border-radius:999px;padding:4px 8px;font-size:11px;
+    border:1px solid rgba(148,163,184,.5);
+    color:var(--muted);cursor:pointer;
+  }
+  .chip.active{
+    background:rgba(59,130,246,.18);color:#bfdbfe;
+    border-color:rgba(59,130,246,.8);
+  }
 
+  .toast{
+    position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+    background:rgba(15,23,42,.92);color:#e5e7eb;
+    padding:8px 14px;border-radius:999px;
+    font-size:13px;border:1px solid rgba(148,163,184,.5);
+    box-shadow:0 12px 30px rgba(15,23,42,.9);z-index:60;
+  }
+  body.theme-light .toast{
+    background:#111827;color:#e5e7eb;
+  }
+
+  .badge-pending{
+    border-radius:999px;
+    padding:4px 8px;
+    font-size:11px;
+    border:1px dashed rgba(234,179,8,.8);
+    color:#facc15;
+    display:inline-flex;align-items:center;gap:4px;
+  }
+
+  .footer-brand{
+    margin-top:12px;
+    text-align:center;
+    font-size:11px;
+    color:var(--muted);
+    opacity:.8;
+  }
+  .footer-brand span{
+    font-style:italic;
+  }
 </style>
 </head>
-<body>
+<body class="theme-dark">
 
-<!-- LOGIN -->
-<section id="loginSection" style="min-height:100vh;display:none;place-items:center;padding:20px">
-  <div style="width:min(420px,92vw);background:var(--panel);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:22px">
-    <div class="row" style="flex-direction:column;align-items:center;gap:6px">
-      <img src="logo.png" class="logo-top" alt="Logo"><h2 style="margin:0">Entrar</h2>
+<header>
+  <div class="inner">
+    <div class="logo-circle">CI</div>
+    <div>
+      <h1>Controle Interno de Solicitações</h1>
+      <div class="tagline">Visão unificada de demandas, SLA e tratativas internas</div>
     </div>
-    <p class="muted small">Seja Bem-Vindo!</p>
-    <div class="space"></div>
-    <div class="row" style="flex-direction:column;gap:10px">
-      <input id="loginUser" placeholder="Usuário ou e-mail" autofocus>
-      <input id="loginPass" placeholder="Senha" type="password">
-      <button id="btnLogin" class="btn-success"><i class="fa fa-right-to-bracket"></i> Entrar</button>
-    </div>
-  </div>
-</section>
-
-<!-- APP -->
-<section id="appSection" style="display:none">
-  <header>
-    <div class="wrap row">
-      <div class="brand"><img src="logo.png" class="logo-top" alt="Logo"><h1>Controle Interno de Solicitações</h1></div>
-      <div class="actions">
-        <span id="whoami" class="pill"></span>
-        <!-- Toggle de tema -->
-        <button id="btnTheme" class="btn-ghost btn-icon" title="Alternar tema"><i id="themeIcon" class="fa fa-moon"></i></button>
-        <button id="btnClosed" class="btn-ghost"><i class="fa fa-archive"></i> Encerrados</button>
-        <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
-        <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
-        <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
-        <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
-        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button>
+    <div class="head-right">
+      <button id="btnTheme" class="theme-toggle">
+        <i class="fa fa-moon"></i><span>Tema</span>
+      </button>
+      <div class="user-pill">
+        <img src="https://api.dicebear.com/7.x/identicon/svg?seed=CI" alt="avatar">
+        <span id="currentUserName">Usuário</span>
       </div>
     </div>
-  </header>
-
-  <!-- Diagnóstico -->
-  <div id="diagBar" class="hidden" style="background:#13202e;color:#cde2ff;border-bottom:1px solid var(--border)">
-    <div class="wrap" style="display:flex;gap:16px;align-items:center;padding:8px 0;font-size:13px">
-      <strong>Diagnóstico</strong>
-      <span id="diagEnv"></span>
-      <span id="diagUser"></span>
-      <span id="diagCount"></span>
-      <span id="diagErr" style="color:#ffb0b0"></span>
-      <button id="diagClose" class="btn-ghost" style="margin-left:auto">Fechar</button>
-    </div>
   </div>
+</header>
 
-  <!-- LISTA -->
-  <main id="listPage" class="wrap">
+<!-- LISTA PRINCIPAL -->
+<main id="mainPage" class="wrap">
+  <div class="col-main">
     <section class="panel panel-fill">
-      <div class="row" style="align-items:center;margin-bottom:10px">
-        <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
-          <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
-          <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
-          <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
-          <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (≤12h)</option><option value="late">Vencido</option></select>
-          <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
-
-          <input type="checkbox" id="fMine" class="hidden-input">
-          <input type="checkbox" id="fHideClosed" class="hidden-input" checked>
-
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="tgMine" class="btn-ghost btn-icon" title="Só meus"><i class="fa fa-user-check"></i></button>
-            <button id="tgHideClosed" class="btn-ghost btn-icon active" title="Ocultar encerrados"><i class="fa fa-eye-slash"></i></button>
-          </div>
+      <div class="panel-header">
+        <div>
+          <h2><i class="fa fa-list-check"></i> Solicitações em aberto</h2>
+          <small>Controle centralizado de tickets internos</small>
         </div>
-
-        <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
+        <div class="row-right">
+          <button class="btn btn-primary" id="btnNew"><i class="fa fa-plus"></i> Nova solicitação</button>
+          <button class="btn btn-primary-outline" id="btnGoClosed"><i class="fa fa-check-double"></i> Encerradas</button>
+        </div>
       </div>
 
-      <!-- tabela expandida até a margem -->
+      <!-- Filtros -->
+      <div class="filters">
+        <div>
+          <label>Busca geral</label>
+          <input id="fSearch" placeholder="Buscar por solicitante, assunto, código, transportadora...">
+        </div>
+        <div>
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="">Todos</option>
+            <option>Aberto</option>
+            <option>Em tratativa</option>
+            <option>Pendente</option>
+            <option>Encerrado</option>
+          </select>
+        </div>
+        <div>
+          <label>Prioridade</label>
+          <select id="fPrio">
+            <option value="">Todas</option>
+            <option>Alta</option>
+            <option>Média</option>
+            <option>Baixa</option>
+          </select>
+        </div>
+        <div>
+          <label>Categoria</label>
+          <select id="fCategoria">
+            <option value="">Todas</option>
+            <option>Geral</option>
+            <option>SAK</option>
+            <option>TI</option>
+            <option>Frota - Transportadora</option>
+            <option>Outros</option>
+          </select>
+        </div>
+        <div>
+          <label>SLA</label>
+          <select id="fSLA">
+            <option value="">Todos</option>
+            <option value="ok">No prazo</option>
+            <option value="risk">Risco</option>
+            <option value="late">Vencido</option>
+          </select>
+        </div>
+        <div>
+          <label>Pendência</label>
+          <select id="fPend">
+            <option value="">Todas</option>
+            <option value="pend">Somente pendentes</option>
+            <option value="due">Pendentes vencidos</option>
+          </select>
+        </div>
+        <div style="align-self:flex-end">
+          <label>&nbsp;</label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="fMine" style="width:auto"> Só minhas
+          </label>
+        </div>
+        <div style="align-self:flex-end">
+          <label>&nbsp;</label>
+          <label style="font-size:12px;display:flex;align-items:center;gap:6px">
+            <input type="checkbox" id="fHideClosed" style="width:auto"> Ocultar encerradas (quando sem busca)
+          </label>
+        </div>
+      </div>
+
+      <div class="space"></div>
+
+      <!-- Tabela -->
       <div class="table-wrap edge">
-        <table id="tbl">
+        <table>
           <thead>
             <tr>
-              <!-- Cabeçalhos agora “clicáveis” para ordenar -->
-              <th data-field="abertoEm" class="sortable">Aberto em<span class="sort-icon"></span></th>
-              <th data-field="solicitante" class="sortable">Solicitante<span class="sort-icon"></span></th>
-              <th data-field="assunto" class="sortable">Assunto<span class="sort-icon"></span></th>
-              <th data-field="codigo" class="sortable">Código cliente<span class="sort-icon"></span></th>
-              <th data-field="categoria" class="sortable">Categoria<span class="sort-icon"></span></th>
-              <th data-field="canal" class="sortable">Canal<span class="sort-icon"></span></th>
-              <th data-field="prioridade" class="sortable">Prioridade<span class="sort-icon"></span></th>
-              <th data-field="status" class="sortable">Status<span class="sort-icon"></span></th>
-              <th data-field="prazo" class="sortable">SLA<span class="sort-icon"></span></th>
-              <th data-field="responsavel" class="sortable">Resp.<span class="sort-icon"></span></th>
-              <th class="nowrap">Ações</th>
+              <th><div class="th-label" data-sort="abertoEm"><span>Abertura</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="solicitante"><span>Solicitante</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="assunto"><span>Assunto</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="codigo"><span>Código</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="categoria"><span>Categoria</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="canal"><span>Canal</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="prioridade"><span>Prioridade</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="status"><span>Status</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="prazo"><span>SLA</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th><div class="th-label" data-sort="responsavel"><span>Responsável</span><i class="fa fa-sort sort-icon"></i></div></th>
+              <th style="width:140px">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -458,44 +603,21 @@ html[data-theme='light'] #toast .t{
 
       <div class="badge" style="margin-top:10px">SLA por prioridade: Alta 1 dia • Média 3 dias • Baixa 5 dias (dias úteis)</div>
     </section>
-  </main>
+  </div>
 
-  <!-- ENCERRADOS -->
-  <main id="closedPage" class="wrap hidden">
-    <section class="panel panel-fill">
-      <div class="row" style="align-items:center;margin-bottom:10px">
-        <h2 style="margin:0;font-size:18px">Solicitações Encerradas</h2>
-        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-          <input id="fClosed" placeholder="Buscar nas encerradas...">
-          <button id="btnBackList" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
-        </div>
-      </div>
-      <div class="table-wrap edge">
-        <table>
-          <thead>
-            <tr>
-              <!-- ID removido -->
-              <th>Aberto em</th><th>Solicitante</th><th>Assunto</th><th>Código cliente</th>
-              <th>Categoria</th><th>Canal</th><th>Prioridade</th><th>Status</th><th>Resp.</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyClosed"></tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <!-- KPIs -->
-  <main id="kpiPage" class="wrap hidden">
+  <!-- LADO DIREITO: KPIs / Gráficos -->
+  <div class="col-side">
     <section class="panel">
-      <div class="row" style="align-items:center;gap:12px">
-        <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
-        <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
-          <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
-          <button id="btnBackList2" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
+      <div class="panel-header">
+        <div>
+          <h2><i class="fa fa-gauge-high"></i> Visão geral</h2>
+          <small>Métricas do mês por status e cumprimento de SLA</small>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted)">Mês de referência</label>
+          <input type="month" id="kpiMonth" style="max-width:140px;font-size:12px">
         </div>
       </div>
-      <div class="space"></div>
 
       <div class="kpi-grid">
         <div class="kpi-card"><small>Aberto (abertos no mês)</small><strong id="mKpiAberto">0</strong></div>
@@ -506,153 +628,223 @@ html[data-theme='light'] #toast .t{
 
       <div class="space"></div>
       <div class="kpi-grid">
-        <div class="kpi-card"><small>Concluídos no mês</small><strong id="mKpiFechadosMes">0</strong><div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div></div>
-        <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPctPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
-        <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiPctVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
-        <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong><div class="kpi-sub">Base dos KPIs acima</div></div>
+        <div class="kpi-card"><small>Concluídos no mês</small><strong id="mKpiFechados">0</strong><div class="kpi-sub" id="mKpiFechadosBase">com SLA: 0</div></div>
+        <div class="kpi-card"><small>% concluídos no prazo</small><strong id="mKpiPrazo">0%</strong><div class="kpi-sub" id="mKpiQtdPrazo">0 de 0</div></div>
+        <div class="kpi-card"><small>% concluídos vencidos</small><strong id="mKpiVenc">0%</strong><div class="kpi-sub" id="mKpiQtdVenc">0 de 0</div></div>
+        <div class="kpi-card"><small>Mês selecionado</small><strong id="mKpiMesLabel">—</strong></div>
       </div>
 
-      <div class="charts">
-        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por categoria</h3><canvas id="chartAbertos"></canvas></div>
-        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Concluídos no mês — No prazo x Vencidos (por categoria)</h3><canvas id="chartConcluidos"></canvas></div>
-        <!-- NOVO gráfico -->
-        <div class="panel"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — Shopee x Mercado Livre</h3><canvas id="chartCanal"></canvas></div>
-        <div class="panel" style="grid-column:1/-1"><h3 style="margin:0 0 10px 0;font-size:16px">Abertos no mês — por transportadora</h3><canvas id="chartTransp"></canvas></div>
-      </div>
       <div class="space"></div>
-      <div class="badge">KPIs “abertos/…” usam a <u>data de abertura</u>. Percentuais usam tickets <u>encerrados</u> no mês.</div>
+      <div class="charts">
+        <div class="panel" style="padding:10px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Distribuição por categoria</div>
+          <canvas id="chartCategoria" height="140"></canvas>
+        </div>
+        <div class="panel" style="padding:10px">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Distribuição por canal / transportadora</div>
+          <canvas id="chartCanal" height="140"></canvas>
+        </div>
+      </div>
+
+      <div class="footer-brand">
+        <span>Desenvolvido por Bruno Ferreira da Cruz</span>
+      </div>
     </section>
-  </main>
+  </div>
+</main>
 
-  <div class="watermark">Desenvolvido por Bruno Ferreira da Cruz</div>
-</section>
-
-<!-- MODAL (ticket) -->
-<div class="modal" id="modal">
-  <div class="card">
-    <div class="row" style="align-items:center">
-      <!-- título sem exibir ID -->
-      <h2 id="modalTitle" style="margin:0;font-size:18px">Nova solicitação</h2>
-      <div class="actions" style="margin-left:auto"><button class="btn-ghost" id="closeModal"><i class="fa fa-xmark"></i></button></div>
-    </div>
-    <div class="space"></div>
-
-    <div class="grid-2">
-      <!-- FORM -->
-      <form id="frm" autocomplete="off" style="display:flex;flex-direction:column;gap:12px">
-        <!-- ID permanece oculto para controle interno/Supabase -->
-        <input type="hidden" id="ticketId">
-
-        <div class="grid-form">
-          <div><label>Solicitante</label><input id="solicitante" /></div>
-          <div><label>Categoria</label><select id="categoriaSel"><option>Frota - Transportadora</option><option>SAK</option></select></div>
-          <div><label>Prioridade</label><select id="prioridade"><option>Alta</option><option selected>Média</option><option>Baixa</option></select></div>
-        </div>
-
-        <div class="grid-row">
-          <div>
-            <label>Assunto</label>
-            <select id="assunto" required>
-              <option value="">Selecione…</option>
-              <option>Cliente Ausente</option>
-              <option>Solicitação contato</option>
-              <option>End. não encontrado</option>
-              <option>Arrependimento</option>
-              <option>Atraso de entrega</option>
-              <option>Mercado Fraude</option>
-              <option>Ruptura de estoque</option>
-              <option>Danificado</option>
-              <option>Erro cadastro</option>
-              <option>Solicitar Coleta</option>
-              <option>Barrar Entrega</option>
-              <option>Outras Informações</option>
-            </select>
-          </div>
-          <div><label>Status</label><select id="status"><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select></div>
-        </div>
-
-        <!-- troquei para grid-4 e acrescentei Canal -->
-        <div class="grid-4">
-          <div><label>Código do cliente</label><input id="codigo" placeholder="Ex.: 12345"/></div>
-          <div id="transportadoraWrap">
-            <label>Transportadora</label>
-            <input id="transportadora" list="lstTransportadora" placeholder="Ex.: Atual, Reunidas..."/>
-            <datalist id="lstTransportadora">
-              <option value="Atual"></option><option value="Correios / Sedex"></option><option value="Reunidas"></option>
-              <option value="TTJB"></option><option value="Rede Sul"></option><option value="Brasil Web"></option>
-              <option value="Zanotelli"></option><option value="Uber"></option><option value="Outros"></option>
-            </datalist>
-          </div>
-          <div id="responsavelWrap"><label>Responsável</label>
-            <select id="responsavel"><option></option><option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option></select>
-          </div>
-          <!-- NOVO CAMPO: Canal -->
-          <div><label>Canal</label>
-            <select id="canalSel">
-              <option value=""></option>
-              <option>Mercado Livre</option>
-              <option>Shopee</option>
-            </select>
-          </div>
-        </div>
-
-        <div><label>Descrição</label><textarea id="descricao" rows="4" placeholder="Detalhe o que precisa"></textarea></div>
-
-        <div class="grid-row">
-          <div><label>Prazo (SLA) — Data</label><input id="prazo" type="date"/></div>
-          <div><label>&nbsp;</label><div class="badge">Definido automaticamente (dias úteis) se vazio</div></div>
-        </div>
-
-        <div class="row" style="gap:8px">
-          <button type="button" class="btn-warning btn-icon" id="btnConfirm" title="Confirmar (tratativa)"><i class="fa fa-check-double"></i></button>
-          <button type="button" class="btn-danger btn-icon" id="btnDelete" title="Excluir"><i class="fa fa-trash"></i></button>
-          <div style="flex:1"></div>
-          <button class="btn-success" id="btnSave"><i class="fa fa-floppy-disk"></i> Salvar</button>
-        </div>
-      </form>
-
-      <!-- CHAT do ticket -->
-      <div>
-        <label>Chat da Solicitação</label>
-        <div class="chat-box">
-          <div id="chatHistory" class="chat-history"></div>
-          <div class="chat-input">
-            <input id="chatText" placeholder="Digite uma mensagem e Enter (Shift+Enter para nova linha)"/>
-            <button id="btnSendChat" class="btn-ghost btn-icon"><i class="fa fa-paper-plane"></i></button>
-          </div>
-        </div>
-        <div style="margin-top:10px" class="muted small" id="chatHint">Mensagens ficam registradas no histórico do ticket.</div>
+<!-- ENCERRADOS -->
+<main id="closedPage" class="wrap hidden">
+  <section class="panel panel-fill">
+    <div class="row" style="align-items:center;margin-bottom:10px">
+      <h2 style="margin:0;font-size:18px">Solicitações Encerradas</h2>
+      <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
+        <input id="fClosed" placeholder="Buscar nas encerradas...">
+        <button id="btnBackList" class="btn btn-primary-outline"><i class="fa fa-arrow-left"></i> Voltar</button>
       </div>
+    </div>
+    <div class="table-wrap edge">
+      <table>
+        <thead>
+          <tr>
+            <th>Abertura</th>
+            <th>Solicitante</th>
+            <th>Assunto</th>
+            <th>Código</th>
+            <th>Categoria</th>
+            <th>Canal</th>
+            <th>Prioridade</th>
+            <th>Status</th>
+            <th>SLA</th>
+            <th>Responsável</th>
+            <th>Encerrado em</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyClosed"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL CADASTRO / EDIÇÃO -->
+<div id="modal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:40;background:rgba(15,23,42,.72);backdrop-filter:blur(10px)">
+  <div style="width:880px;max-width:96%;max-height:90vh;overflow:auto;border-radius:18px;background:var(--panel);border:1px solid var(--border);box-shadow:0 18px 45px rgba(15,23,42,.95);padding:16px 18px">
+    <div class="row" style="align-items:center;margin-bottom:8px">
+      <h2 style="font-size:17px;display:flex;align-items:center;gap:8px"><i class="fa fa-pen-to-square" style="color:var(--primary)"></i> <span id="modalTitle">Nova solicitação</span></h2>
+      <div class="row-right">
+        <button id="btnExportChat" class="btn btn-ghost"><i class="fa fa-file-export"></i> Exportar histórico</button>
+        <button id="btnCloseModal" class="btn btn-ghost"><i class="fa fa-times"></i></button>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <div class="row" style="margin-bottom:10px">
+      <div style="flex:1;min-width:200px">
+        <label>Solicitante *</label>
+        <input id="inpSolicitante" placeholder="Nome de quem solicitou">
+      </div>
+      <div style="flex:1;min-width:200px">
+        <label>Responsável</label>
+        <input id="inpResponsavel" placeholder="Quem está tratando (opcional)">
+      </div>
+      <div style="width:160px">
+        <label>Canal</label>
+        <select id="selCanal">
+          <option value="">Selecione...</option>
+          <option>Email</option>
+          <option>Telefone</option>
+          <option>WhatsApp</option>
+          <option>Portal interno</option>
+          <option>Presencial</option>
+          <option>Transportadora</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:10px">
+      <div style="flex:2;min-width:260px">
+        <label>Assunto *</label>
+        <input id="inpAssunto" placeholder="Resumo da solicitação">
+      </div>
+      <div style="flex:1;min-width:180px">
+        <label>Código / Protocolo *</label>
+        <input id="inpCodigo" placeholder="NF, chamado, pedido...">
+      </div>
+      <div style="width:140px">
+        <label>Prioridade *</label>
+        <select id="selPrioridade">
+          <option value="">Selecione...</option>
+          <option>Alta</option>
+          <option>Média</option>
+          <option>Baixa</option>
+        </select>
+      </div>
+      <div style="width:190px">
+        <label>Categoria *</label>
+        <select id="selCategoria">
+          <option value="">Selecione...</option>
+          <option>Geral</option>
+          <option>SAK</option>
+          <option>TI</option>
+          <option>Frota - Transportadora</option>
+          <option>Outros</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:10px">
+      <div style="width:160px">
+        <label>Status *</label>
+        <select id="selStatus">
+          <option>Aberto</option>
+          <option>Em tratativa</option>
+          <option>Pendente</option>
+          <option>Encerrado</option>
+        </select>
+      </div>
+      <div style="width:160px">
+        <label>Prazo (data limite / SLA)</label>
+        <input type="date" id="inpPrazo">
+      </div>
+      <div style="flex:1;min-width:200px">
+        <label>Transportadora (quando Frota)</label>
+        <input id="inpTransportadora" placeholder="Nome da transportadora (se aplicável)">
+      </div>
+      <div style="width:190px">
+        <label>Retomar em (quando Pendente)</label>
+        <input type="date" id="inpRetomar">
+      </div>
+    </div>
+
+    <div class="row" style="margin-bottom:10px">
+      <div style="flex:1">
+        <label>Descrição detalhada *</label>
+        <textarea id="inpDescricao" rows="4" placeholder="Descreva a situação, contexto, impactos e qualquer informação relevante"></textarea>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Chat histórico -->
+    <div class="row" style="align-items:flex-start">
+      <div style="flex:2;min-width:260px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <label>Histórico / Comentários</label>
+          <span class="muted" style="font-size:11px">Use para registrar tratativas e decisões</span>
+        </div>
+        <div id="history" style="border-radius:12px;border:1px solid var(--border);padding:8px 10px;max-height:220px;overflow:auto;background:var(--panel-2);font-size:13px"></div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <input id="inpChat" placeholder="Adicionar atualização ao histórico...">
+          <button id="btnAddChat" class="btn btn-primary"><i class="fa fa-paper-plane"></i></button>
+        </div>
+      </div>
+      <div style="flex:1;min-width:220px">
+        <label>Resumo / Insights</label>
+        <div id="summaryBox" style="border-radius:12px;border:1px dashed rgba(148,163,184,.6);padding:8px 10px;font-size:13px;color:var(--muted);background:linear-gradient(135deg,rgba(15,23,42,.9),rgba(15,23,42,.96))">
+          <div style="font-size:12px;margin-bottom:4px"><i class="fa fa-wand-magic-sparkles"></i> <strong>Resumo rápido</strong></div>
+          <div id="summaryContent">Digite uma descrição e adicione comentários para gerar um resumo automático da tratativa.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row" style="margin-top:8px">
+      <span class="muted">Campos com * são obrigatórios</span>
+      <div class="spacer"></div>
+      <button id="btnDelete" class="btn btn-danger hidden"><i class="fa fa-trash"></i> Excluir</button>
+      <button id="btnSave" class="btn btn-primary"><i class="fa fa-save"></i> Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- DM (chat usuários) -->
+<!-- DM FLOATING (entre usuários) -->
 <div class="dm-launcher">
-  <button id="dmFab" class="dm-fab btn-icon" title="Chat com usuários"><i class="fa fa-comments"></i><span id="dmBadge" class="badge-unread" style="display:none">0</span></button>
-</div>
-<div id="dmPanel" class="dm-panel">
-  <div class="dm-head">
-    <strong><i class="fa fa-comments"></i> Conversas</strong>
-    <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
-      <input id="dmSearch" placeholder="Buscar usuário..." style="width:180px">
-      <button id="dmClose" class="btn-ghost btn-icon" title="Fechar"><i class="fa fa-xmark"></i></button>
+  <button id="btnDmToggle" class="dm-fab" title="Mensagens privadas">
+    <i class="fa fa-comments"></i>
+    <span id="badgeDm" class="badge-unread hidden">0</span>
+  </button>
+  <div id="dmPanel" class="dm-panel hidden">
+    <div class="dm-header">
+      <i class="fa fa-user-group" style="font-size:14px;color:var(--primary)"></i>
+      <h3>Mensagens internas</h3>
+      <div class="spacer"></div>
+      <button id="btnCloseDm" class="btn-ghost btn-icon"><i class="fa fa-times"></i></button>
     </div>
-  </div>
-  <div class="dm-body">
-    <div id="dmUsers" class="dm-users"></div>
-    <div class="dm-chat">
-      <div id="dmHeader" class="small muted" style="padding:8px 10px;border-bottom:1px solid var(--border)">Selecione um usuário para conversar</div>
-      <div id="dmHistory" class="dm-history"></div>
-      <div class="dm-input">
-        <input id="dmText" placeholder="Mensagem (Enter para enviar)" disabled>
-        <button id="dmSend" class="btn-ghost btn-icon" disabled><i class="fa fa-paper-plane"></i></button>
+    <div class="dm-body">
+      <div class="dm-users" id="dmUsers"></div>
+      <div class="dm-chat">
+        <div id="dmMessages" class="dm-messages"></div>
+        <div class="dm-input">
+          <input id="dmInput" placeholder="Digite uma mensagem...">
+          <button id="dmSend" class="btn btn-primary btn-icon"><i class="fa fa-paper-plane"></i></button>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast hidden"></div>
 
 <script>
 /* ===== Layout ===== */
@@ -670,303 +862,206 @@ const qsa=(s,el)=>Array.prototype.slice.call((el||document).querySelectorAll(s))
 const fmtDate=ts=>new Date(ts).toLocaleString('pt-BR');
 const uid = ()=>Math.random().toString(36).slice(2,8).toUpperCase();
 function escapeHtml(str){
-  str=(str||'');
-  return str.replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))
+  if(!str) return '';
+  return str.replace(/[&<>"']/g,function(ch){
+    const map={ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+    return map[ch]||ch;
+  });
 }
-const debounce=(fn,ms=150)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
-function toast(msg){
-  var c=document.getElementById('toast');
-  if(!c){
-    c=document.createElement('div');
-    c.id='toast';
-    document.body.appendChild(c);
-  }
-  var el=document.createElement('div');
-  el.className='t';
-  el.textContent=msg;
-  c.appendChild(el);
-  requestAnimationFrame(()=>el.classList.add('show'));
-  setTimeout(()=>{
-    el.classList.remove('show');
-    setTimeout(()=>el.remove(),250);
-  },3000);
+function toDateInputValue(d){
+  if(!d) return '';
+  const z=new Date(d), off=z.getTimezoneOffset();
+  const local=new Date(z.getTime() - (off*60*1000));
+  return local.toISOString().slice(0,10);
 }
-
-function canUseNativeNotif(){
-  return typeof window!=='undefined' && 'Notification' in window;
-}
-function askNotifyPermission(){
-  try{
-    if(!canUseNativeNotif()) return;
-    if(Notification.permission==='default'){
-      Notification.requestPermission().catch(()=>{});
-    }
-  }catch(e){}
-}
-function showNativeNotification(title,opts){
-  try{
-    if(!canUseNativeNotif()) return;
-    if(Notification.permission==='granted'){
-      var n=new Notification(title||'',opts||{});
-      n.onclick=function(){
-        try{ window.focus(); }catch(e){}
-        this.close();
-      };
-    }else if(Notification.permission==='default'){
-      Notification.requestPermission().then(function(p){
-        if(p==='granted') showNativeNotification(title,opts);
-      }).catch(()=>{});
-    }
-  }catch(e){}
-}
-
-function prioToDays(p){return p==='Alta'?1: p==='Média'?3:5}
-
-/* dias úteis */
-function addBusinessDays(base, days){
-  var d=new Date(base); d.setHours(0,0,0,0);
-  var added=0;
+function businessAdd(date, days){
+  let d=new Date(date);
+  let added=0;
   while(added<days){
     d.setDate(d.getDate()+1);
-    var wd=d.getDay(); // 0=domingo,6=sábado
-    if(wd!==0 && wd!==6) added++;
+    const day=d.getDay();
+    if(day!==0 && day!==6) added++;
   }
   return d;
 }
-
-function ensureSLA(prazo,prioridade,abertoEm){
-  if(prazo) return prazo;
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var dt=addBusinessDays(base,dias);
-  return dt.toISOString().slice(0,10)
+function isBusinessDay(date){
+  const day=date.getDay();
+  return day!==0 && day!==6;
 }
-function slaStatus(dateStr,d){
-  if(!dateStr)return{code:'',label:'—'};
-  var due=new Date(dateStr+'T23:59:59');
-
-  // Se estiver encerrado, trava o SLA na data de encerramento
-  if(d && d.status==='Encerrado'){
-    var closedAt=getClosedAt(d)||d.closedAt||d.abertoEm||new Date();
-    // positivo => fechou depois do prazo (vencido)
-    var diffH=(new Date(closedAt)-due)/36e5;
-    if(diffH>0)return{code:'late',label:'Vencido'};
-    return{code:'ok',label:'No prazo'};
+function addBusinessDays(startDate, days){
+  let d=new Date(startDate);
+  let added=0;
+  while(added<days){
+    d.setDate(d.getDate()+1);
+    if(isBusinessDay(d)) added++;
   }
-
-  // Em aberto: usa hoje como referência (contador correndo)
-  var today=new Date();today.setHours(23,59,59,999);
-  var diffH=(due-today)/36e5;
-  if(diffH<0)return{code:'late',label:'Vencido'};
-  if(diffH<=12)return{code:'risk',label:'Risco'};
-  return{code:'ok',label:'No prazo'};
+  return d;
 }
-
-/* tooltip SLA */
-function slaTooltip(dateStr,d){
-  if(!dateStr) return '';
-  var due = new Date(dateStr+'T23:59:59');
-  var dataPrazo = new Date(dateStr).toLocaleDateString('pt-BR');
-
-  // Encerrado: não continua contando, trava no momento do fechamento
-  if(d && d.status==='Encerrado'){
-    var closedAt = getClosedAt(d) || d.closedAt || d.abertoEm || new Date();
-    var closedDt = new Date(closedAt);
-    var diffH = Math.round((closedDt - due)/36e5); // >0 = fechou depois do prazo
-    var dataFech = closedDt.toLocaleDateString('pt-BR');
-
-    if(diffH<=0){
-      return 'Encerrado em '+dataFech+' — dentro do prazo (SLA '+dataPrazo+')';
-    }else{
-      return 'Encerrado em '+dataFech+' — '+diffH+'h após o vencimento (SLA '+dataPrazo+')';
-    }
-  }
-
-  // Em aberto: contador correndo
-  var now = new Date();
-  var diffMs = due - now;
-  var diffH = Math.round(diffMs/36e5);
-
-  if(diffH>=0){
-    return 'Vence em '+dataPrazo+' — faltam '+diffH+'h';
-  }else{
-    return 'Venceu em '+dataPrazo+' — há '+Math.abs(diffH)+'h';
-  }
-}
-
-function statusBadge(s){
-  var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Pendente':'status-pendente','Encerrado':'status-encerrado'};
-  return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'
-}
-function prioBadge(p){return '<span class="badge '+(p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa')+'">'+p+'</span>'}
+function today(){ return new Date(); }
 const ym=d=>d.toISOString().slice(0,7);
 const startOfDay=dt=>{var d=new Date(dt);d.setHours(0,0,0,0);return d}
 const today0=()=>{var d=new Date();d.setHours(0,0,0,0);return d}
 var DEFAULT_EMAIL_DOMAIN="koerich.com.br";
 
 /* sort + paginação estado */
-var sortField='default';
-var sortDir='asc';
-var pageSize=50;
-var currentPage=1;
+var sortField='default', sortDir='desc';
+var pageSize=12, currentPage=1;
 
-/* filtros salvos / tema */
-const FILTER_KEY_BASE='ticket_filters_';
-const THEME_KEY='ticket_theme';
-
-/* ===== Config + Supabase ===== */
-var SUPA_URL=(window.ENV&&window.ENV.SUPABASE_URL)||'';
-var SUPA_KEY=(window.ENV&&window.ENV.SUPABASE_ANON_KEY)||'';
-var supa=(SUPA_URL&&SUPA_KEY)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
-const supaReady=()=>!!supa;
-
-/* ===== Flag de coluna CANAL ===== */
-var HAS_CANAL=false;
-
-/* ===== Sessão ===== */
-const SESSION_KEY='ticket_session_v1';
-const setSession=u=>localStorage.setItem(SESSION_KEY,JSON.stringify(u));
-const currentUser=()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'')}catch(e){return null}}
-const clearSession=()=>localStorage.removeItem(SESSION_KEY);
-
-/* ===== Estado ===== */
-var data=[]; var lastReadMap={};
-var chartAbertos=null, chartConcluidos=null, chartTransp=null, chartCanal=null;
-
-/* ===== Perfis e DM ===== */
-var profiles=[];  // {id, display_name, role, username}
-var dmCache=[];   // [{id,sender,receiver,body,created_at}]
-var dmTarget=null;
-var dmUnread=0;
-function dmKey(me,other){return 'dm_lastread_'+me+'_'+other}
-var dmSeen=new Set();
-function markSeen(sig){dmSeen.add(sig);setTimeout(()=>dmSeen.delete(sig),5000)}
-
-/* ========= Filtros armazenados ========= */
-function saveFilters(){
-  var u=currentUser(); if(!u) return;
-  var obj={
-    search: qs('#fSearch').value || '',
-    status: qs('#fStatus').value || '',
-    prio: qs('#fPrio').value || '',
-    categoria: qs('#fCategoria').value || '',
-    sla: qs('#fSLA').value || '',
-    pend: qs('#fPend').value || '',
-    mine: !!qs('#fMine').checked,
-    hideClosed: !!qs('#fHideClosed').checked
-  };
-  localStorage.setItem(FILTER_KEY_BASE+u.id, JSON.stringify(obj));
+/* ===== Tema / usuário fake (até ter login) ===== */
+function loadTheme(){
+  const t=localStorage.getItem('ci_theme')||'theme-dark';
+  document.body.className=t;
 }
-function loadFilters(){
-  var u=currentUser(); if(!u) return;
-  var raw=localStorage.getItem(FILTER_KEY_BASE+u.id); if(!raw) return;
-  try{
-    var f=JSON.parse(raw);
-    if('search' in f) qs('#fSearch').value = f.search;
-    if('status' in f) qs('#fStatus').value = f.status;
-    if('prio' in f) qs('#fPrio').value = f.prio;
-    if('categoria' in f) qs('#fCategoria').value = f.categoria;
-    if('sla' in f) qs('#fSLA').value = f.sla;
-    if('pend' in f) qs('#fPend').value = f.pend;
-    if('mine' in f){
-      qs('#fMine').checked = f.mine;
-      qs('#tgMine').classList.toggle('active', f.mine);
-    }
-    if('hideClosed' in f){
-      qs('#fHideClosed').checked = f.hideClosed;
-      qs('#tgHideClosed').classList.toggle('active', f.hideClosed);
-    }
-  }catch(e){}
+function toggleTheme(){
+  const cur=document.body.classList.contains('theme-light')?'theme-light':'theme-dark';
+  const next=cur==='theme-light'?'theme-dark':'theme-light';
+  document.body.classList.remove(cur);
+  document.body.classList.add(next);
+  localStorage.setItem('ci_theme',next);
 }
+loadTheme();
 
-/* ========= Tema (claro/escuro) ========= */
-function applyTheme(theme){
-  var body=document.body;
-  var icon=qs('#themeIcon');
-  if(theme==='light'){
-    body.classList.add('theme-light');
-    if(icon){icon.classList.remove('fa-moon');icon.classList.add('fa-sun')}
+function fakeUsers(){
+  return [
+    {id:'u1',name:'Bruno Ferreira',email:'bruno@'+DEFAULT_EMAIL_DOMAIN,role:'admin'},
+    {id:'u2',name:'Operador Logística',email:'logistica@'+DEFAULT_EMAIL_DOMAIN,role:'user'},
+    {id:'u3',name:'Atendente SAC',email:'sac@'+DEFAULT_EMAIL_DOMAIN,role:'user'},
+  ];
+}
+function currentUser(){
+  const raw=localStorage.getItem('ci_user');
+  if(raw){
+    try{return JSON.parse(raw)}catch(e){}
+  }
+  const u=fakeUsers()[0];
+  localStorage.setItem('ci_user',JSON.stringify(u));
+  return u;
+}
+function setUser(u){
+  localStorage.setItem('ci_user',JSON.stringify(u));
+  renderUserPill();
+}
+function renderUserPill(){
+  const me=currentUser();
+  if(!me) return;
+  qs('#currentUserName').textContent=me.name;
+}
+renderUserPill();
+
+/* ===== Supabase client ===== */
+let supa=null;
+let HAS_CANAL=false;
+function initSupabase(){
+  if(typeof SUPABASE_URL==='string' && typeof SUPABASE_ANON_KEY==='string'){
+    supa=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   }else{
-    body.classList.remove('theme-light');
-    if(icon){icon.classList.remove('fa-sun');icon.classList.add('fa-moon')}
+    console.warn('config.js sem SUPABASE_URL / SUPABASE_ANON_KEY');
   }
-  localStorage.setItem(THEME_KEY, theme);
 }
-function initTheme(){
-  var saved = localStorage.getItem(THEME_KEY) || 'dark';
-  applyTheme(saved);
-}
-
-/* ========= TICKETS: load ========= */
-async function loadFromSupabase(){
-  if(!supaReady()){toast('Config Supabase ausente.'); data=[]; render(); return;}
-
-  // tenta com a coluna 'canal'
-  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by';
-  var resp=await supa.from('tickets').select(sel);
-  var tks=resp.data; var error=resp.error;
-  if(!error){ HAS_CANAL=true; }
-  if(error){
-    // fallback sem 'canal'
-    HAS_CANAL=false;
-    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by';
-    resp=await supa.from('tickets').select(sel);
-    tks=resp.data; error=resp.error;
-  }
-  if(error){
-    // fallback mínimo
-    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
-    resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
-  }
-  if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
-
-  tks.sort((a,b)=>new Date(b.aberto_em)-new Date(a.aberto_em));
-
-  // mensagens do ticket
-  var ids=tks.map(t=>t.id); var msgsByTicket={};
-  if(ids.length){
-    var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
-    if(!r2.error){(r2.data||[]).forEach(m=>((msgsByTicket[m.ticket_id]=msgsByTicket[m.ticket_id]||[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})))}
-  }
-  // last_reads
-  lastReadMap={};
-  var me=currentUser(); if(me){var lr=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id); (lr.data||[]).forEach(r=>lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime())}
-
-  data=tks.map(t=>({
-    id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
-    prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
-    codigo:t.codigo||'', transportadora:t.transportadora||'', canal: (t.canal||''), pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
-    openedBy:t.opened_by||null, historico:msgsByTicket[t.id]||[]
-  }));
+initSupabase();
+function supaReady(){return !!supa;}
+function toast(msg,ms){
+  ms=ms||3500;
+  const el=qs('#toast');
+  el.textContent=msg;
+  el.classList.remove('hidden');
+  setTimeout(()=>el.classList.add('hidden'),ms);
 }
 
-/* ========= TICKETS: persist ========= */
+/* ===== Dados principais (tickets) ===== */
+let data=[];
+let lastReadMap={}; // ticketId -> timestamp
+let charts={cat:null,canal:null};
+
+/* SLA helpers */
+function slaStatus(prazo, ticket){
+  if(!prazo) return {code:'none',label:'Sem SLA'};
+  const hoje=today0();
+  const limit=startOfDay(prazo);
+  const diff=(limit-hoje)/(1000*60*60*24);
+  if(ticket && ticket.status==='Encerrado'){
+    const closedAt=getClosedAt(ticket);
+    if(!closedAt) return {code:'ok',label:'Encerrado'};
+    const closedDay=startOfDay(closedAt);
+    if(closedDay<=limit) return {code:'ok',label:'Cumprido'};
+    return {code:'late',label:'Encerrado após prazo'};
+  }
+  if(diff<0) return {code:'late',label:'Vencido'};
+  if(diff<=1) return {code:'risk',label:'Risco'};
+  return {code:'ok',label:'No prazo'};
+}
+function slaTooltip(prazo, ticket){
+  if(!prazo) return '';
+  const dt=new Date(prazo);
+  const base='Prazo: '+dt.toLocaleDateString('pt-BR');
+  const st=slaStatus(prazo,ticket).code;
+  if(st==='late') return base+' (já vencido)';
+  if(st==='risk') return base+' (vence em breve)';
+  if(st==='ok') return base+' (no prazo)';
+  return base;
+}
+
+/* badges */
+function prioBadge(p){
+  if(p==='Alta') return '<span class="badge prio-alta"><i class="fa fa-flag"></i> Alta</span>';
+  if(p==='Média')return '<span class="badge prio-media"><i class="fa fa-flag"></i> Média</span>';
+  if(p==='Baixa')return '<span class="badge prio-baixa"><i class="fa fa-flag"></i> Baixa</span>';
+  return '<span class="badge">'+(p||'-')+'</span>';
+}
+function statusBadge(s){
+  if(s==='Aberto') return '<span class="badge status-aberto"><i class="fa fa-circle"></i> Aberto</span>';
+  if(s==='Em tratativa') return '<span class="badge status-tratativa"><i class="fa fa-spinner"></i> Em tratativa</span>';
+  if(s==='Pendente') return '<span class="badge status-pendente"><i class="fa fa-pause-circle"></i> Pendente</span>';
+  if(s==='Encerrado') return '<span class="badge status-encerrado"><i class="fa fa-check-circle"></i> Encerrado</span>';
+  return '<span class="badge">'+(s||'-')+'</span>';
+}
+
+/* Abrir / fechar páginas */
+function showMain(){ qs('#mainPage').classList.remove('hidden'); qs('#closedPage').classList.add('hidden'); }
+function showClosed(){ qs('#mainPage').classList.add('hidden'); qs('#closedPage').classList.remove('hidden'); renderClosedPage(); }
+
+/* Local storage fallback (caso Supabase indisponível) */
+const LS_KEY='ci_tickets';
+
+function loadLocal(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    data=raw? JSON.parse(raw):[];
+  }catch(e){
+    console.error(e);data=[];
+  }
+}
+function saveLocal(){
+  try{
+    localStorage.setItem(LS_KEY,JSON.stringify(data));
+  }catch(e){
+    console.error(e);
+  }
+}
+
+/* Supabase: tickets */
+async function supaLoadTickets(){
+  if(!supaReady()) { loadLocal(); renderAll(); return; }
+  let r=await supa.from('tickets').select('*').order('abertoEm',{ascending:false});
+  if(r.error){
+    console.error(r.error); toast('Erro ao carregar tickets (usando localStorage)');
+    loadLocal(); renderAll(); return;
+  }
+  data=r.data||[];
+  var col = (data[0] && ('canal' in data[0]));
+  HAS_CANAL = !!col;
+  renderAll();
+}
 async function supaUpsertTicket(rec){
-  if(!supaReady())return;
-  var me=currentUser();
-  var payload={
-    id:rec.id, 
-    aberto_em:new Date(rec.abertoEm).toISOString(), 
-    solicitante:rec.solicitante, 
-    categoria:rec.categoria,
-    assunto:rec.assunto, 
-    prioridade:rec.prioridade, 
-    descricao:rec.descricao||null, 
-    status:rec.status, 
-    responsavel:rec.responsavel||null,
-    prazo:rec.prazo||null, 
-    codigo:rec.codigo||null, 
-    transportadora:rec.transportadora||null, 
-    pendente:!!rec.pendente, 
-    retomar_em:rec.retomar_em||null,
-    opened_by: me? me.id : rec.openedBy || null, 
-    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
-  };
+  if(!supaReady()) return;
+  const payload={...rec};
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
   var r=await supa.from('tickets').upsert(payload); 
   if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
+
+/* Supabase: mensagens do ticket */
 async function supaAddMessage(ticketId, text){
   if (!supaReady()) return;
 
@@ -977,87 +1072,290 @@ async function supaAddMessage(ticketId, text){
   const { data: ins, error } = await supa
     .from('messages')
     .insert({
-      ticket_id: String(ticketId),
+      ticket_id: ticketId,
       body: text,
-      sender: userId,
-      sender_name: userName
+      user: userName,
+      user_id: userId
     })
-    .select()
-    .single();
+    .select();
 
   if (error) {
-    console.error('insert message error:', error);
+    console.error(error);
+    toast('Erro ao registrar histórico no Supabase');
     return;
   }
-
-  await loadTicketChat(ticketId);
 }
-async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
+async function supaLoadMessages(ticketId){
+  if (!supaReady()) return [];
+  const { data, error } = await supa
+    .from('messages')
+    .select('id, body, user, created_at')
+    .eq('ticket_id', ticketId)
+    .order('created_at', { ascending: true });
 
-/* ========= Realtime + fallback ========= */
-var __rtOK={messages:false,tickets:false,dm:false}; var __pollId=null;
-async function refreshNow(){await loadFromSupabase(); render()}
-function setPollTimer(){
-  if(__pollId) clearInterval(__pollId);
-  var ms=(document.visibilityState==='visible')?800:8000;
-  __pollId=setInterval(()=>{ if(!__rtOK.messages||!__rtOK.tickets||!__rtOK.dm){refreshNow(); loadDM(true)} },ms)
+  if (error) {
+    console.error(error);
+    return [];
+  }
+  return data || [];
 }
-function setupRealtime(){
-  if(!supaReady())return;
-  supa.getChannels().forEach(ch=>supa.removeChannel(ch));
 
-  supa.channel('realtime-messages')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
-      var m   = payload.new;
-      var tid = String(m.ticket_id);
-
-      // Garante que comparamos sempre como string
-      var d = data.find(x => String(x.id) === tid);
-
-      // Se ainda não temos o ticket em memória, força um refresh completo
-      if(!d){
-        refreshNow();
-        return;
-      }
-
-      d.historico = d.historico || [];
-      d.historico.push({
-        at:  new Date(m.created_at).getTime(),
-        txt: m.body,
-        user: m.sender_name || '—'
-      });
-
-      render();
-
-      var me = (currentUser()||{}).name || '';
-      if(me !== (m.sender_name||'')){
-        var title = 'Nova mensagem no ticket '+tid;
-        toast(title);
-        if(document.visibilityState!=='visible'){
-          showNativeNotification('Nova mensagem',{
-            body: 'Ticket '+tid+' — '+(m.body||'').slice(0,80),
-            tag: 'ticket-'+tid,
-            ticketId: tid
-          });
-        }
-      }
-    })
-    .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
-
-  supa.channel('realtime-tickets')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},()=>refreshNow())
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},()=>refreshNow())
-    .subscribe(status=>__rtOK.tickets=(status==='SUBSCRIBED'));
-
-  supa.channel('realtime-dm')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},p=>onDmInsert(p.new))
-    .subscribe(status=>__rtOK.dm=(status==='SUBSCRIBED'));
-
-  setPollTimer();
+/* Histórico: converte supa messages -> estrutura local (para render) */
+function mapMessagesToHistorico(msgs){
+  return msgs.map(m=>({
+    at:new Date(m.created_at).getTime(),
+    user:m.user||'—',
+    text:m.body||''
+  }));
 }
-document.addEventListener('visibilitychange', setPollTimer);
-window.addEventListener('focus', ()=>{refreshNow(); loadDM(true)});
-window.addEventListener('online', ()=>{ setupRealtime(); refreshNow(); loadDM(true) });
+
+/* find ticket */
+function findTicket(id){ return data.find(d=>d.id===id); }
+
+/* ===== Modal / edição ===== */
+let editingId=null;
+
+function openModal(){
+  qs('#modal').classList.remove('hidden');
+}
+function closeModal(){
+  qs('#modal').classList.add('hidden');
+  editingId=null;
+}
+
+function fillForm(t){
+  const me=currentUser();
+  const isAdmin=(me && me.role==='admin');
+
+  qs('#inpSolicitante').value=t.solicitante||'';
+  qs('#inpResponsavel').value=t.responsavel||'';
+  qs('#selCanal').value=t.canal||'';
+  qs('#inpAssunto').value=t.assunto||'';
+  qs('#inpCodigo').value=t.codigo||'';
+  qs('#selPrioridade').value=t.prioridade||'';
+  qs('#selCategoria').value=t.categoria||'';
+  qs('#selStatus').value=t.status||'Aberto';
+  qs('#inpPrazo').value= t.prazo ? toDateInputValue(t.prazo) : '';
+  qs('#inpTransportadora').value=t.transportadora||'';
+  qs('#inpRetomar').value=t.retomar_em ? toDateInputValue(t.retomar_em) : '';
+
+  qs('#btnDelete').classList.toggle('hidden',!editingId || !isAdmin);
+
+  // campos somente leitura para não-admin (exceto prioridade)
+  const lockFields=['inpSolicitante','inpResponsavel','selCanal','inpAssunto','inpCodigo','selCategoria','selStatus','inpPrazo','inpTransportadora','inpRetomar'];
+  lockFields.forEach(id=>{
+    const el=qs('#'+id);
+    if(!el) return;
+    el.disabled=!isAdmin;
+  });
+  const prioEl=qs('#selPrioridade');
+  if(prioEl) prioEl.disabled=false;
+
+  renderHistory(t);
+  qs('#modalTitle').textContent = editingId? 'Editar solicitação' : 'Nova solicitação';
+  updateSummary(t);
+}
+
+function collectForm(){
+  const me=currentUser();
+  const isAdmin=(me && me.role==='admin');
+
+  const solicitante=qs('#inpSolicitante').value.trim();
+  const responsavel=qs('#inpResponsavel').value.trim();
+  const canal=qs('#selCanal').value||'';
+  const assunto=qs('#inpAssunto').value.trim();
+  const codigo=qs('#inpCodigo').value.trim();
+  const prioridade=qs('#selPrioridade').value;
+  const categoria=qs('#selCategoria').value;
+  const status=qs('#selStatus').value;
+  const prazoStr=qs('#inpPrazo').value;
+  const transportadora=qs('#inpTransportadora').value.trim();
+  const retomarStr=qs('#inpRetomar').value;
+  const descricao=qs('#inpDescricao').value.trim();
+
+  if(!solicitante || !assunto || !codigo || !prioridade || !categoria || !status || !descricao){
+    toast('Preencha todos os campos obrigatórios (*)');
+    return null;
+  }
+  if(categoria==='Frota - Transportadora' && !transportadora){
+    toast('Informe a transportadora para categoria "Frota - Transportadora"');
+    return null;
+  }
+
+  let prazo=prazoStr? new Date(prazoStr).getTime():null;
+  let retomar_em=retomarStr? new Date(retomarStr).getTime():null;
+
+  // se prioridade for alta/média/baixa e não tiver prazo, sugere com base em dias úteis
+  if(!prazo && prioridade){
+    const base = new Date();
+    const days = prioridade==='Alta'? 1 : prioridade==='Média'? 3 : 5;
+    prazo = addBusinessDays(base, days).getTime();
+  }
+
+  const base={
+    solicitante,
+    responsavel,
+    canal,
+    assunto,
+    codigo,
+    prioridade,
+    categoria,
+    status,
+    prazo,
+    transportadora,
+    retomar_em,
+    descricao
+  };
+  if(editingId){
+    const old=findTicket(editingId);
+    return {...old,...base};
+  }else{
+    const me=currentUser()||{};
+    return {
+      id: uid(),
+      abertoEm: Date.now(),
+      historico:[],
+      openedBy: me.id||null,
+      ...base
+    };
+  }
+}
+
+/* histórico local + UI */
+function renderHistory(t){
+  const box=qs('#history');
+  const hist=(t && t.historico)||[];
+  if(!hist.length){
+    box.innerHTML='<div class="muted">Nenhuma atualização registrada ainda.</div>';
+    return;
+  }
+  box.innerHTML=hist.map(h=>{
+    const dt=new Date(h.at).toLocaleString('pt-BR');
+    return '<div style="margin-bottom:6px"><div><strong>'+escapeHtml(h.user||'')+'</strong> <span class="muted" style="font-size:11px">('+dt+')</span></div><div>'+escapeHtml(h.text||'')+'</div></div>'
+  }).join('');
+}
+function addHistoryEntry(t, text){
+  const me=currentUser();
+  const entry={
+    at:Date.now(),
+    user: me? me.name : 'Usuário',
+    text:text
+  };
+  t.historico = t.historico || [];
+  t.historico.push(entry);
+  renderHistory(t);
+  updateSummary(t);
+}
+
+/* resumo simples (não-IA) com base na descrição + histórico */
+function updateSummary(t){
+  if(!t){
+    qs('#summaryContent').textContent='Digite uma descrição e adicione comentários para gerar um resumo automático da tratativa.';
+    return;
+  }
+  const partes=[];
+  if(t.descricao){
+    partes.push('Descrição: '+t.descricao);
+  }
+  if(t.historico && t.historico.length){
+    const ult=t.historico[t.historico.length-1];
+    partes.push('Última atualização por '+(ult.user||'')+' em '+new Date(ult.at).toLocaleString('pt-BR')+': '+(ult.text||''));
+  }
+  if(!partes.length){
+    qs('#summaryContent').textContent='Sem informações suficientes para resumo.';
+  }else{
+    qs('#summaryContent').textContent=partes.join(' ');
+  }
+}
+
+/* cadastrar / salvar */
+async function saveTicket(){
+  const rec=collectForm();
+  if(!rec) return;
+
+  if(editingId){
+    const idx=data.findIndex(d=>d.id===editingId);
+    if(idx>-1) data[idx]=rec; else data.push(rec);
+  }else{
+    data.push(rec);
+  }
+  saveLocal();
+  await supaUpsertTicket(rec);
+  renderAll();
+  closeModal();
+  toast('Solicitação salva com sucesso');
+}
+
+/* excluir */
+async function deleteTicket(){
+  if(!editingId) return;
+  if(!confirm('Deseja realmente excluir esta solicitação?')) return;
+  data=data.filter(d=>d.id!==editingId);
+  saveLocal();
+  await supaDeleteTicket(editingId);
+  renderAll();
+  closeModal();
+  toast('Solicitação excluída');
+}
+
+/* Comentário no histórico (chat interno do ticket) */
+async function addChat(){
+  if(!editingId) return;
+  const text=qs('#inpChat').value.trim();
+  if(!text) return;
+  const t=findTicket(editingId);
+  if(!t) return;
+  addHistoryEntry(t,text);
+  qs('#inpChat').value='';
+  saveLocal();
+  await supaUpsertTicket(t);
+  await supaAddMessage(t.id,text);
+}
+
+/* Exportar histórico básico (CSV) */
+function exportHistory(){
+  if(!editingId) return;
+  const t=findTicket(editingId);
+  if(!t || !t.historico || !t.historico.length){
+    toast('Sem histórico para exportar');
+    return;
+  }
+  const rows=[['Data','Usuário','Texto']];
+  t.historico.forEach(h=>{
+    rows.push([
+      new Date(h.at).toLocaleString('pt-BR'),
+      h.user||'',
+      h.text||''
+    ]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Historico');
+  XLSX.writeFile(wb,'historico_'+(t.codigo||t.id)+'.xlsx');
+}
+
+/* eventos modal */
+document.addEventListener('DOMContentLoaded',()=>{
+  qs('#btnNew').addEventListener('click',()=>{
+    editingId=null;
+    fillForm({
+      solicitante:(currentUser()||{}).name||'',
+      prioridade:'Média',
+      categoria:'Geral',
+      status:'Aberto',
+      historico:[]
+    });
+    openModal();
+  });
+  qs('#btnCloseModal').addEventListener('click',closeModal);
+  qs('#btnSave').addEventListener('click',saveTicket);
+  qs('#btnDelete').addEventListener('click',deleteTicket);
+  qs('#btnAddChat').addEventListener('click',addChat);
+  qs('#btnExportChat').addEventListener('click',exportHistory);
+  qs('#btnGoClosed').addEventListener('click',showClosed);
+  qs('#btnBackList').addEventListener('click',showMain);
+  qs('#btnTheme').addEventListener('click',toggleTheme);
+});
 
 /* ========= Render Lista ========= */
 const prioRank=p=>p==='Alta'?0: p==='Média'?1:2;
@@ -1083,27 +1381,13 @@ function sortRows(rows){
     });
   }
 
-  const dirMult = (sortDir==='asc'?1:-1);
+  const dirMult = (sortDir==='asc'? 1 : -1);
 
   return rows.sort((a,b)=>{
     let va=a[sortField], vb=b[sortField];
-
-    // campos especiais
-    if(sortField==='prioridade'){
-      return (prioRank(va)-prioRank(vb))*dirMult;
-    }
-    if(sortField==='abertoEm'){
-      return (va-vb)*dirMult;
-    }
-    if(sortField==='prazo'){
-      var da = va? new Date(va).getTime():0;
-      var db = vb? new Date(vb).getTime():0;
-      return (da-db)*dirMult;
-    }
-
-    // string genérica
-    va = (va||'').toString().toLowerCase();
-    vb = (vb||'').toString().toLowerCase();
+    if(va==null && vb!=null) return 1;
+    if(vb==null && va!=null) return -1;
+    if(va==null && vb==null) return 0;
     if(va<vb) return -1*dirMult;
     if(va>vb) return  1*dirMult;
     return 0;
@@ -1111,14 +1395,139 @@ function sortRows(rows){
 }
 
 function updateSortIcons(){
-  qsa('th.sortable').forEach(th=>{
-    var f=th.dataset.field;
-    var icon=th.querySelector('.sort-icon');
-    if(!icon) return;
-    if(f===sortField){
-      icon.textContent = (sortDir==='asc'?'▲':'▼');
-    }else{
-      icon.textContent = '';
+  qsa('th .sort-icon').forEach(ic=>{
+    ic.className='fa fa-sort sort-icon';
+  });
+  if(sortField==='default') return;
+  const th = qsa('th .th-label').find(el=>el.dataset.sort===sortField);
+  if(!th) return;
+  const icon=th.querySelector('.sort-icon');
+  if(!icon) return;
+  icon.className='fa fa-sort-'+(sortDir==='asc'?'up':'down')+' sort-icon';
+}
+
+/* define sort */
+function setSort(field){
+  if(sortField===field){
+    sortDir=(sortDir==='asc'?'desc':'asc');
+  }else{
+    sortField=field;
+    sortDir='asc';
+  }
+  currentPage=1;
+  render();
+}
+
+let sortHandlersBound=false;
+function bindSortHandlers(){
+  if(sortHandlersBound) return;
+  sortHandlersBound=true;
+  qsa('th .th-label').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const f=el.dataset.sort;
+      if(f) setSort(f);
+    });
+  });
+}
+
+/* getClosedAt: procura histórico c/ status Encerrado, se existir */
+function getClosedAt(d){
+  if(!d || !d.historico) return null;
+  // tenta achar a última entrada que indique encerramento (simples, baseado em texto)
+  const enc = [...d.historico].reverse().find(h=>{
+    const txt=(h.text||'').toLowerCase();
+    return txt.includes('encerrado') || txt.includes('finalizado');
+  });
+  if(enc) return enc.at;
+  // fallback: se está encerrado mas não tem histórico marcado,
+  // usa data de abertura só para não "sumir" dos KPIs
+  if (d.status === 'Encerrado') {
+    return d.abertoEm;
+  }
+  return null;
+}
+function renderKPIs(){
+  var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
+  var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
+
+  var baseAbertos=data.filter(d=>ym(new Date(d.abertoEm))===sel);
+  qs('#mKpiAberto').textContent    = baseAbertos.filter(d=>d.status==='Aberto').length;
+  qs('#mKpiTratativa').textContent = baseAbertos.filter(d=>d.status==='Em tratativa').length;
+  qs('#mKpiPendente').textContent  = baseAbertos.filter(d=>d.status==='Pendente').length;
+  qs('#mKpiEncerrado').textContent = baseAbertos.filter(d=>d.status==='Encerrado').length;
+
+  var closedThisMonth=data.map(d=>({d,closedAt:getClosedAt(d)})).filter(x=>x.closedAt && ym(new Date(x.closedAt))===sel);
+  var closedWithSLA=closedThisMonth.filter(x=>!!x.d.prazo);
+
+  var totalFechados=closedThisMonth.length;
+  var fechadosNoPrazo=closedWithSLA.filter(x=>{
+    var limit = startOfDay(x.d.prazo);
+    var cd    = startOfDay(x.closedAt);
+    return cd<=limit;
+  }).length;
+  var fechadosVencidos=closedWithSLA.filter(x=>{
+    var limit = startOfDay(x.d.prazo);
+    var cd    = startOfDay(x.closedAt);
+    return cd>limit;
+  }).length;
+
+  qs('#mKpiFechados').textContent = totalFechados;
+  qs('#mKpiFechadosBase').textContent = 'com SLA: '+closedWithSLA.length;
+  qs('#mKpiQtdPrazo').textContent = fechadosNoPrazo+' de '+closedWithSLA.length;
+  qs('#mKpiQtdVenc').textContent  = fechadosVencidos+' de '+closedWithSLA.length;
+
+  var pctPrazo = closedWithSLA.length? Math.round((fechadosNoPrazo/closedWithSLA.length)*100):0;
+  var pctVenc  = closedWithSLA.length? Math.round((fechadosVencidos/closedWithSLA.length)*100):0;
+  qs('#mKpiPrazo').textContent = pctPrazo+'%';
+  qs('#mKpiVenc').textContent  = pctVenc+'%';
+}
+
+/* charts */
+function renderCharts(){
+  var byCat={}, byCanal={};
+  data.forEach(d=>{
+    var cat=d.categoria||'Sem categoria';
+    var canal=d.canal||d.transportadora||'N/A';
+    byCat[cat]=(byCat[cat]||0)+1;
+    byCanal[canal]=(byCanal[canal]||0)+1;
+  });
+  var catLabels=Object.keys(byCat);
+  var catVals=catLabels.map(k=>byCat[k]);
+  var canLabels=Object.keys(byCanal);
+  var canVals=canLabels.map(k=>byCanal[k]);
+
+  if(charts.cat) charts.cat.destroy();
+  if(charts.canal) charts.canal.destroy();
+
+  var ctx1=document.getElementById('chartCategoria').getContext('2d');
+  charts.cat=new Chart(ctx1,{
+    type:'doughnut',
+    data:{
+      labels:catLabels,
+      datasets:[{data:catVals}]
+    },
+    options:{
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{color:document.body.classList.contains('theme-light')?'#111827':'#e5e7eb',font:{size:11}}},
+      }
+    }
+  });
+
+  var ctx2=document.getElementById('chartCanal').getContext('2d');
+  charts.canal=new Chart(ctx2,{
+    type:'bar',
+    data:{
+      labels:canLabels,
+      datasets:[{data:canVals}]
+    },
+    options:{
+      scales:{
+        x:{ticks:{color:document.body.classList.contains('theme-light')?'#111827':'#e5e7eb'}},
+        y:{ticks:{color:document.body.classList.contains('theme-light')?'#111827':'#e5e7eb',precision:0,stepSize:1}}
+      },
+      plugins:{
+        legend:{display:false}
+      }
     }
   });
 }
@@ -1186,7 +1595,16 @@ function render(){
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
 
-    return '<tr>\
+    var rowClass='';
+    var isPend=(d.status==='Pendente');
+    var r=d.retomar_em? startOfDay(d.retomar_em):null;
+    var t=today0();
+    if(isPend && r){
+      if(r < t) rowClass='row-pendente-vencida';
+      else if(r.getTime()===t.getTime()) rowClass='row-pendente-hoje';
+    }
+
+    return '<tr'+(rowClass? ' class="'+rowClass+'"':'')+'>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
       <td>'+ (d.assunto||'-') +'</td>\
@@ -1198,63 +1616,47 @@ function render(){
       <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
       <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
       <td class="table-actions">\
-        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
+        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar recebimento" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
         <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>\
         <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>\
-        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
+        <button class="btn-ghost btn-icon" title="Adiar (definir pendência)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
         '+(d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+'\
       </td>\
     </tr>';
   }).join('');
 
-  /* render paginação */
+  /* paginação footer */
   var pager=qs('#pager');
-  var infoText='Mostrando '+(start+1)+'–'+end+' de '+total;
-  var hasPrev=currentPage>1;
-  var hasNext=currentPage<totalPages;
-  var pagesHtml='';
-  // mostra no máx 5 páginas no controle
-  var from=Math.max(1,currentPage-2);
-  var to=Math.min(totalPages,from+4);
-  for(var p=from;p<=to;p++){
-    pagesHtml+='<button class="pager-btn" '+(p===currentPage?'style="font-weight:600;border-color:var(--primary)"':'')+' onclick="goPage('+p+')">'+p+'</button>';
-  }
-  pager.innerHTML=
-    '<span class="muted">'+infoText+'</span>'+
-    '<div class="pager-pages">'+
-      '<button class="pager-btn" onclick="goPage(1)" '+(hasPrev?'':'disabled')+'>«</button>'+
-      '<button class="pager-btn" onclick="goPage('+(currentPage-1)+')" '+(hasPrev?'':'disabled')+'>‹</button>'+
-      pagesHtml+
-      '<button class="pager-btn" onclick="goPage('+(currentPage+1)+')" '+(hasNext?'':'disabled')+'>›</button>'+
-      '<button class="pager-btn" onclick="goPage('+totalPages+')" '+(hasNext?'':'disabled')+'>»</button>'+
-    '</div>';
+  pager.innerHTML='';
+  var info=document.createElement('div');
+  info.textContent='Mostrando '+(start+1)+'–'+(end)+' de '+total+' registros';
+  pager.appendChild(info);
+
+  var nav=document.createElement('div');
+  nav.className='row';
+  var btnPrev=document.createElement('button');
+  btnPrev.className='btn btn-ghost';
+  btnPrev.innerHTML='<i class="fa fa-chevron-left"></i>';
+  btnPrev.disabled=currentPage<=1;
+  btnPrev.onclick=()=>{currentPage--; render();};
+  var pageLabel=document.createElement('span');
+  pageLabel.className='muted';
+  pageLabel.textContent='Página '+currentPage+' de '+totalPages;
+  var btnNext=document.createElement('button');
+  btnNext.className='btn btn-ghost';
+  btnNext.innerHTML='<i class="fa fa-chevron-right"></i>';
+  btnNext.disabled=currentPage>=totalPages;
+  btnNext.onclick=()=>{currentPage++; render();};
+  nav.appendChild(btnPrev);
+  nav.appendChild(pageLabel);
+  nav.appendChild(btnNext);
+  pager.appendChild(nav);
 
   updateSortIcons();
+  renderKPIs();
+  renderCharts();
+  bindSortHandlers();
 }
-
-/* pagina change + sort setter */
-function goPage(p){
-  currentPage = p;
-  render();
-}
-function setSort(field){
-  if(sortField===field){
-    sortDir = (sortDir==='asc'?'desc':'asc');
-  }else{
-    sortField = field;
-    sortDir = (field==='abertoEm' ? 'desc' : 'asc');
-  }
-  currentPage = 1;
-  render();
-}
-
-/* bind cabeçalhos sortáveis */
-qsa('th.sortable').forEach(th=>{
-  th.addEventListener('click', function(){
-    var f=this.dataset.field;
-    if(f) setSort(f);
-  });
-});
 
 /* ========= Render Encerrados ========= */
 function renderClosedPage(){
@@ -1267,735 +1669,292 @@ function renderClosedPage(){
   }).sort((a,b)=>b.abertoEm-a.abertoEm);
 
   var tbody=qs('#tbodyClosed');
-  if(!rows.length){tbody.innerHTML='<tr><td colspan="9" class="muted">Nenhum encerrado encontrado</td></tr>';return;}
+  if(!rows.length){
+    tbody.innerHTML='<tr><td colspan="11" class="muted">Nenhum registro encerrado encontrado</td></tr>';
+    return;
+  }
   tbody.innerHTML=rows.map(d=>{
-    var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
-                 : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
-                 : (d.categoria||'-');
-    return '<tr>\n\
-      <td>'+fmtDate(d.abertoEm)+'</td>\n\
-      <td>'+ (d.solicitante||'-') +'</td>\n\
-      <td>'+ (d.assunto||'-') +'</td>\n\
-      <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\n\
-      <td>'+catCell+'</td>\n\
-      <td>'+ (d.canal||'<span class="muted">—</span>') +'</td>\n\
-      <td>'+prioBadge(d.prioridade||'-')+'</td>\n\
-      <td>'+statusBadge(d.status||'-')+'</td>\n\
-      <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\n\
+    var slaObj=slaStatus(d.prazo,d);
+    var tooltip=slaTooltip(d.prazo,d);
+    var slaPill='<span class="badge" title="'+(tooltip||d.prazo||'')+'">'+slaObj.label+'</span>';
+    var closedAt=getClosedAt(d);
+    return '<tr>\
+      <td>'+fmtDate(d.abertoEm)+'</td>\
+      <td>'+ (d.solicitante||'-') +'</td>\
+      <td>'+ (d.assunto||'-') +'</td>\
+      <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
+      <td>'+ (d.categoria||'-') +'</td>\
+      <td>'+ (d.canal||'<span class="muted">—</span>') +'</td>\
+      <td>'+prioBadge(d.prioridade||'-')+'</td>\
+      <td>'+statusBadge(d.status||'-')+'</td>\
+      <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
+      <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
+      <td>'+ (closedAt? fmtDate(closedAt) : '<span class="muted">—</span>') +'</td>\
     </tr>';
   }).join('');
 }
 
-/* ========= KPIs ========= */
-function getClosedAt(d){
-  // se no futuro trouxermos closedAt direto do banco, usa primeiro
-  if (d.closedAt) {
-    return d.closedAt;
-  }
-  // tenta achar no histórico a primeira entrada que contenha "encerrado"
-  var h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
-  for(var i=0;i<h.length;i++){
-    var it=h[i]; 
-    if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
-  }
-  // fallback: se está encerrado mas não tem histórico marcado,
-  // usa data de abertura só para não "sumir" dos KPIs
-  if (d.status === 'Encerrado') {
-    return d.abertoEm;
-  }
-  return null;
-}
-function renderKPIs(){
-  var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
-  var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
-
-  var baseAbertos=data.filter(d=>ym(new Date(d.abertoEm))===sel);
-  qs('#mKpiAberto').textContent    = baseAbertos.filter(d=>d.status==='Aberto').length;
-  qs('#mKpiTratativa').textContent = baseAbertos.filter(d=>d.status==='Em tratativa').length;
-  qs('#mKpiPendente').textContent  = baseAbertos.filter(d=>d.status==='Pendente').length;
-  qs('#mKpiEncerrado').textContent = baseAbertos.filter(d=>d.status==='Encerrado').length;
-
-  var closedThisMonth=data.map(d=>({d,closedAt:getClosedAt(d)})).filter(x=>x.closedAt && ym(new Date(x.closedAt))===sel);
-  var closedWithSLA=closedThisMonth.filter(x=>!!x.d.prazo);
-  var denom=closedWithSLA.length;
-  var onTime=closedWithSLA.filter(x=>new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)).length;
-  var pctOn=denom?Math.round(onTime/denom*100):0;
-  var pctLate=denom?100-pctOn:0;
-  qs('#mKpiFechadosMes').textContent=closedThisMonth.length;
-  qs('#mKpiFechadosBase').textContent='com SLA: '+denom;
-  qs('#mKpiPctPrazo').textContent=pctOn+'%';
-  qs('#mKpiQtdPrazo').textContent=onTime+' de '+denom;
-  qs('#mKpiPctVenc').textContent=pctLate+'%';
-  qs('#mKpiQtdVenc').textContent=(denom-onTime)+' de '+denom;
-
-  var categorias=[...new Set(data.map(d=>d.categoria||'—'))].sort();
-  function porCat(c){return baseAbertos.filter(d=>d.categoria===c)}
-  var valsAberto=categorias.map(c=>porCat(c).filter(d=>d.status==='Aberto').length);
-  var valsTrat=categorias.map(c=>porCat(c).filter(d=>d.status==='Em tratativa').length);
-  var valsPend=categorias.map(c=>porCat(c).filter(d=>d.status==='Pendente').length);
-  var valsEnc=categorias.map(c=>porCat(c).filter(d=>d.status==='Encerrado').length);
-  var ctx1=document.getElementById('chartAbertos').getContext('2d');
-  if(chartAbertos)chartAbertos.destroy();
-  chartAbertos=new Chart(ctx1,{type:'bar',data:{labels:categorias,datasets:[{label:'Aberto',data:valsAberto},{label:'Em tratativa',data:valsTrat},{label:'Pendente',data:valsPend},{label:'Encerrado',data:valsEnc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-
-  function closedByCat(c){return closedThisMonth.filter(x=>x.d.categoria===c)}
-  var valsPrazo=categorias.map(c=>closedByCat(c).filter(x=>new Date(x.d.prazo+'T23:59:59')>=new Date(x.closedAt)).length);
-  var valsVenc=categorias.map(c=>closedByCat(c).filter(x=>new Date(x.d.prazo+'T23:59:59')< new Date(x.closedAt)).length);
-  var ctx2=document.getElementById('chartConcluidos').getContext('2d');
-  if(chartConcluidos)chartConcluidos.destroy();
-  chartConcluidos=new Chart(ctx2,{type:'bar',data:{labels:categorias,datasets:[{label:'No prazo',data:valsPrazo},{label:'Vencidos',data:valsVenc}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-
-  // NOVO: Shopee x Mercado Livre
-  var qtdShopee = baseAbertos.filter(d=>(d.canal||'')==='Shopee').length;
-  var qtdMeli   = baseAbertos.filter(d=>(d.canal||'')==='Mercado Livre').length;
-  var ctxC=document.getElementById('chartCanal').getContext('2d');
-  if(chartCanal) chartCanal.destroy();
-  chartCanal=new Chart(ctxC,{type:'bar',data:{labels:['Mercado Livre','Shopee'],datasets:[{label:'Abertos',data:[qtdMeli,qtdShopee]}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-
-  var baseTransp=baseAbertos.filter(d=>(d.transportadora||'').trim()!=='');
-  var mapa={}; baseTransp.forEach(d=>{var k=d.transportadora.trim(); mapa[k]=(mapa[k]||0)+1});
-  var transp=Object.keys(mapa).sort((a,b)=>mapa[b]-mapa[a]);
-  var valsTransp=transp.map(t=>mapa[t]);
-  var ctx3=document.getElementById('chartTransp').getContext('2d');
-  if(chartTransp)chartTransp.destroy();
-  chartTransp=new Chart(ctx3,{type:'bar',data:{labels:transp,datasets:[{label:'Abertos',data:valsTransp}]},options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-}
-
-/* ========= Modal + Form (tickets) ========= */
-function openModal(show){var m=qs('#modal'); if(show){m.classList.add('show');m.style.display='grid'}else{m.classList.remove('show');m.style.display='none'}}
-
-/* Admin pode editar tudo; não-admin mantém restrição */
-function setEditable(edit){
-  var form=qs('#frm');
-  form.classList.toggle('readonly',!edit);
-  qsa('#frm input,#frm select,#frm textarea').forEach(el=>{ if(el.id==='ticketId') return; el.readOnly = !edit; el.disabled = !edit; });
-  var me=currentUser()||{};
-  if(!(me.role==='admin')){
-    qs('#solicitante').readOnly = true;
-    qs('#solicitante').disabled = true;
-  }
-}
-function enablePriorityOnly(){
-  qsa('#frm input, #frm select, #frm textarea').forEach(el=>{ if(['ticketId','prioridade'].includes(el.id)) return; el.readOnly=true; el.disabled=true });
-  var p=qs('#prioridade'); p.disabled=false; p.readOnly=false; p.style.pointerEvents='auto'; p.style.opacity='1';
-  qs('#btnSave').classList.remove('hidden');
-}
-function toggleResponsavelByCategoria(){
-  var frota = qs('#categoriaSel').value==='Frota - Transportadora';
-  qs('#responsavelWrap').classList.toggle('hidden', qs('#categoriaSel').value==='SAK');
-  qs('#transportadoraWrap').classList.toggle('hidden', !frota);
-}
-function resetForm(){
-  qs('#ticketId').value='';
-  qs('#solicitante').value=(currentUser()||{}).name||'';
-  qs('#categoriaSel').value='Frota - Transportadora';
-  qs('#assunto').value=''; qs('#prioridade').value='Média'; qs('#descricao').value='';
-  qs('#status').value='Aberto'; qs('#responsavel').value=''; qs('#transportadora').value='';
-  qs('#prazo').value=''; qs('#codigo').value=''; qs('#canalSel').value='';
-  qs('#chatHistory').innerHTML=''; qs('#chatText').value='';
-  qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
-  qs('#btnConfirm').disabled=true; qs('#btnSave').classList.remove('hidden');
-  setEditable(true); toggleResponsavelByCategoria();
-}
-
-function renderTicketChat(list){
-  const u = (currentUser()||{}).name || '';
-  const chunks = [];
-  let lastDay = null, lastWho = null;
-  (list||[]).slice().sort((a,b)=>a.at-b.at).forEach(h=>{
-    const d   = new Date(h.at);
-    const day = d.toISOString().slice(0,10);
-    const who = (h.user===u ? 'me' : 'them');
-    if (day !== lastDay){
-      chunks.push({ t:'sep', label: d.toLocaleDateString('pt-BR') });
-      lastDay = day; lastWho = null;
-    }
-    chunks.push({
-      t:'msg',
-      who,
-      txt: (h.txt||''),
-      time: d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
-      grouped: (who===lastWho)
-    });
-    lastWho = who;
-  });
-  qs('#chatHistory').innerHTML = chunks.map(c=>{
-    if (c.t==='sep') return `<div class="sep"><span>${c.label}</span></div>`;
-    return `<div class="bubble ${c.who}${c.grouped?' grouped':''}">${escapeHtml(c.txt)}<time>${c.time}</time></div>`;
-  }).join('');
-  const div = qs('#chatHistory');
-  if (div) div.scrollTop = div.scrollHeight;
-}
-
-async function loadTicketChat(ticketId){
-  if (!supa) return;
-  const d    = Array.isArray(data) ? data.find(x => x.id === ticketId) : null;
-  const key1 = (ticketId + "");
-  let   key2 = d && d.codigo ? (d.codigo + "") : null;
-  if (!key2) {
-    const tr = await supa.from('tickets').select('codigo').eq('id', ticketId).single();
-    if (!tr.error && tr.data && tr.data.codigo) key2 = tr.data.codigo + "";
-  }
-  const keys = (key2 && key2 !== key1) ? [key1, key2] : [key1];
-  const r = await supa
-    .from('messages')
-    .select('ticket_id, body, sender_name, created_at')
-    .in('ticket_id', keys)
-    .order('created_at', { ascending: true });
-  if (r.error){ console.error('loadTicketChat error:', r.error, 'keys=', keys); renderTicketChat([]); return; }
-  const list = (r.data || []).map(m => ({
-    at:  new Date(m.created_at).getTime(),
-    txt: m.body,
-    user: (m.sender_name || '—')
-  }));
-  if (d) d.historico = list;
-  renderTicketChat(list);
-}
-
-function setSelectValue(sel,value){
-  if(!sel)return; var has=[].some.call(sel.options,o=>o.value===value);
-  if(value && !has){var o=document.createElement('option');o.value=value;o.textContent=value+' (legado)'; sel.appendChild(o)}
-  sel.value=value||sel.value;
-}
-function openNew(){resetForm();qs('#modalTitle').textContent='Nova solicitação';openModal(true)}
-async function subscribeTicketChannel(ticketId){
-  if (!supa) return;
-  if (ticketChannels.has(ticketId)) return;
-  var ch = supa.channel('ticket-'+ticketId);
-  ch.on('broadcast', { event: 'chat' }, payload=>{
-    var d = data.find(x=>x.id === ticketId);
-    if (!d) return;
-    var p = (payload && payload.payload) ? payload.payload : {};
-    var at = p.at, txt = p.txt, user = p.user;
-    var exists = (d.historico||[]).some(h=>h.at===at && h.txt===txt && h.user===user);
-    if (!exists){
-      d.historico.push({ at: at, txt: txt, user: user });
-      if (qs('#ticketId').value === ticketId) loadTicketChat(ticketId);
-      render();
-    }
-  });
-  await ch.subscribe();
-  ticketChannels.set(ticketId, ch);
-}
-var ticketChannels = new Map();
-async function openEdit(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  resetForm(); qs('#modalTitle').textContent='Editar solicitação'; qs('#ticketId').value=d.id;
-  qs('#solicitante').value=d.solicitante||((currentUser()||{}).name||'');
-  qs('#categoriaSel').value=d.categoria||'Frota - Transportadora';
-  setSelectValue(qs('#assunto'), d.assunto||''); qs('#prioridade').value=d.prioridade||'Média';
-  qs('#descricao').value=d.descricao||''; qs('#status').value=d.status||'Aberto'; qs('#responsavel').value=d.responsavel||'';
-  qs('#prazo').value=d.prazo||''; qs('#codigo').value=d.codigo||''; qs('#transportadora').value=d.transportadora||'';
-  qs('#canalSel').value=d.canal||'';
-  await loadTicketChat(d.id); qs('#btnDelete').style.display=((currentUser()||{}).role==='admin')?'inline-flex':'none';
-  qs('#btnConfirm').disabled=d.status!=='Aberto';
-
-  var isAdmin = ((currentUser()||{}).role === 'admin');
-  if(isAdmin){ setEditable(true); } else { setEditable(false); enablePriorityOnly(); }
-
-  toggleResponsavelByCategoria();
-  await supaMarkRead(d.id); await subscribeTicketChannel(d.id); render(); openModal(true);
-}
-function collectForm(){
-  var id=qs('#ticketId').value||uid(); var now=Date.now();
-  var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now;
-  var prazo=ensureSLA(qs('#prazo').value,qs('#prioridade').value,abertoEm);
-  var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
-  return {
-    id:id, abertoEm:abertoEm,
-    solicitante:qs('#solicitante').value.trim(),
-    categoria:categoria, assunto:qs('#assunto').value.trim(),
-    prioridade:qs('#prioridade').value,
-    descricao:qs('#descricao').value.trim(),
-    status:qs('#status').value,
-    responsavel:responsavel,
-    prazo:prazo,
-    codigo:qs('#codigo').value.trim(),
-    transportadora:qs('#transportadora').value.trim(),
-    canal: qs('#canalSel').value.trim(),
-    pendente: exists? !!exists.pendente : false,
-    retomar_em: exists? (exists.retomar_em||'') : '',
-    openedBy: exists? exists.openedBy : ((currentUser()||{}).id || null),
-    historico: exists? exists.historico : [{at:abertoEm,txt:'Ticket aberto por '+(qs('#solicitante').value.trim()||'usuário'),user:(qs('#solicitante').value.trim()||'usuário')}]
-  }
-}
-async function save(e){
-  e.preventDefault();
-
-  var solicitante    = qs('#solicitante').value.trim();
-  var categoria      = qs('#categoriaSel').value;
-  var prioridade     = qs('#prioridade').value;
-  var assunto        = qs('#assunto').value.trim();
-  var status         = qs('#status').value;
-  var codigo         = qs('#codigo').value.trim();
-  var canal          = qs('#canalSel').value.trim();
-  var descricao      = qs('#descricao').value.trim();
-  var transportadora = qs('#transportadora').value.trim();
-  var isFrota        = (categoria === 'Frota - Transportadora');
-
-  // validação dos campos obrigatórios
-  if (
-    !solicitante ||
-    !categoria ||
-    !prioridade ||
-    !assunto ||
-    !status ||
-    !codigo ||
-    !canal ||
-    !descricao ||
-    (isFrota && !transportadora)
-  ){
-    alert('Preencha todos os campos obrigatórios antes de salvar. Para categoria "Frota - Transportadora", Transportadora também é obrigatória.');
-    return;
-  }
-
-  // Responsável pode ficar em branco (será definido no Confirmar)
-
-  var rec = collectForm();
-
-  var i = data.findIndex(x => x.id === rec.id);
-  if (i >= 0) {
-    data[i] = Object.assign({}, data[i], rec);
-  } else {
-    data.push(rec);
-  }
-
-  await supaUpsertTicket(rec);
-
-  await addHistory(
-    rec.id,
-    (i >= 0 ? 'Atualizado' : 'Criado') + ' por ' + (((currentUser() || {}).name) || 'sistema')
-  );
-
+/* ========= Ações rápidas na tabela ========= */
+function openEdit(id){
+  const t=findTicket(id);
+  if(!t) return;
+  editingId=id;
+  fillForm(t);
+  openModal();
+  // marca como lido (para badge de unread)
+  lastReadMap[id]=Date.now();
   render();
-  openEdit(rec.id);
 }
-async function addHistory(id,text,ts){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  var stamp = ts || Date.now();
-  d.historico=d.historico||[]; d.historico.push({at:stamp,txt:text,user:((currentUser()||{}).name)||''});
-  await loadTicketChat(d.id);
-  await supaAddMessage(id,text);
-}
-async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false)}
-
-async function snoozeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  var pad=n=>String(n).padStart(2,'0');
-  var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
-  var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
-  d.pendente=true; d.retomar_em=val; d.status='Pendente';
-  await supaUpsertTicket(d); await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR')); render();
-}
-async function resumeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
-  await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
-}
-
 async function closeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
-  if(d.status==='Encerrado'){
-    toast('Esta solicitação já está encerrada.');
-    return;
-  }
-  if(!confirm('Deseja encerrar esta solicitação?')) return;
-
-  var me=currentUser()||{};
-  var meName=me.name||'usuário';
-
-  // garante responsável definido
-  if(!d.responsavel){
-    d.responsavel = meName;
-  }
-  // garante SLA definido
-  d.prazo = ensureSLA(d.prazo, d.prioridade, d.abertoEm);
-
-  // remove pendência/retomada e marca como encerrado
-  d.pendente = false;
-  d.retomar_em = '';
-  d.status = 'Encerrado';
-
-  await supaUpsertTicket(d);
-  await addHistory(id,'Encerrado por '+meName);
+  const t=findTicket(id); if(!t) return;
+  if(!confirm('Encerrar esta solicitação?')) return;
+  t.status='Encerrado';
+  addHistoryEntry(t,'Solicitação encerrada.');
+  saveLocal();
+  await supaUpsertTicket(t);
   render();
 }
-async function confirmTicket(id){
-  var d = data.find(x => x.id === id);
-  if (!d) return;
-
-  // só faz sentido confirmar se ainda está em Aberto
-  if (d.status !== 'Aberto') {
-    toast('Ticket já não está em Aberto.');
-    return;
-  }
-
-  var me     = currentUser() || {};
-  var meName = me.name || 'usuário';
-  var oldStatus = d.status;
-
-  // define responsável automaticamente para quem confirmou
-  if (d.categoria === 'SAK' || d.categoria === 'Frota - Transportadora') {
-    d.responsavel = meName;
-    toast('Responsável definido: ' + d.responsavel);
-  }
-
-  d.status = 'Em tratativa';
-
-  await supaUpsertTicket(d);
-
-  await addHistory(
-    id,
-    'Confirmado por ' + meName +
-    ' — responsável definido para ' + (d.responsavel || 'não definido') +
-    ' (status ' + oldStatus + ' ➜ Em tratativa)'
-  );
-
+function confirmTicket(id){
+  const t=findTicket(id); if(!t) return;
+  t.status='Em tratativa';
+  addHistoryEntry(t,'Recebida e em tratativa.');
+  saveLocal();
+  supaUpsertTicket(t);
+  render();
+}
+function snoozeTicket(id){
+  const t=findTicket(id); if(!t) return;
+  const daysStr=prompt('Em quantos dias úteis deseja retomar? (ex: 2)');
+  if(!daysStr) return;
+  const days=parseInt(daysStr,10);
+  if(isNaN(days)||days<=0){alert('Informe um número válido');return;}
+  const base=new Date();
+  const retomar=addBusinessDays(base,days);
+  t.status='Pendente';
+  t.retomar_em=retomar.getTime();
+  addHistoryEntry(t,'Marcado como pendente. Retomar em '+retomar.toLocaleDateString('pt-BR')+'.');
+  saveLocal();
+  supaUpsertTicket(t);
+  render();
+}
+function resumeTicket(id){
+  const t=findTicket(id); if(!t) return;
+  t.status='Em tratativa';
+  t.retomar_em=null;
+  addHistoryEntry(t,'Retomado da pendência.');
+  saveLocal();
+  supaUpsertTicket(t);
   render();
 }
 
-/* Bindings tickets */
-document.getElementById('btnDelete').onclick=function(){removeTicket(qs('#ticketId').value)};
-document.getElementById('btnConfirm').onclick=async function(){
-  var id=qs('#ticketId').value; if(!id){alert('Salve primeiro para confirmar.');return;} 
-  await confirmTicket(id); await openEdit(id)
-};
-document.getElementById('frm').addEventListener('submit',save); 
-document.getElementById('btnSave').addEventListener('click',save);
-document.getElementById('closeModal').addEventListener('click',function(){openModal(false)}); 
-document.getElementById('categoriaSel').addEventListener('change',toggleResponsavelByCategoria);
-document.getElementById('btnNew').addEventListener('click',function(e){e.preventDefault();e.stopPropagation();openNew()});
-
-/* filtros + salvar filtros */
-['#fStatus','#fPrio','#fCategoria','#fSLA','#fPend'].forEach(id=>{
-  qs(id).addEventListener('change',function(){
-    saveFilters();
-    currentPage=1;
-    render();
+/* ========= Filtros / eventos gerais ========= */
+document.addEventListener('DOMContentLoaded',()=>{
+  ['fSearch','fStatus','fPrio','fCategoria','fSLA','fPend'].forEach(id=>{
+    const el=qs('#'+id); if(el) el.addEventListener('input',()=>{currentPage=1;render();});
   });
-});
-qs('#fSearch').addEventListener('input',debounce(function(){
-  saveFilters();
-  currentPage=1;
-  render();
-},200));
-
-qs('#btnClear').onclick=function(){
-  qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';
-  qs('#fSLA').value='';qs('#fPend').value='';
-  qs('#fMine').checked=false;qs('#tgMine').classList.remove('active');
-  qs('#fHideClosed').checked=true;qs('#tgHideClosed').classList.add('active');
-  saveFilters();
-  currentPage=1;
-  render()
-};
-
-/* Toggle compactos (ícones) */
-qs('#tgMine').onclick=function(){
-  var c=qs('#fMine');c.checked=!c.checked;
-  this.classList.toggle('active',c.checked);
-  saveFilters();
-  currentPage=1;
-  render()
-};
-qs('#tgHideClosed').onclick=function(){
-  var c=qs('#fHideClosed');c.checked=!c.checked;
-  this.classList.toggle('active',c.checked);
-  saveFilters();
-  currentPage=1;
-  render()
-};
-
-/* Chat do ticket (instant) */
-async function sendChat(){
-  var id = qs('#ticketId').value;
-  if (!id) {
-    alert('Salve primeiro para conversar.');
-    return;
-  }
-
-  var txt = qs('#chatText').value;
-  if (!txt || !txt.trim()) return;
-
-  var ts = Date.now();
-
-  // Só registra a mensagem no histórico/chat. NÃO muda status.
-  await addHistory(id, txt.trimEnd(), ts);
-  qs('#chatText').value = '';
-
-  await supaMarkRead(id);
-  render();
-
-  var ch = ticketChannels.get(id);
-  if (ch) {
-    ch.send({
-      type: 'broadcast',
-      event: 'chat',
-      payload: {
-        at: ts,
-        txt: txt.trimEnd(),
-        user: ((currentUser() || {}).name || '')
-      }
-    });
-  }
-
-  var divEl = qs('#chatHistory');
-  if (divEl) divEl.scrollTop = divEl.scrollHeight;
-}
-  
-qs('#btnSendChat').onclick=sendChat; 
-qs('#chatText').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    if(e.shiftKey){
-      // permite quebra de linha
-      return;
-    }
-    e.preventDefault();
-    sendChat();
-  }
+  ['fMine','fHideClosed'].forEach(id=>{
+    const el=qs('#'+id); if(el) el.addEventListener('change',()=>{currentPage=1;render();});
+  });
+  qs('#fClosed').addEventListener('input',renderClosedPage);
+  qs('#kpiMonth').addEventListener('change',()=>{renderKPIs();renderCharts();});
 });
 
-/* Export XLSX (mantive ID no export, útil para auditoria) */
-function buildHistoricoString(hist){return (hist||[]).sort((a,b)=>a.at-b.at).map(h=>new Date(h.at).toLocaleString('pt-BR')+' — '+(h.user||'')+': '+(h.txt||'')).join('\n')}
-function exportXLSX(){
-  var rows=data.slice().sort((a,b)=>{const pr=p=>p==='Alta'?0:(p==='Média'?1:2); return pr(a.prioridade)-pr(b.prioridade) || b.abertoEm-a.abertoEm});
-  var header=['ID','Aberto em','Solicitante','Categoria','Assunto','Prioridade','Descrição','Status','Responsável','Prazo (SLA)','Código cliente','Transportadora','Canal','Pendente?','Retomar em','Histórico (chat)'];
-  var aoa=[header];
-  rows.forEach(r=>aoa.push([
-    r.id, new Date(r.abertoEm), r.solicitante||'', r.categoria||'', r.assunto||'', r.prioridade||'', r.descricao||'', r.status||'', r.responsavel||'',
-    r.prazo?new Date(r.prazo+'T00:00:00'):'', r.codigo||'', r.transportadora||'', r.canal||'', 
-    r.status==='Pendente'?'Sim':'Não', r.retomar_em||'', buildHistoricoString(r.historico)
-  ]));
-  var ws=XLSX.utils.aoa_to_sheet(aoa,{cellDates:true}); 
-  ws['!cols']=[
-    {wch:8},{wch:19},{wch:14},{wch:22},{wch:24},
-    {wch:22},{wch:28},{wch:14},{wch:12},{wch:12},
-    {wch:16},{wch:18},{wch:10},{wch:10},{wch:12},{wch:60}
-  ];
-  var wb=XLSX.utils.book_new(); 
-  XLSX.utils.book_append_sheet(wb,ws,'Tickets'); 
-  XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
-}
-qs('#btnExportXLSX').onclick=exportXLSX;
+/* ========= DM (chat entre usuários) ========= */
+let dmOpen=false;
+let dmTarget=null;
+let dmCache=[];
+let dmLastRead={};
+let dmSeen=new Set();
 
-/* Navegação: KPIs / Encerrados */
-qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#closedPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs();setHeadH()};
-qs('#btnClosed').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.add('hidden');qs('#closedPage').classList.remove('hidden');renderClosedPage();setHeadH()};
-qs('#btnBackList').onclick=function(){qs('#closedPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
-qs('#btnBackList2').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
-qs('#fClosed').addEventListener('input',debounce(renderClosedPage,200));
-
-/* Diagnóstico */
-function showDiag(){
-  var b=qs('#diagBar'); b.classList.remove('hidden');
-  qs('#diagEnv').textContent   = 'Projeto: '+(SUPA_URL||'N/D');
-  var cu=(currentUser()||{}).id||'sem sessão';
-  qs('#diagUser').textContent  = 'Usuário: '+cu;
-  qs('#diagCount').textContent = 'Tickets retornados: '+(data?data.length:0);
-  qs('#diagErr').textContent   = supaReady()? '' : 'config.js ausente/sem chaves';
+function dmKey(meId,otherId){return 'ci_dm_last_'+meId+'_'+otherId;}
+function loadDmLast(){
+  const me=currentUser(); if(!me) return;
+  dmLastRead={};
+  fakeUsers().forEach(u=>{
+    if(u.id===me.id) return;
+    const key=dmKey(me.id,u.id);
+    const raw=localStorage.getItem(key);
+    dmLastRead[u.id]= raw ? parseInt(raw,10):0;
+  });
 }
-qs('#btnDiag').onclick=showDiag; 
-qs('#diagClose').onclick=function(){qs('#diagBar').classList.add('hidden')};
-
-/* ========= Perfis / DM ========= */
-async function loadProfiles(){
-  if(!supaReady())return;
-  var r=await supa.from('profiles').select('id,display_name,role,username').order('display_name');
-  profiles=r.data||[];
+function saveDmLast(userId,timestamp){
+  const me=currentUser(); if(!me)return;
+  localStorage.setItem(dmKey(me.id,userId), String(timestamp));
+  dmLastRead[userId]=timestamp;
 }
-function renderDmUsers(){
-  var me=currentUser(); var term=(qs('#dmSearch').value||'').toLowerCase();
-  var list=profiles.filter(p=>p.id!==me.id && ((p.display_name||'').toLowerCase().indexOf(term)>-1));
-  var host=qs('#dmUsers');
-  host.innerHTML=list.map(p=>{
-    var unread=countDmUnread(p.id);
-    var badge=unread>0?'<span class="badge-unread" style="position:static;margin-left:auto">'+unread+'</span>':'';
-    return '<div class="item" onclick="openDm(\''+p.id+'\')"><i class="fa fa-user"></i> <div>'+escapeHtml(p.display_name||p.username||'')+'</div>'+badge+'</div>';
-  }).join('') || '<div class="item muted">Nenhum usuário encontrado</div>';
+function dmLastReadFor(userId){
+  const me=currentUser(); if(!me)return 0;
+  return dmLastRead[userId] || parseInt(localStorage.getItem(dmKey(me.id,userId))||'0',10);
+}
+function dmUnreadCount(userId){
+  const me=currentUser(); if(!me) return 0;
+  const last=dmLastReadFor(userId);
+  return dmCache.filter(m=>
+    (m.sender===userId && m.receiver===me.id && new Date(m.created_at).getTime()>last)
+  ).length;
 }
 function setDmBadge(){
-  dmUnread = profiles.reduce((acc,p)=>acc + countDmUnread(p.id), 0);
-  var b=qs('#dmBadge'); if(dmUnread>0){b.style.display='inline-grid'; b.textContent=dmUnread}else{b.style.display='none'}
+  const me=currentUser(); if(!me) return;
+  const total=fakeUsers().filter(u=>u.id!==me.id).reduce((sum,u)=>sum+dmUnreadCount(u.id),0);
+  const badge=qs('#badgeDm');
+  if(total>0){
+    badge.textContent=total;
+    badge.classList.remove('hidden');
+  }else{
+    badge.classList.add('hidden');
+  }
 }
-function dmLastRead(userId){var me=currentUser(); return +(localStorage.getItem(dmKey(me.id,userId))||0)}
-function markDmRead(userId){var me=currentUser(); localStorage.setItem(dmKey(me.id,userId), Date.now().toString()); setDmBadge(); renderDmUsers()}
-function msgsWith(userId){var me=currentUser(); return dmCache.filter(m=>(m.sender===me.id && m.receiver===userId) || (m.sender===userId && m.receiver===me.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))}
-function countDmUnread(userId){var last=dmLastRead(userId); return msgsWith(userId).filter(m=>m.sender===userId && new Date(m.created_at).getTime()>last ).length}
+function renderDmUsers(){
+  const me=currentUser(); if(!me) return;
+  const box=qs('#dmUsers');
+  const users=fakeUsers().filter(u=>u.id!==me.id);
+  box.innerHTML=users.map(u=>{
+    const unread=dmUnreadCount(u.id);
+    const badge=unread>0?'<span class="badge-unread" style="transform:scale(.8);margin-left:auto">'+unread+'</span>':'';
+    const active=(dmTarget && dmTarget.id===u.id);
+    return '<div class="dm-user'+(active?' active':'')+'" data-id="'+u.id+'">\
+      <span>'+escapeHtml(u.name)+'</span>'+badge+'\
+    </div>';
+  }).join('');
+  qsa('.dm-user',box).forEach(el=>{
+    el.onclick=()=>{
+      const id=el.getAttribute('data-id');
+      const u=fakeUsers().find(x=>x.id===id);
+      if(u){
+        dmTarget=u;
+        renderDmUsers();
+        renderDmChat(u);
+      }
+    };
+  });
+}
+function renderDmChat(user){
+  const me=currentUser(); if(!me) return;
+  const box=qs('#dmMessages');
+  const msgs=msgsWith(user.id);
+  if(!msgs.length){
+    box.innerHTML='<div class="muted">Nenhuma mensagem ainda. Inicie uma conversa com '+escapeHtml(user.name)+'.</div>';
+  }else{
+    box.innerHTML=msgs.map(m=>{
+      const isMe=(m.sender===me.id);
+      const side=isMe?'me':'other';
+      const dt=new Date(m.created_at).toLocaleString('pt-BR');
+      return '<div class="dm-bubble '+side+'">\
+        <div>'+escapeHtml(m.body||'')+'</div>\
+        <div class="dm-meta">'+(isMe?'Você':escapeHtml(user.name))+' • '+dt+'</div>\
+      </div>';
+    }).join('');
+  }
+  box.scrollTop=box.scrollHeight;
+  markDmRead(user.id);
+}
+function msgsWith(userId){
+  var me=currentUser(); if(!me) return [];
+  return dmCache.filter(m=>
+    (m.sender===me.id && m.receiver===userId) ||
+    (m.sender===userId && m.receiver===me.id)
+  ).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+}
+function markDmRead(userId){
+  const me=currentUser(); if(!me)return;
+  const now=Date.now();
+  saveDmLast(userId,now);
+  setDmBadge();
+}
+async function sendDm(){
+  const me=currentUser(); if(!me || !dmTarget) return;
+  const inp=qs('#dmInput');
+  const text=inp.value.trim();
+  if(!text) return;
+  inp.value='';
+  if(!supaReady()){
+    toast('DM requer Supabase configurado (tabela dm_messages)');
+    return;
+  }
+  const { data: auth } = await supa.auth.getUser();
+  const senderId = auth?.user?.id || me.id;
+  const receiverId = dmTarget.id;
 
+  const { data, error } = await supa
+    .from('dm_messages')
+    .insert({
+      sender:senderId,
+      receiver:receiverId,
+      body:text
+    })
+    .select();
+
+  if(error){
+    console.error(error); toast('Erro ao enviar DM');
+    return;
+  }
+  if(data && data[0]){
+    dmCache.push(data[0]);
+    renderDmChat(dmTarget);
+    setDmBadge();
+  }
+}
 async function loadDM(silent){
   if(!supaReady())return;
   var me=currentUser(); if(!me) return;
   var r=await supa.from('dm_messages').select('id,sender,receiver,body,created_at').or('sender.eq.'+me.id+',receiver.eq.'+me.id).order('created_at',{ascending:true});
-  if(r.error){ if(!silent){toast('DM indisponível. Crie a tabela "dm_messages" (sender uuid, receiver uuid, body text, created_at).')} return; }
+  if(r.error){ if(!silent){toast('DM indisponível. Crie a tabela dm_messages (id uuid, sender uuid, receiver uuid, body text, created_at).')} return; }
   dmCache=r.data||[];
   setDmBadge(); renderDmUsers(); if(dmTarget) renderDmChat(dmTarget);
 }
 function onDmInsert(row){
   var sig = [row.sender,row.receiver,row.body].join('|');
   if (dmSeen.has(sig)) return;
-  markSeen(sig);
+  dmSeen.add(sig);
   var me=currentUser(); if(!me) return;
-  if(row.sender===me.id || row.receiver===me.id){
-    dmCache.push(row);
-    if(dmTarget && (row.sender===dmTarget || row.receiver===dmTarget)) renderDmChat(dmTarget);
-    setDmBadge(); renderDmUsers();
-    if(row.receiver===me.id && (!dmTarget || dmTarget!==row.sender)){
-      toast('Nova mensagem de usuário');
-      if(document.visibilityState!=='visible'){
-        showNativeNotification('Nova mensagem direta',{
-          body:(row.body||'').slice(0,80),
-          tag:'dm-'+row.sender
-        });
-      }
-    }
+  dmCache.push(row);
+  if(dmTarget && (row.sender===dmTarget.id || row.receiver===dmTarget.id)){
+    renderDmChat(dmTarget);
   }
+  setDmBadge();
 }
-async function subscribeDmChannel(otherId){
-  if (!supa) return;
-  var me = currentUser(); if (!me) return;
-  var room = [me.id, otherId].sort().join('_');
-  if (dmChannels.has(room)) return;
+function initDmRealtime(){
+  if(!supaReady()) return;
+  const me=currentUser(); if(!me) return;
+  const channel = supa
+    .channel('dm-realtime')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},payload=>{
+      onDmInsert(payload.new);
+    })
+    .subscribe();
+}
 
-  var ch = supa.channel('dm-'+room);
-  ch.on('broadcast', { event:'dm' }, payload=>{
-    var m = payload && payload.payload ? payload.payload : {};
-    var sig = [m.sender,m.receiver,m.body].join('|');
-    if (dmSeen.has(sig)) return;
-    markSeen(sig);
-    dmCache.push({ id: m.id||uid(), sender: m.sender, receiver: m.receiver, body: m.body, created_at: new Date().toISOString() });
-    if (dmTarget && (m.sender===dmTarget || m.receiver===dmTarget)) renderDmChat(dmTarget);
-    setDmBadge(); renderDmUsers();
-  });
-  await ch.subscribe();
-  dmChannels.set(room, ch);
-}
-var dmChannels = new Map();
-function openDm(userId){
-  dmTarget=userId;
-  var user=profiles.find(p=>p.id===userId);
-  qs('#dmHeader').textContent='Conversando com: ' + (user? (user.display_name||user.username||user.id) : userId);
-  qs('#dmText').disabled=false; qs('#dmSend').disabled=false;
-  renderDmChat(userId); subscribeDmChannel(userId); markDmRead(userId);
-}
-function renderDmChat(userId){
-  const me = currentUser();
-  const hist = qs('#dmHistory');
-  const list = msgsWith(userId).sort((a,b)=> new Date(a.created_at)-new Date(b.created_at));
-
-  const chunks = [];
-  let lastDay = null, lastWho = null;
-  list.forEach(m=>{
-    const d = new Date(m.created_at);
-    const dayKey = d.toISOString().slice(0,10);
-    if(dayKey !== lastDay){
-      chunks.push({type:'sep', label: d.toLocaleDateString('pt-BR')});
-      lastDay = dayKey;
-      lastWho = null;
+document.addEventListener('DOMContentLoaded',()=>{
+  loadDmLast();
+  qs('#btnDmToggle').addEventListener('click',()=>{
+    dmOpen=!dmOpen;
+    qs('#dmPanel').classList.toggle('hidden',!dmOpen);
+    if(dmOpen){
+      renderDmUsers();
+      setDmBadge();
     }
-    const who = (m.sender===me.id) ? 'me' : 'them';
-    const grouped = (who === lastWho);
-    const time = d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    chunks.push({type:'msg', who: who, body: (m.body||''), time: time, grouped: grouped});
-    lastWho = who;
+  });
+  qs('#btnCloseDm').addEventListener('click',()=>{
+    dmOpen=false;
+    qs('#dmPanel').classList.add('hidden');
+  });
+  qs('#dmSend').addEventListener('click',sendDm);
+  qs('#dmInput').addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'){ev.preventDefault();sendDm();}
   });
 
-  hist.innerHTML = chunks.length ? chunks.map(c=>{
-    if(c.type==='sep'){
-      return `<div class="dm-sep"><span>${c.label}</span></div>`;
-    }
-    const cls = `bubble ${c.who} dm${c.grouped ? ' grouped':''}`;
-    const txt = escapeHtml(c.body).replace(/\r?\n/g,'\n');
-    return `<div class="${cls}"><div>${txt}</div><time>${c.time}</time></div>`;
-  }).join('') : '<div class="muted small" style="padding:10px">Sem mensagens. Inicie a conversa.</div>';
+  loadDM(true);
+  initDmRealtime();
+});
 
-  requestAnimationFrame(()=>{
-    const nearBottom = (hist.scrollHeight - hist.clientHeight - hist.scrollTop) < 120;
-    if(nearBottom) hist.scrollTop = hist.scrollHeight;
-  });
+/* ========= Init ========= */
+function renderAll(){
+  render();
+  renderClosedPage();
 }
-async function sendDM(){
-  const txt = (qs('#dmText').value||'').trimEnd();
-  if(!txt || !dmTarget) return;
-
-  const me=currentUser();
-  const payload={sender:me.id,receiver:dmTarget,body:txt};
-  const r=await supa.from('dm_messages').insert(payload);
-  if(r.error){toast('Não foi possível enviar DM (policies/estrutura).');return;}
-
-  qs('#dmText').value='';
-  const room = [me.id, dmTarget].sort().join('_');
-  const ch = dmChannels.get(room);
-  if (ch){
-    const sig = [me.id, dmTarget, txt].join('|'); markSeen(sig);
-    ch.send({ type:'broadcast', event:'dm', payload:{ sender: me.id, receiver: dmTarget, body: txt, id: uid() } });
-  }
-  const hist = qs('#dmHistory');
-  requestAnimationFrame(()=>{ hist.scrollTop = hist.scrollHeight; });
-}
-
-/* DM bindings */
-qs('#dmSend').onclick=sendDM; 
-qs('#dmText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendDM()}});
-qs('#dmFab').onclick=function(){qs('#dmPanel').classList.toggle('show'); renderDmUsers(); if(dmTarget) markDmRead(dmTarget)};
-qs('#dmClose').onclick=function(){qs('#dmPanel').classList.remove('show')};
-qs('#dmSearch').addEventListener('input',debounce(renderDmUsers,150));
-
-/* Tema binding */
-qs('#btnTheme').onclick=function(){
-  var current = document.body.classList.contains('theme-light') ? 'light' : 'dark';
-  applyTheme(current==='light'?'dark':'light');
-};
-
-/* ========= Boot & Login ========= */
-function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
-function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
-
-async function boot(){ 
-  initTheme();
-  var u=currentUser(); 
-  if(!u){showLogin();return;} 
-  showApp(); 
-  await loadProfiles(); 
-  await loadFromSupabase(); 
-  await loadDM(true); 
-  loadFilters();
-  render(); 
-  setupRealtime(); 
-  setHeadH();
-}
-boot();
-
-qs('#btnLogout').onclick=async function(){ if(supaReady()) await supa.auth.signOut(); clearSession(); showLogin()};
-
-qs('#btnLogin').onclick=async function(){
-  var login=(qs('#loginUser').value||'').trim().toLowerCase();
-  var pass=qs('#loginPass').value;
-  if(!supaReady()){alert('config.js não carregado ou incompleto (SUPABASE_URL/KEY).');return;}
-  var email=login.indexOf('@')>-1?login:(login+'@'+DEFAULT_EMAIL_DOMAIN);
-
-  var authResp=await supa.auth.signInWithPassword({email:email,password:pass});
-  if(authResp.error){alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
-
-  var profileResp=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).maybeSingle();
-  var profile=profileResp.data;
-  if(!profile){
-    var username=email.split('@')[0];
-    var display_name=username.replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
-    await supa.from('profiles').upsert({id:authResp.data.user.id,username:username,display_name:display_name,role:'operador'});
-    var pr2=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).single(); profile=pr2.data;
-  }
-  var user={id:authResp.data.user.id,username:profile.username,name:profile.display_name,role:profile.role};
-  setSession(user); 
-  await loadProfiles(); 
-  await loadFromSupabase(); 
-  await loadDM(true); 
-  showApp(); 
-  loadFilters();
-  render(); 
-  setupRealtime(); 
-  setHeadH();
-  askNotifyPermission();
-};
+document.addEventListener('DOMContentLoaded',()=>{
+  supaLoadTickets();
+});
 
 /* expose debug/global */
 window.openEdit=openEdit; 
@@ -2003,10 +1962,9 @@ window.closeTicket=closeTicket;
 window.confirmTicket=confirmTicket;
 window.snoozeTicket=snoozeTicket; 
 window.resumeTicket=resumeTicket;
-window.openDm=openDm;
-window.goPage=goPage;
+window.openDm=()=>{dmOpen=true;qs('#dmPanel').classList.remove('hidden');renderDmUsers();};
+window.goPage=pg=>{currentPage=pg;render();};
 window.setSort=setSort;
 </script>
 </body>
 </html>
-
