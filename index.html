@@ -109,7 +109,6 @@
     grid-template-columns:1.2fr 1fr 1fr 1fr .9fr 1fr auto auto;
     gap:10px
   }
-
   /* responsividade filtros */
   @media (max-width: 1200px){
     .filters{
@@ -129,6 +128,8 @@
       min-width:0;
     }
   }
+
+
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:12px;
     border:1px solid var(--border);background:#0f1319;color:var(--text);
@@ -182,7 +183,22 @@ body.theme-light .row-pendente-hoje{
     background:rgba(255,191,71,.14);
 }
 
-  .badge{
+  /* destaque SLA geral */
+  .row-sla-late{
+    border-left:4px solid var(--danger);
+    background:rgba(255,93,93,.08);
+  }
+  .row-sla-risk{
+    border-left:4px solid var(--warning);
+    background:rgba(255,191,71,.08);
+  }
+  body.theme-light .row-sla-late{
+    background:rgba(255,93,93,.12);
+  }
+  body.theme-light .row-sla-risk{
+    background:rgba(255,191,71,.16);
+  }
+.badge{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 10px;border-radius:999px;
     background:var(--badge);font-size:12px
@@ -1231,7 +1247,11 @@ function render(){
       if(r < t) rowClass='row-pendente-vencida';
       else if(r.getTime()===t.getTime()) rowClass='row-pendente-hoje';
     }
-
+    // destaque por SLA se não estiver pendente com retomar_em
+    if(!rowClass){
+      if(slaObj.code==='late') rowClass='row-sla-late';
+      else if(slaObj.code==='risk') rowClass='row-sla-risk';
+    }
     return '<tr'+(rowClass? ' class="'+rowClass+'"':'')+'>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
