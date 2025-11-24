@@ -825,24 +825,34 @@ function addBusinessDays(base, days){
   return d;
 }
 
-function ensureSLA(prazo,prioridade,abertoEm){
+function ensureSLA(prazo, prioridade, abertoEm){
   if(prazo) return prazo;
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var dt=addBusinessDays(base,dias);
-  return dt.toISOString().slice(0,10)
+  var base = new Date(abertoEm || Date.now());
+  var dias = prioToDays(prioridade || 'Média');
+  var dt   = addBusinessDays(base, dias);
+  return dt.toISOString().slice(0,10);
+}
 
-function ensureSLAForForm(prazo,prioridade,abertoEm){
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var minDate=addBusinessDays(base,dias).toISOString().slice(0,10);
+function ensureSLAForForm(prazo, prioridade, abertoEm){
+  var base = new Date(abertoEm || Date.now());
+  var dias = prioToDays(prioridade || 'Média');
+
+  // data mínima obrigatória
+  var minDate = addBusinessDays(base, dias).toISOString().slice(0,10);
+
+  // se o usuário não escolher nada → atribui minDate automaticamente
   if(!prazo) return minDate;
-  if(prazo<minDate){
-    alert('Para prioridade "'+(prioridade||'Média')+'", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.');
+
+  // se escolher algo menor → bloqueia
+  if(prazo < minDate){
+    alert(
+      'Para prioridade "'+(prioridade||'Média')+
+      '", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.'
+    );
     throw new Error('SLA abaixo do mínimo');
   }
+
   return prazo;
-}
 }
 function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
@@ -1119,7 +1129,7 @@ async function loadFromSupabase(){
   }
   if(error){
     // fallback mínimo
-    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,closed_at';
+    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
   if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
@@ -1164,7 +1174,7 @@ async function supaUpsertTicket(rec){
     pendente:!!rec.pendente, 
     retomar_em:rec.retomar_em||null,
     opened_by: me? me.id : rec.openedBy || null, 
-    closed_at:rec.closedAt?new Date(rec.closedAt).toISOString():null
+    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
   };
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
   var r=await supa.from('tickets').upsert(payload); 
