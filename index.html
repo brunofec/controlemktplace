@@ -104,32 +104,11 @@
     height:calc(100vh - var(--headH) - 24px);
     display:flex;flex-direction:column;min-height:520px
   }
-.filters{
+  .filters{
     display:grid;
     grid-template-columns:1.2fr 1fr 1fr 1fr .9fr 1fr auto auto;
     gap:10px
   }
-  /* responsividade filtros */
-  @media (max-width: 1200px){
-    .filters{
-      grid-template-columns:repeat(4,minmax(0,1fr));
-    }
-  }
-  @media (max-width: 900px){
-    .filters{
-      grid-template-columns:repeat(2,minmax(0,1fr));
-    }
-  }
-  @media (max-width: 600px){
-    .filters{
-      grid-template-columns:1fr;
-    }
-    .filters > *{
-      min-width:0;
-    }
-  }
-
-
   input,select,textarea{
     width:100%;padding:10px 12px;border-radius:12px;
     border:1px solid var(--border);background:#0f1319;color:var(--text);
@@ -160,45 +139,14 @@
     padding:12px;border-bottom:1px solid var(--border);
     vertical-align:middle;font-size:14px
   }
-tbody tr:hover{
-    background:rgba(255,93,93,.06);
-}
-body.theme-light tbody tr:hover{
+  tbody tr:hover{
+    background:rgba(255,255,255,.02)
+  }
+  body.theme-light tbody tr:hover{
     background:rgba(15,23,42,.04)
-}
+  }
 
-/* destaque pendências */
-.row-pendente-vencida{
-    border-left:4px solid var(--danger);
-    background:rgba(255,93,93,.06);
-}
-.row-pendente-hoje{
-    border-left:4px solid var(--warning);
-    background:rgba(255,191,71,.06);
-}
-body.theme-light .row-pendente-vencida{
-    background:rgba(255,93,93,.10);
-}
-body.theme-light .row-pendente-hoje{
-    background:rgba(255,191,71,.14);
-}
-
-  /* destaque SLA geral */
-  .row-sla-late{
-    border-left:4px solid var(--danger);
-    background:rgba(255,93,93,.08);
-  }
-  .row-sla-risk{
-    border-left:4px solid var(--warning);
-    background:rgba(255,191,71,.08);
-  }
-  body.theme-light .row-sla-late{
-    background:rgba(255,93,93,.12);
-  }
-  body.theme-light .row-sla-risk{
-    background:rgba(255,191,71,.16);
-  }
-.badge{
+  .badge{
     display:inline-flex;align-items:center;gap:6px;
     padding:6px 10px;border-radius:999px;
     background:var(--badge);font-size:12px
@@ -407,6 +355,76 @@ html[data-theme='light'] #toast .t{
   transform:translateY(0);
 }
 
+
+  .hidden{display:none !important;}
+
+  .notif-btn{position:relative;}
+  .notif-badge{
+    position:absolute;top:-4px;right:-4px;
+    background:#f97316;color:#fff;border-radius:999px;
+    min-width:16px;height:16px;font-size:10px;
+    display:grid;place-items:center;
+    padding:0 4px;
+    box-shadow:0 0 0 2px var(--panel);
+  }
+
+  .notif-panel{
+    position:fixed;
+    top:80px;
+    right:16px;
+    width:320px;
+    max-height:60vh;
+    background:var(--panel);
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    z-index:1200;
+  }
+  body.theme-light .notif-panel{
+    background:#ffffff;
+  }
+  .notif-head{
+    padding:10px 12px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .notif-list{
+    padding:8px 0;
+    overflow-y:auto;
+  }
+  .notif-item{
+    padding:8px 12px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .notif-item:hover{
+    background:rgba(255,255,255,.04);
+  }
+  body.theme-light .notif-item:hover{
+    background:rgba(15,23,42,.04);
+  }
+  .notif-msg{
+    font-size:13px;
+  }
+  .notif-meta{
+    font-size:11px;
+    color:var(--muted);
+  }
+  .notif-read .notif-msg{
+    opacity:.7;
+  }
+  .notif-empty{
+    padding:12px;
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+  }
 </style>
 </head>
 <body>
@@ -436,12 +454,16 @@ html[data-theme='light'] #toast .t{
         <span id="whoami" class="pill"></span>
         <!-- Toggle de tema -->
         <button id="btnTheme" class="btn-ghost btn-icon" title="Alternar tema"><i id="themeIcon" class="fa fa-moon"></i></button>
+        <button id="btnNotif" class="btn-ghost btn-icon notif-btn" title="Notificações">
+          <i class="fa fa-bell"></i>
+          <span id="notifCount" class="notif-badge hidden">0</span>
+        </button>
         <button id="btnClosed" class="btn-ghost"><i class="fa fa-archive"></i> Encerrados</button>
         <button id="btnKPIs" class="btn-ghost"><i class="fa fa-chart-pie"></i> Painel KPIs</button>
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
         <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
-        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button>
+        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button><i class="fa fa-right-from-bracket"></i> Sair</button>
       </div>
     </div>
   </header>
@@ -677,6 +699,16 @@ html[data-theme='light'] #toast .t{
       </div>
     </div>
   </div>
+</div>
+
+
+<!-- Notificações -->
+<div id="notifPanel" class="notif-panel hidden">
+  <div class="notif-head">
+    <strong><i class="fa fa-bell"></i> Notificações</strong>
+    <button id="notifClose" class="btn-ghost btn-icon" title="Fechar"><i class="fa fa-xmark"></i></button>
+  </div>
+  <div id="notifList" class="notif-list"></div>
 </div>
 
 <!-- DM (chat usuários) -->
@@ -1238,21 +1270,7 @@ function render(){
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
 
-    // destaque visual para pendências
-    var rowClass='';
-    var isPend=(d.status==='Pendente');
-    var r=d.retomar_em? startOfDay(d.retomar_em):null;
-    var t=today0();
-    if(isPend && r){
-      if(r < t) rowClass='row-pendente-vencida';
-      else if(r.getTime()===t.getTime()) rowClass='row-pendente-hoje';
-    }
-    // destaque por SLA se não estiver pendente com retomar_em
-    if(!rowClass){
-      if(slaObj.code==='late') rowClass='row-sla-late';
-      else if(slaObj.code==='risk') rowClass='row-sla-risk';
-    }
-    return '<tr'+(rowClass? ' class="'+rowClass+'"':'')+'>\
+    return '<tr>\
       <td>'+fmtDate(d.abertoEm)+'</td>\
       <td>'+ (d.solicitante||'-') +'</td>\
       <td>'+ (d.assunto||'-') +'</td>\
@@ -1264,10 +1282,10 @@ function render(){
       <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
       <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
       <td class="table-actions">\
-        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar recebimento" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
+        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
         <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>\
         <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>\
-        <button class="btn-ghost btn-icon" title="Adiar (definir pendência)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
+        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
         '+(d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+'\
       </td>\
     </tr>';
@@ -1353,24 +1371,19 @@ function renderClosedPage(){
 }
 
 /* ========= KPIs ========= */
+
 function getClosedAt(d){
-  // se no futuro trouxermos closedAt direto do banco, usa primeiro
   if (d.closedAt) {
     return d.closedAt;
   }
-  // tenta achar no histórico a primeira entrada que contenha "encerrado"
   var h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
   for(var i=0;i<h.length;i++){
     var it=h[i]; 
     if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
   }
-  // fallback: se está encerrado mas não tem histórico marcado,
-  // usa data de abertura só para não "sumir" dos KPIs
-  if (d.status === 'Encerrado') {
-    return d.abertoEm;
-  }
   return null;
 }
+
 function renderKPIs(){
   var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
   var sel=input.value; qs('#mKpiMesLabel').textContent=sel;
@@ -1564,7 +1577,7 @@ async function openEdit(id){
 }
 function collectForm(){
   var id=qs('#ticketId').value||uid(); var now=Date.now();
-  var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now;
+  var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now; var prevClosedAt=exists?exists.closedAt||null:null;
   var prazo=ensureSLA(qs('#prazo').value,qs('#prioridade').value,abertoEm);
   var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
   return {
@@ -1574,6 +1587,7 @@ function collectForm(){
     prioridade:qs('#prioridade').value,
     descricao:qs('#descricao').value.trim(),
     status:qs('#status').value,
+    closedAt: (qs('#status').value==='Encerrado' ? (prevClosedAt||now) : prevClosedAt),
     responsavel:responsavel,
     prazo:prazo,
     codigo:qs('#codigo').value.trim(),
@@ -1681,6 +1695,7 @@ async function closeTicket(id){
   d.pendente = false;
   d.retomar_em = '';
   d.status = 'Encerrado';
+  d.closedAt = Date.now();
 
   await supaUpsertTicket(d);
   await addHistory(id,'Encerrado por '+meName);
@@ -1843,6 +1858,8 @@ function exportXLSX(){
   XLSX.writeFile(wb,'solicitacoes_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 qs('#btnExportXLSX').onclick=exportXLSX;
+qs('#btnNotif').onclick=toggleNotifPanel;
+qs('#notifClose').onclick=hideNotifPanel;
 
 /* Navegação: KPIs / Encerrados */
 qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#closedPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs();setHeadH()};
@@ -2016,8 +2033,7 @@ qs('#btnTheme').onclick=function(){
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
 function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
 
-async function boot(){ 
-  initTheme();
+async function boot(){ initTheme();
   var u=currentUser(); 
   if(!u){showLogin();return;} 
   showApp(); 
@@ -2059,9 +2075,13 @@ qs('#btnLogin').onclick=async function(){
   loadFilters();
   render(); 
   setupRealtime(); 
+  
+  loadNotifications();
+  renderNotificationsIcon();
   setHeadH();
   askNotifyPermission();
-};
+}
+boot();;
 
 /* expose debug/global */
 window.openEdit=openEdit; 
