@@ -825,24 +825,34 @@ function addBusinessDays(base, days){
   return d;
 }
 
-function ensureSLA(prazo,prioridade,abertoEm){
+function ensureSLA(prazo, prioridade, abertoEm){
   if(prazo) return prazo;
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var dt=addBusinessDays(base,dias);
-  return dt.toISOString().slice(0,10)
+  var base = new Date(abertoEm || Date.now());
+  var dias = prioToDays(prioridade || 'Média');
+  var dt   = addBusinessDays(base, dias);
+  return dt.toISOString().slice(0,10);
+}
 
-function ensureSLAForForm(prazo,prioridade,abertoEm){
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var minDate=addBusinessDays(base,dias).toISOString().slice(0,10);
+function ensureSLAForForm(prazo, prioridade, abertoEm){
+  var base = new Date(abertoEm || Date.now());
+  var dias = prioToDays(prioridade || 'Média');
+
+  // data mínima obrigatória
+  var minDate = addBusinessDays(base, dias).toISOString().slice(0,10);
+
+  // se o usuário não escolher nada → atribui minDate automaticamente
   if(!prazo) return minDate;
-  if(prazo<minDate){
-    alert('Para prioridade "'+(prioridade||'Média')+'", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.');
+
+  // se escolher algo menor → bloqueia
+  if(prazo < minDate){
+    alert(
+      'Para prioridade "'+(prioridade||'Média')+
+      '", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.'
+    );
     throw new Error('SLA abaixo do mínimo');
   }
+
   return prazo;
-}
 }
 function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
@@ -2222,4 +2232,3 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
-
