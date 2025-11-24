@@ -426,7 +426,11 @@ html[data-theme='light'] #toast .t{
     color:var(--muted);
   }
 
-  #btnClosed, #btnDiag{display:none !important;}
+  /* esconder botões Encerrados e Diagnóstico */
+  #btnClosed,
+  #btnDiag{
+    display:none !important;
+  }
 </style>
 </head>
 <body>
@@ -827,6 +831,18 @@ function ensureSLA(prazo,prioridade,abertoEm){
   var dias=prioToDays(prioridade||'Média');
   var dt=addBusinessDays(base,dias);
   return dt.toISOString().slice(0,10)
+
+function ensureSLAForForm(prazo,prioridade,abertoEm){
+  var base=new Date(abertoEm||Date.now());
+  var dias=prioToDays(prioridade||'Média');
+  var minDate=addBusinessDays(base,dias).toISOString().slice(0,10);
+  if(!prazo) return minDate;
+  if(prazo<minDate){
+    alert('Para prioridade "'+(prioridade||'Média')+'", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.');
+    throw new Error('SLA abaixo do mínimo');
+  }
+  return prazo;
+}
 }
 function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
@@ -916,6 +932,7 @@ const setSession=u=>localStorage.setItem(SESSION_KEY,JSON.stringify(u));
 const currentUser=()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'')}catch(e){return null}}
 const clearSession=()=>localStorage.removeItem(SESSION_KEY);
 
+
 const NOTIF_PREFIX='ticket_notif_';
 let notifications=[];
 const notifKey=()=>{
@@ -946,7 +963,7 @@ function renderNotificationsIcon(){
   }
 }
 function markNotificationRead(id){
-  var idx=(notifications||[]).findIndex(function(n){return n.id===id;});
+  var idx=(notifications||[]).findIndex(n=>n.id===id);
   if(idx>-1){
     notifications[idx].read=true;
     saveNotifications();
@@ -1475,25 +1492,17 @@ function renderClosedPage(){
 
 /* ========= KPIs ========= */
 
-
 function getClosedAt(d){
   if (d.closedAt) {
     return d.closedAt;
   }
-  var h=(d.historico||[]).slice().sort(function(a,b){return (a.at||0)-(b.at||0);});
+  var h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
   for(var i=0;i<h.length;i++){
-    var it=h[i];
-    if(((it.txt||'')+'').toLowerCase().indexOf('encerrado')>-1 && it.at){
-      return it.at;
-    }
-  }
-  // fallback: se estiver encerrado mas sem histórico, usa abertura como aproximação
-  if(d.status==='Encerrado' && d.abertoEm){
-    return d.abertoEm;
+    var it=h[i]; 
+    if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
   }
   return null;
 }
-
 
 function renderKPIs(){
   var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
@@ -1689,7 +1698,8 @@ async function openEdit(id){
 function collectForm(){
   var id=qs('#ticketId').value||uid(); var now=Date.now();
   var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now; var prevClosedAt=exists?exists.closedAt||null:null;
-  var prazo=ensureSLA(qs('#prazo').value,qs('#prioridade').value,abertoEm);
+  var rawPrazo=qs('#prazo').value; var prioridadeSel=qs('#prioridade').value;
+  var prazo=exists?ensureSLA(rawPrazo,prioridadeSel,abertoEm):ensureSLAForForm(rawPrazo,prioridadeSel,abertoEm);
   var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
   return {
     id:id, abertoEm:abertoEm,
@@ -1976,7 +1986,6 @@ qs('#notifClose').onclick=hideNotifPanel;
 qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#closedPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs();setHeadH()};
 qs('#btnClosed').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.add('hidden');qs('#closedPage').classList.remove('hidden');renderClosedPage();setHeadH()};
 qs('#btnBackList').onclick=function(){qs('#closedPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
-qs('#btnApplyKpi').onclick=function(){renderKPIs()};
 qs('#btnBackList2').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
 qs('#fClosed').addEventListener('input',debounce(renderClosedPage,200));
 
@@ -2140,6 +2149,9 @@ qs('#btnTheme').onclick=function(){
   var current = document.body.classList.contains('theme-light') ? 'light' : 'dark';
   applyTheme(current==='light'?'dark':'light');
 };
+qs('#btnNotif').onclick=toggleNotifPanel;
+if(qs('#notifClose')) qs('#notifClose').onclick=hideNotifPanel;
+
 
 /* ========= Boot & Login ========= */
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
@@ -2153,12 +2165,12 @@ async function boot(){ initTheme();
   await loadFromSupabase(); 
   await loadDM(true); 
   loadFilters();
-  render();
   loadNotifications();
   renderNotificationsIcon();
-  askNotifyPermission(); 
+  render(); 
   setupRealtime(); 
   setHeadH();
+  if(window.askNotifyPermission) askNotifyPermission();
 }
 boot();
 
