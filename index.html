@@ -827,25 +827,6 @@ function ensureSLA(prazo,prioridade,abertoEm){
   var dias=prioToDays(prioridade||'Média');
   var dt=addBusinessDays(base,dias);
   return dt.toISOString().slice(0,10)
-
-function ensureSLAForForm(prazo,prioridade,abertoEm,isNew){
-  var base=new Date(abertoEm||Date.now());
-  var dias=prioToDays(prioridade||'Média');
-  var dtMin=addBusinessDays(base,dias);
-  // Se não informar prazo, define automaticamente respeitando a regra
-  if(!prazo){
-    return dtMin.toISOString().slice(0,10);
-  }
-  // Para tickets novos, não permitir prazo abaixo do mínimo
-  if(isNew){
-    var dtUser=new Date(prazo+'T00:00:00');
-    if(dtUser<dtMin){
-      alert('Para prioridade "'+(prioridade||'Média')+'", o prazo mínimo é '+dtMin.toLocaleDateString('pt-BR')+'. Ajuste o SLA antes de salvar.');
-      return null;
-    }
-  }
-  return prazo;
-}
 }
 function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
@@ -1708,10 +1689,7 @@ async function openEdit(id){
 function collectForm(){
   var id=qs('#ticketId').value||uid(); var now=Date.now();
   var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now; var prevClosedAt=exists?exists.closedAt||null:null;
-    var prioridadeSel=qs('#prioridade').value;
-  var prazoInput=qs('#prazo').value;
-  var prazo=ensureSLAForForm(prazoInput,prioridadeSel,abertoEm,!exists);
-  if(prazo===null) return null;
+  var prazo=ensureSLA(qs('#prazo').value,qs('#prioridade').value,abertoEm);
   var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
   return {
     id:id, abertoEm:abertoEm,
@@ -1765,7 +1743,6 @@ async function save(e){
   // Responsável pode ficar em branco (será definido no Confirmar)
 
   var rec = collectForm();
-  if(!rec) return;
 
   var i = data.findIndex(x => x.id === rec.id);
   if (i >= 0) {
