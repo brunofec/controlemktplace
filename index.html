@@ -1748,6 +1748,8 @@ async function save(e){
     (i >= 0 ? 'Atualizado' : 'Criado') + ' por ' + (((currentUser() || {}).name) || 'sistema')
   );
 
+  addNotification(rec,(i>=0?'Solicitação atualizada':'Solicitação criada'),'ticket');
+
   render();
   openEdit(rec.id);
 }
@@ -1766,12 +1768,18 @@ async function snoozeTicket(id){
   var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
   var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
   d.pendente=true; d.retomar_em=val; d.status='Pendente';
-  await supaUpsertTicket(d); await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR')); render();
+  await supaUpsertTicket(d);
+  await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR'));
+  addNotification(d,'Solicitação adiada para '+new Date(val).toLocaleDateString('pt-BR'),'pendente');
+  render();
 }
 async function resumeTicket(id){
   var d=data.find(x=>x.id===id); if(!d)return;
   d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
-  await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
+  await supaUpsertTicket(d);
+  await addHistory(id,'Retomado (status Em tratativa)');
+  addNotification(d,'Solicitação retomada (Em tratativa)','retomado');
+  render()
 }
 
 async function closeTicket(id){
@@ -1800,6 +1808,7 @@ async function closeTicket(id){
 
   await supaUpsertTicket(d);
   await addHistory(id,'Encerrado por '+meName);
+  addNotification(d,'Solicitação encerrada por '+meName,'encerrado');
   render();
 }
 async function confirmTicket(id){
@@ -1832,6 +1841,8 @@ async function confirmTicket(id){
     ' — responsável definido para ' + (d.responsavel || 'não definido') +
     ' (status ' + oldStatus + ' ➜ Em tratativa)'
   );
+
+  addNotification(d,'Solicitação confirmada por '+meName,'status');
 
   render();
 }
