@@ -425,8 +425,6 @@ html[data-theme='light'] #toast .t{
     font-size:12px;
     color:var(--muted);
   }
-
-  #btnClosed, #btnDiag{display:none !important;}
 </style>
 </head>
 <body>
@@ -465,7 +463,7 @@ html[data-theme='light'] #toast .t{
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
         <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
-        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button><i class="fa fa-right-from-bracket"></i> Sair</button>
+        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button>
       </div>
     </div>
   </header>
@@ -568,7 +566,6 @@ html[data-theme='light'] #toast .t{
         <h2 style="margin:0;font-size:18px">Painel — KPIs</h2>
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center">
           <label class="muted" for="kpiMonth">Mês:</label><input id="kpiMonth" type="month"/>
-          <button id="btnApplyKpi" class="btn-ghost"><i class="fa fa-filter"></i> Aplicar filtro</button>
           <button id="btnBackList2" class="btn-ghost"><i class="fa fa-table"></i> Voltar à Tabela</button>
         </div>
       </div>
@@ -916,6 +913,107 @@ const setSession=u=>localStorage.setItem(SESSION_KEY,JSON.stringify(u));
 const currentUser=()=>{try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'')}catch(e){return null}}
 const clearSession=()=>localStorage.removeItem(SESSION_KEY);
 
+
+const NOTIF_PREFIX='ticket_notif_';
+let notifications=[];
+const notifKey=()=>{
+  var me=currentUser()||{};
+  return NOTIF_PREFIX+(me.id||'anon');
+};
+function loadNotifications(){
+  try{
+    notifications=JSON.parse(localStorage.getItem(notifKey())||'[]');
+  }catch(e){
+    notifications=[];
+  }
+}
+function saveNotifications(){
+  try{
+    localStorage.setItem(notifKey(),JSON.stringify(notifications||[]));
+  }catch(e){}
+}
+function renderNotificationsIcon(){
+  var el=document.getElementById('notifCount');
+  if(!el) return;
+  var unread=(notifications||[]).filter(n=>!n.read).length;
+  if(unread>0){
+    el.textContent=unread>9?'9+':String(unread);
+    el.classList.remove('hidden');
+  }else{
+    el.classList.add('hidden');
+  }
+}
+function markNotificationRead(id){
+  var idx=(notifications||[]).findIndex(n=>n.id===id);
+  if(idx>-1){
+    notifications[idx].read=true;
+    saveNotifications();
+    renderNotificationsIcon();
+  }
+}
+function addNotification(ticket,message,type){
+  if(!ticket || !ticket.id) return;
+  notifications=notifications||[];
+  var n={
+    id:uid(),
+    ticketId:ticket.id,
+    message:message||'Atualização na solicitação',
+    type:type||'info',
+    ts:Date.now(),
+    read:false
+  };
+  notifications.unshift(n);
+  if(notifications.length>50) notifications=notifications.slice(0,50);
+  saveNotifications();
+  renderNotificationsIcon();
+}
+function renderNotificationsList(){
+  var panel=document.getElementById('notifPanel');
+  var list=document.getElementById('notifList');
+  if(!panel || !list) return;
+  if(!notifications || notifications.length===0){
+    list.innerHTML='<div class="notif-empty">Sem notificações.</div>';
+  }else{
+    list.innerHTML=(notifications||[]).map(function(n){
+      var dt=new Date(n.ts).toLocaleString('pt-BR');
+      return '<div class="notif-item'+(n.read?' notif-read':'')+'" data-id="'+n.id+'" data-ticket="'+n.ticketId+'">\
+        <div class="notif-msg">'+escapeHtml(n.message||'')+'</div>\
+        <div class="notif-meta">'+dt+'</div>\
+      </div>';
+    }).join('');
+  }
+  var items=document.querySelectorAll('#notifList .notif-item');
+  items.forEach(function(el){
+    el.onclick=function(){
+      var id=el.getAttribute('data-id');
+      var tk=el.getAttribute('data-ticket');
+      markNotificationRead(id);
+      if(tk && window.openEdit){
+        window.openEdit(tk);
+      }
+      hideNotifPanel();
+    };
+  });
+}
+function showNotifPanel(){
+  var panel=document.getElementById('notifPanel');
+  if(!panel) return;
+  renderNotificationsList();
+  panel.classList.remove('hidden');
+}
+function hideNotifPanel(){
+  var panel=document.getElementById('notifPanel');
+  if(!panel) return;
+  panel.classList.add('hidden');
+}
+function toggleNotifPanel(){
+  var panel=document.getElementById('notifPanel');
+  if(!panel) return;
+  if(panel.classList.contains('hidden')) showNotifPanel();
+  else hideNotifPanel();
+}
+
+
 /* ===== Estado ===== */
 var data=[]; var lastReadMap={};
 var chartAbertos=null, chartConcluidos=null, chartTransp=null, chartCanal=null;
@@ -1047,7 +1145,7 @@ async function supaUpsertTicket(rec){
     pendente:!!rec.pendente, 
     retomar_em:rec.retomar_em||null,
     opened_by: me? me.id : rec.openedBy || null, 
-    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
+    closed_at:rec.closedAt?new Date(rec.closedAt).toISOString():null
   };
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
   var r=await supa.from('tickets').upsert(payload); 
@@ -1375,25 +1473,17 @@ function renderClosedPage(){
 
 /* ========= KPIs ========= */
 
-
 function getClosedAt(d){
   if (d.closedAt) {
     return d.closedAt;
   }
-  var h=(d.historico||[]).slice().sort(function(a,b){return (a.at||0)-(b.at||0);});
+  var h=(d.historico||[]).slice().sort((a,b)=>a.at-b.at);
   for(var i=0;i<h.length;i++){
-    var it=h[i];
-    if(((it.txt||'')+'').toLowerCase().indexOf('encerrado')>-1 && it.at){
-      return it.at;
-    }
-  }
-  // fallback: se estiver encerrado mas sem histórico, usa abertura como aproximação
-  if(d.status==='Encerrado' && d.abertoEm){
-    return d.abertoEm;
+    var it=h[i]; 
+    if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
   }
   return null;
 }
-
 
 function renderKPIs(){
   var input=qs('#kpiMonth'); if(!input.value){input.value=ym(new Date())}
@@ -1658,6 +1748,8 @@ async function save(e){
     (i >= 0 ? 'Atualizado' : 'Criado') + ' por ' + (((currentUser() || {}).name) || 'sistema')
   );
 
+  addNotification(rec,(i>=0?'Solicitação atualizada':'Solicitação criada'),'ticket');
+
   render();
   openEdit(rec.id);
 }
@@ -1676,12 +1768,18 @@ async function snoozeTicket(id){
   var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
   var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
   d.pendente=true; d.retomar_em=val; d.status='Pendente';
-  await supaUpsertTicket(d); await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR')); render();
+  await supaUpsertTicket(d);
+  await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR'));
+  addNotification(d,'Solicitação adiada para '+new Date(val).toLocaleDateString('pt-BR'),'pendente');
+  render();
 }
 async function resumeTicket(id){
   var d=data.find(x=>x.id===id); if(!d)return;
   d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
-  await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
+  await supaUpsertTicket(d);
+  await addHistory(id,'Retomado (status Em tratativa)');
+  addNotification(d,'Solicitação retomada (Em tratativa)','retomado');
+  render()
 }
 
 async function closeTicket(id){
@@ -1710,6 +1808,7 @@ async function closeTicket(id){
 
   await supaUpsertTicket(d);
   await addHistory(id,'Encerrado por '+meName);
+  addNotification(d,'Solicitação encerrada por '+meName,'encerrado');
   render();
 }
 async function confirmTicket(id){
@@ -1742,6 +1841,8 @@ async function confirmTicket(id){
     ' — responsável definido para ' + (d.responsavel || 'não definido') +
     ' (status ' + oldStatus + ' ➜ Em tratativa)'
   );
+
+  addNotification(d,'Solicitação confirmada por '+meName,'status');
 
   render();
 }
@@ -1876,7 +1977,6 @@ qs('#notifClose').onclick=hideNotifPanel;
 qs('#btnKPIs').onclick=function(){qs('#listPage').classList.add('hidden');qs('#closedPage').classList.add('hidden');qs('#kpiPage').classList.remove('hidden');renderKPIs();setHeadH()};
 qs('#btnClosed').onclick=function(){qs('#listPage').classList.add('hidden');qs('#kpiPage').classList.add('hidden');qs('#closedPage').classList.remove('hidden');renderClosedPage();setHeadH()};
 qs('#btnBackList').onclick=function(){qs('#closedPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
-qs('#btnApplyKpi').onclick=function(){renderKPIs()};
 qs('#btnBackList2').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
 qs('#fClosed').addEventListener('input',debounce(renderClosedPage,200));
 
@@ -2055,8 +2155,13 @@ async function boot(){ initTheme();
   loadFilters();
   render(); 
   setupRealtime(); 
+  
+  loadNotifications();
+  renderNotificationsIcon();
+  askNotifyPermission();
   setHeadH();
 }
+boot();
 boot();
 
 qs('#btnLogout').onclick=async function(){ if(supaReady()) await supa.auth.signOut(); clearSession(); showLogin()};
