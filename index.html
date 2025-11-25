@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="app-version" content="V2.1"/>
 <title>Controle Interno de Solicações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -825,35 +826,26 @@ function addBusinessDays(base, days){
   return d;
 }
 
-function ensureSLA(prazo, prioridade, abertoEm){
+function ensureSLA(prazo,prioridade,abertoEm){
   if(prazo) return prazo;
-  var base = new Date(abertoEm || Date.now());
-  var dias = prioToDays(prioridade || 'Média');
-  var dt   = addBusinessDays(base, dias);
+  var base=new Date(abertoEm||Date.now());
+  var dias=prioToDays(prioridade||'Média');
+  var dt=addBusinessDays(base,dias);
   return dt.toISOString().slice(0,10);
 }
 
-function ensureSLAForForm(prazo, prioridade, abertoEm){
-  var base = new Date(abertoEm || Date.now());
-  var dias = prioToDays(prioridade || 'Média');
-
-  // data mínima obrigatória
-  var minDate = addBusinessDays(base, dias).toISOString().slice(0,10);
-
-  // se o usuário não escolher nada → atribui minDate automaticamente
+function ensureSLAForForm(prazo,prioridade,abertoEm){
+  var base=new Date(abertoEm||Date.now());
+  var dias=prioToDays(prioridade||'Média');
+  var minDate=addBusinessDays(base,dias).toISOString().slice(0,10);
   if(!prazo) return minDate;
-
-  // se escolher algo menor → bloqueia
-  if(prazo < minDate){
-    alert(
-      'Para prioridade "'+(prioridade||'Média')+
-      '", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.'
-    );
+  if(prazo<minDate){
+    alert('Para prioridade "'+(prioridade||'Média')+'", o prazo mínimo é '+minDate+'. Ajuste o SLA antes de salvar.');
     throw new Error('SLA abaixo do mínimo');
   }
-
   return prazo;
 }
+
 function slaStatus(dateStr,d){
   if(!dateStr)return{code:'',label:'—'};
   var due=new Date(dateStr+'T23:59:59');
@@ -1116,20 +1108,20 @@ async function loadFromSupabase(){
   if(!supaReady()){toast('Config Supabase ausente.'); data=[]; render(); return;}
 
   // tenta com a coluna 'canal'
-  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by';
+  var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by,closed_at';
   var resp=await supa.from('tickets').select(sel);
   var tks=resp.data; var error=resp.error;
   if(!error){ HAS_CANAL=true; }
   if(error){
     // fallback sem 'canal'
     HAS_CANAL=false;
-    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by';
+    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by,closed_at';
     resp=await supa.from('tickets').select(sel);
     tks=resp.data; error=resp.error;
   }
   if(error){
     // fallback mínimo
-    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo';
+    sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,closed_at';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
   if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
@@ -1150,7 +1142,7 @@ async function loadFromSupabase(){
     id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
     prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
     codigo:t.codigo||'', transportadora:t.transportadora||'', canal: (t.canal||''), pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
-    openedBy:t.opened_by||null, historico:msgsByTicket[t.id]||[]
+    openedBy:t.opened_by||null, closedAt:t.closed_at?new Date(t.closed_at).getTime():null, historico:msgsByTicket[t.id]||[]
   }));
 }
 
@@ -1174,7 +1166,7 @@ async function supaUpsertTicket(rec){
     pendente:!!rec.pendente, 
     retomar_em:rec.retomar_em||null,
     opened_by: me? me.id : rec.openedBy || null, 
-    closed_at:rec.status==='Encerrado'?new Date().toISOString():null
+    closed_at:rec.closedAt?new Date(rec.closedAt).toISOString():null
   };
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
   var r=await supa.from('tickets').upsert(payload); 
@@ -1510,6 +1502,16 @@ function getClosedAt(d){
   for(var i=0;i<h.length;i++){
     var it=h[i]; 
     if((it.txt||'').toLowerCase().indexOf('encerrado')>-1) return it.at;
+  }
+  // fallback para tickets antigos sem closedAt/histórico
+  if(d.status==='Encerrado'){
+    if(d.prazo){
+      // usa o final do dia do prazo como aproximação
+      return new Date(d.prazo+'T23:59:59').getTime();
+    }
+    if(d.abertoEm){
+      return d.abertoEm;
+    }
   }
   return null;
 }
@@ -2167,7 +2169,26 @@ if(qs('#notifClose')) qs('#notifClose').onclick=hideNotifPanel;
 function showLogin(){qs('#loginSection').style.display='grid';qs('#appSection').style.display='none'}
 function showApp(){qs('#loginSection').style.display='none';qs('#appSection').style.display='block';var u=currentUser();qs('#whoami').textContent=(u?u.name:'')+' • '+(u?u.role:'')}
 
-async function boot(){ initTheme();
+
+const APP_VERSION = document.querySelector('meta[name="app-version"]')?.content || 'dev';
+const VERSION_KEY = 'ci_interno_app_version';
+function ensureLatestVersion(){
+  try{
+    const last = localStorage.getItem(VERSION_KEY);
+    if(last && last !== APP_VERSION){
+      localStorage.setItem(VERSION_KEY, APP_VERSION);
+      alert('Sistema atualizado. A página será recarregada.');
+      setTimeout(()=>location.reload(true), 300);
+      return false;
+    }
+    localStorage.setItem(VERSION_KEY, APP_VERSION);
+    return true;
+  }catch(e){
+    return true;
+  }
+}
+
+async function boot(){ if(!ensureLatestVersion()) return; initTheme();
   var u=currentUser(); 
   if(!u){showLogin();return;} 
   showApp(); 
@@ -2232,3 +2253,4 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
+
