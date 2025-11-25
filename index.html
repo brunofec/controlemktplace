@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.2"/>
+<meta name="app-version" content="V2.3"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1237,122 +1237,164 @@ async function supaAddMessage(ticketId, text){
   await loadTicketChat(ticketId);
 }
 async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
-
 /* ========= Realtime + fallback ========= */
-var __rtOK={messages:false,tickets:false,dm:false}; var __pollId=null;
-async function refreshNow(){await loadFromSupabase(); render()}
+var __rtOK={messages:false,tickets:false,dm:false}; 
+var __pollId=null;
+
+async function refreshNow(){
+  await loadFromSupabase();
+  render();
+}
+
 function setPollTimer(){
   if(__pollId) clearInterval(__pollId);
   var ms=(document.visibilityState==='visible')?800:8000;
-  __pollId=setInterval(()=>{ if(!__rtOK.messages||!__rtOK.tickets||!__rtOK.dm){refreshNow(); loadDM(true)} },ms)
-}
-supa.channel('realtime-messages')
-  .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
-    var m   = payload.new;
-    var tid = String(m.ticket_id);
-
-    // ticket na estrutura do front
-    var d = data.find(x => String(x.id) === tid);
-
-    // se ainda não temos o ticket em memória, faz refresh e sai
-    if(!d){
+  __pollId=setInterval(()=>{
+    if(!__rtOK.messages || !__rtOK.tickets || !__rtOK.dm){
       refreshNow();
-      return;
+      loadDM(true);
     }
+  }, ms);
+}
 
-    // atualiza histórico local
-    d.historico = d.historico || [];
-    d.historico.push({
-      at:  new Date(m.created_at).getTime(),
-      txt: m.body,
-      user: m.sender_name || '—'
-    });
+function setupRealtime(){
+  if(!supaReady()) return;
 
-    render();
+  // limpa canais antigos antes de reabrir
+  try{
+    supa.getChannels().forEach(ch=>supa.removeChannel(ch));
+  }catch(e){}
 
-    var me = currentUser() || {};
-    var meName = me.name || '';
+  /* === REALTIME: MENSAGENS DO TICKET === */
+  supa.channel('realtime-messages')
+    .on(
+      'postgres_changes',
+      {event:'INSERT',schema:'public',table:'messages'},
+      payload=>{
+        var m   = payload.new;
+        var tid = String(m.ticket_id);
 
-    // não avisa quem enviou
-    if (meName === (m.sender_name || '')) return;
+        // ticket na estrutura do front
+        var d = data.find(x => String(x.id) === tid);
 
-    // dispara sino + native notification só pra quem é relacionado ao ticket
-    notifyTicketEventFront(
-      d,
-      'Nova mensagem no ticket ' + tid,
-      'message'
-    );
-  })
-  .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
+        // se ainda não temos o ticket em memória, faz refresh e sai
+        if(!d){
+          refreshNow();
+          return;
+        }
 
-/* === REALTIME: TICKETS (criação e update) === */
-supa.channel('realtime-tickets')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, payload => {
-    var tNew = payload.new;
-    var id   = String(tNew.id);
+        // atualiza histórico local
+        d.historico = d.historico || [];
+        d.historico.push({
+          at:  new Date(m.created_at).getTime(),
+          txt: m.body,
+          user: m.sender_name || '—'
+        });
 
-    refreshNow();
+        render();
 
-    // tenta achar o ticket no array atual
-    var d = data.find(x => String(x.id) === id);
-    if (!d) {
-      d = {
-        id: id,
-        solicitante: tNew.solicitante || '',
-        responsavel: tNew.responsavel || '',
-        openedBy: tNew.opened_by || null
-      };
-    }
+        var me     = currentUser() || {};
+        var meName = me.name || '';
 
-    notifyTicketEventFront(
-      d,
-      'Nova solicitação criada (ticket ' + id + ')',
-      'ticket_new'
-    );
-  })
+        // não avisa quem enviou
+        if (meName === (m.sender_name || '')) return;
 
-  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, payload => {
-    var tNew = payload.new;
-    var id   = String(tNew.id);
-
-    // pega estado ANTES de atualizar
-    var prev = data.find(x => String(x.id) === id);
-
-    refreshNow();
-
-    var msg = null;
-
-    if (prev) {
-      if (prev.status !== tNew.status) {
-        msg = 'Ticket ' + id + ' mudou de "' + prev.status + '" para "' + tNew.status + '"';
-      } else if ((prev.responsavel || '') !== (tNew.responsavel || '')) {
-        msg = 'Ticket ' + id + ' teve o responsável alterado para "' + (tNew.responsavel || '-') + '"';
-      } else {
-        msg = 'Ticket ' + id + ' foi atualizado';
+        // dispara sino + native notification só pra quem é relacionado ao ticket
+        notifyTicketEventFront(
+          d,
+          'Nova mensagem no ticket ' + tid,
+          'message'
+        );
       }
-    } else {
-      msg = 'Ticket ' + id + ' foi atualizado';
-    }
+    )
+    .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
 
-    var d = prev || {
-      id: id,
-      solicitante: tNew.solicitante || '',
-      responsavel: tNew.responsavel || '',
-      openedBy: tNew.opened_by || null
-    };
+  /* === REALTIME: TICKETS (criação e update) === */
+  supa.channel('realtime-tickets')
+    .on(
+      'postgres_changes',
+      {event:'INSERT',schema:'public',table:'tickets'},
+      payload=>{
+        var tNew = payload.new;
+        var id   = String(tNew.id);
 
-    notifyTicketEventFront(
-      d,
-      msg,
-      'ticket_update'
-    );
-  })
+        refreshNow();
 
-  .subscribe(status => __rtOK.tickets = (status === 'SUBSCRIBED'));
+        // tenta achar o ticket no array atual
+        var d = data.find(x => String(x.id) === id);
+        if (!d) {
+          d = {
+            id: id,
+            solicitante: tNew.solicitante || '',
+            responsavel: tNew.responsavel || '',
+            openedBy: tNew.opened_by || null
+          };
+        }
+
+        notifyTicketEventFront(
+          d,
+          'Nova solicitação criada (ticket ' + id + ')',
+          'ticket_new'
+        );
+      }
+    )
+    .on(
+      'postgres_changes',
+      {event:'UPDATE',schema:'public',table:'tickets'},
+      payload=>{
+        var tNew = payload.new;
+        var id   = String(tNew.id);
+
+        // pega estado ANTES de atualizar
+        var prev = data.find(x => String(x.id) === id);
+
+        refreshNow();
+
+        var msg = null;
+
+        if (prev) {
+          if (prev.status !== tNew.status) {
+            msg = 'Ticket ' + id + ' mudou de "' + prev.status + '" para "' + tNew.status + '"';
+          } else if ((prev.responsavel || '') !== (tNew.responsavel || '')) {
+            msg = 'Ticket ' + id + ' teve o responsável alterado para "' + (tNew.responsavel || '-') + '"';
+          } else {
+            msg = 'Ticket ' + id + ' foi atualizado';
+          }
+        } else {
+          msg = 'Ticket ' + id + ' foi atualizado';
+        }
+
+        var d = prev || {
+          id: id,
+          solicitante: tNew.solicitante || '',
+          responsavel: tNew.responsavel || '',
+          openedBy: tNew.opened_by || null
+        };
+
+        notifyTicketEventFront(
+          d,
+          msg,
+          'ticket_update'
+        );
+      }
+    )
+    .subscribe(status=>__rtOK.tickets=(status==='SUBSCRIBED'));
+
+  /* === REALTIME: DM ENTRE USUÁRIOS === */
+  supa.channel('realtime-dm')
+    .on(
+      'postgres_changes',
+      {event:'INSERT',schema:'public',table:'dm_messages'},
+      p=>onDmInsert(p.new)
+    )
+    .subscribe(status=>__rtOK.dm=(status==='SUBSCRIBED'));
+
+  setPollTimer();
+}
+
 document.addEventListener('visibilitychange', setPollTimer);
 window.addEventListener('focus', ()=>{refreshNow(); loadDM(true)});
 window.addEventListener('online', ()=>{ setupRealtime(); refreshNow(); loadDM(true) });
-
 /* ========= Render Lista ========= */
 const prioRank=p=>p==='Alta'?0: p==='Média'?1:2;
 function getUnreadCount(d){
