@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.1"/>
-<title>Controle Interno de Solicações</title>
+<meta name="app-version" content="V2.2"/>
+<title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -470,7 +470,10 @@ html[data-theme='light'] #toast .t{
         <button id="btnNew"><i class="fa fa-plus"></i> Nova</button>
         <button id="btnExportXLSX" class="btn-ghost"><i class="fa fa-file-excel"></i> Exportar</button>
         <button id="btnDiag" class="btn-ghost"><i class="fa fa-stethoscope"></i> Diagnóstico</button>
-        <button id="btnLogout" class="btn-ghost"><i class="fa fa-right-from-bracket"></i> Sair</button><i class="fa fa-right-from-bracket"></i> Sair</button>
+        <button id="btnLogout" class="btn-ghost">
+          <i class="fa fa-right-from-bracket"></i> Sair
+        </button>
+
       </div>
     </div>
   </header>
@@ -964,6 +967,41 @@ function renderNotificationsIcon(){
     el.classList.add('hidden');
   }
 }
+// === Regras de quem deve ser avisado ===
+function isUserRelatedToTicketFront(d){
+  if (!d) return false;
+  var me = currentUser() || {};
+  var meName = me.name || '';
+
+  // abriu o ticket
+  if (d.openedBy && d.openedBy === me.id) return true;
+
+  // é solicitante
+  if ((d.solicitante || '') === meName) return true;
+
+  // é responsável
+  if ((d.responsavel || '') === meName) return true;
+
+  return false;
+}
+
+// dispara toast + sino + notificação nativa
+function notifyTicketEventFront(d, msg, type){
+  if (!d) return;
+  // só notifica se esse usuário tem relação com o ticket
+  if (!isUserRelatedToTicketFront(d)) return;
+
+  addNotification(d, msg, type || 'info');
+  toast(msg);
+
+  // se a aba não está visível, manda Notification do navegador
+  if (document.visibilityState !== 'visible'){
+    showNativeNotification('Ticket ' + d.id, {
+      body: msg,
+      tag: 'ticket-' + d.id
+    });
+  }
+}
 function markNotificationRead(id){
   var idx=(notifications||[]).findIndex(n=>n.id===id);
   if(idx>-1){
@@ -1208,59 +1246,109 @@ function setPollTimer(){
   var ms=(document.visibilityState==='visible')?800:8000;
   __pollId=setInterval(()=>{ if(!__rtOK.messages||!__rtOK.tickets||!__rtOK.dm){refreshNow(); loadDM(true)} },ms)
 }
-function setupRealtime(){
-  if(!supaReady())return;
-  supa.getChannels().forEach(ch=>supa.removeChannel(ch));
+supa.channel('realtime-messages')
+  .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
+    var m   = payload.new;
+    var tid = String(m.ticket_id);
 
-  supa.channel('realtime-messages')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{
-      var m   = payload.new;
-      var tid = String(m.ticket_id);
+    // ticket na estrutura do front
+    var d = data.find(x => String(x.id) === tid);
 
-      // Garante que comparamos sempre como string
-      var d = data.find(x => String(x.id) === tid);
+    // se ainda não temos o ticket em memória, faz refresh e sai
+    if(!d){
+      refreshNow();
+      return;
+    }
 
-      // Se ainda não temos o ticket em memória, força um refresh completo
-      if(!d){
-        refreshNow();
-        return;
+    // atualiza histórico local
+    d.historico = d.historico || [];
+    d.historico.push({
+      at:  new Date(m.created_at).getTime(),
+      txt: m.body,
+      user: m.sender_name || '—'
+    });
+
+    render();
+
+    var me = currentUser() || {};
+    var meName = me.name || '';
+
+    // não avisa quem enviou
+    if (meName === (m.sender_name || '')) return;
+
+    // dispara sino + native notification só pra quem é relacionado ao ticket
+    notifyTicketEventFront(
+      d,
+      'Nova mensagem no ticket ' + tid,
+      'message'
+    );
+  })
+  .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
+
+/* === REALTIME: TICKETS (criação e update) === */
+supa.channel('realtime-tickets')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tickets' }, payload => {
+    var tNew = payload.new;
+    var id   = String(tNew.id);
+
+    refreshNow();
+
+    // tenta achar o ticket no array atual
+    var d = data.find(x => String(x.id) === id);
+    if (!d) {
+      d = {
+        id: id,
+        solicitante: tNew.solicitante || '',
+        responsavel: tNew.responsavel || '',
+        openedBy: tNew.opened_by || null
+      };
+    }
+
+    notifyTicketEventFront(
+      d,
+      'Nova solicitação criada (ticket ' + id + ')',
+      'ticket_new'
+    );
+  })
+
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tickets' }, payload => {
+    var tNew = payload.new;
+    var id   = String(tNew.id);
+
+    // pega estado ANTES de atualizar
+    var prev = data.find(x => String(x.id) === id);
+
+    refreshNow();
+
+    var msg = null;
+
+    if (prev) {
+      if (prev.status !== tNew.status) {
+        msg = 'Ticket ' + id + ' mudou de "' + prev.status + '" para "' + tNew.status + '"';
+      } else if ((prev.responsavel || '') !== (tNew.responsavel || '')) {
+        msg = 'Ticket ' + id + ' teve o responsável alterado para "' + (tNew.responsavel || '-') + '"';
+      } else {
+        msg = 'Ticket ' + id + ' foi atualizado';
       }
+    } else {
+      msg = 'Ticket ' + id + ' foi atualizado';
+    }
 
-      d.historico = d.historico || [];
-      d.historico.push({
-        at:  new Date(m.created_at).getTime(),
-        txt: m.body,
-        user: m.sender_name || '—'
-      });
+    var d = prev || {
+      id: id,
+      solicitante: tNew.solicitante || '',
+      responsavel: tNew.responsavel || '',
+      openedBy: tNew.opened_by || null
+    };
 
-      render();
+    notifyTicketEventFront(
+      d,
+      msg,
+      'ticket_update'
+    );
+  })
 
-      var me = (currentUser()||{}).name || '';
-      if(me !== (m.sender_name||'')){
-        var title = 'Nova mensagem no ticket '+tid;
-        toast(title);
-        if(document.visibilityState!=='visible'){
-          showNativeNotification('Nova mensagem',{
-            body: 'Ticket '+tid+' — '+(m.body||'').slice(0,80),
-            tag: 'ticket-'+tid,
-            ticketId: tid
-          });
-        }
-      }
-    })
-    .subscribe(status=>__rtOK.messages=(status==='SUBSCRIBED'));
-
-  supa.channel('realtime-tickets')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'tickets'},()=>refreshNow())
-    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'tickets'},()=>refreshNow())
-    .subscribe(status=>__rtOK.tickets=(status==='SUBSCRIBED'));
-
-  supa.channel('realtime-dm')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'dm_messages'},p=>onDmInsert(p.new))
-    .subscribe(status=>__rtOK.dm=(status==='SUBSCRIBED'));
-
-  setPollTimer();
-}
+  .subscribe(status => __rtOK.tickets = (status === 'SUBSCRIBED'));
 document.addEventListener('visibilitychange', setPollTimer);
 window.addEventListener('focus', ()=>{refreshNow(); loadDM(true)});
 window.addEventListener('online', ()=>{ setupRealtime(); refreshNow(); loadDM(true) });
@@ -2253,4 +2341,3 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
-
