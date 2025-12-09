@@ -2131,6 +2131,9 @@ qs('#btnBackList').onclick=function(){qs('#closedPage').classList.add('hidden');
 qs('#btnBackList2').onclick=function(){qs('#kpiPage').classList.add('hidden');qs('#listPage').classList.remove('hidden');setHeadH();render()};
 qs('#fClosed').addEventListener('input',debounce(renderClosedPage,200));
 
+qs('#btnApplyKpi').onclick=function(){
+  renderKPIs();
+};
 /* Diagnóstico */
 function showDiag(){
   var b=qs('#diagBar'); b.classList.remove('hidden');
@@ -2383,3 +2386,4 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
+
