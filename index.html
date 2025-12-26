@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.3"/>
+<meta name="app-version" content="V2.4"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -425,6 +425,12 @@ html[data-theme='light'] #toast .t{
     text-align:center;
     font-size:12px;
     color:var(--muted);
+  }
+
+  /* DESATIVAR DM (chat usuários) */
+  .dm-launcher,
+  #dmPanel{
+    display:none !important;
   }
 
   /* esconder botões Encerrados e Diagnóstico */
@@ -1078,6 +1084,8 @@ var data=[]; var lastReadMap={};
 var chartAbertos=null, chartConcluidos=null, chartTransp=null, chartCanal=null;
 
 /* ===== Perfis e DM ===== */
+const ENABLE_DM = false; // DM desativado
+
 var profiles=[];  // {id, display_name, role, username}
 var dmCache=[];   // [{id,sender,receiver,body,created_at}]
 var dmTarget=null;
@@ -1167,11 +1175,8 @@ async function loadFromSupabase(){
   tks.sort((a,b)=>new Date(b.aberto_em)-new Date(a.aberto_em));
 
   // mensagens do ticket
-  var ids=tks.map(t=>t.id); var msgsByTicket={};
-  if(ids.length){
-    var r2=await supa.from('messages').select('ticket_id,body,sender_name,created_at').in('ticket_id',ids).order('created_at',{ascending:true});
-    if(!r2.error){(r2.data||[]).forEach(m=>((msgsByTicket[m.ticket_id]=msgsByTicket[m.ticket_id]||[]).push({at:new Date(m.created_at).getTime(),txt:m.body,user:m.sender_name||'—'})))}
-  }
+  // (otimização V2.4) não carregamos histórico na lista; o chat é carregado só ao abrir o ticket.
+
   // last_reads
   lastReadMap={};
   var me=currentUser(); if(me){var lr=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id); (lr.data||[]).forEach(r=>lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime())}
@@ -1180,7 +1185,7 @@ async function loadFromSupabase(){
     id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
     prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
     codigo:t.codigo||'', transportadora:t.transportadora||'', canal: (t.canal||''), pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
-    openedBy:t.opened_by||null, closedAt:t.closed_at?new Date(t.closed_at).getTime():null, historico:msgsByTicket[t.id]||[]
+    openedBy:t.opened_by||null, closedAt:t.closed_at?new Date(t.closed_at).getTime():null, historico:[]
   }));
 }
 
@@ -1238,7 +1243,7 @@ async function supaAddMessage(ticketId, text){
 }
 async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 /* ========= Realtime + fallback ========= */
-var __rtOK={messages:false,tickets:false,dm:false}; 
+var __rtOK={messages:false,tickets:false,dm:(!ENABLE_DM)}; 
 var __pollId=null;
 
 async function refreshNow(){
@@ -1250,8 +1255,11 @@ function setPollTimer(){
   if(__pollId) clearInterval(__pollId);
   var ms=(document.visibilityState==='visible')?800:8000;
   __pollId=setInterval(()=>{
-    if(!__rtOK.messages || !__rtOK.tickets || !__rtOK.dm){
+    // polling só como fallback se realtime falhar
+    if(!__rtOK.messages || !__rtOK.tickets){
       refreshNow();
+    }
+    if(ENABLE_DM && !__rtOK.dm){
       loadDM(true);
     }
   }, ms);
@@ -1381,15 +1389,15 @@ function setupRealtime(){
     .subscribe(status=>__rtOK.tickets=(status==='SUBSCRIBED'));
 
   /* === REALTIME: DM ENTRE USUÁRIOS === */
-  supa.channel('realtime-dm')
-    .on(
-      'postgres_changes',
-      {event:'INSERT',schema:'public',table:'dm_messages'},
-      p=>onDmInsert(p.new)
-    )
-    .subscribe(status=>__rtOK.dm=(status==='SUBSCRIBED'));
-
-  setPollTimer();
+  if(ENABLE_DM){
+    supa.channel('realtime-dm')
+      .on(
+        'postgres_changes',
+        {event:'INSERT',schema:'public',table:'dm_messages'},
+        p=>onDmInsert(p.new)
+      )
+      .subscribe(status=>__rtOK.dm=(status==='SUBSCRIBED'));
+  }setPollTimer();
 }
 
 document.addEventListener('visibilitychange', setPollTimer);
@@ -2325,9 +2333,11 @@ async function boot(){ if(!ensureLatestVersion()) return; initTheme();
   var u=currentUser(); 
   if(!u){showLogin();return;} 
   showApp(); 
-  await loadProfiles(); 
-  await loadFromSupabase(); 
-  await loadDM(true); 
+  await loadFromSupabase();
+  if(ENABLE_DM){
+    await loadProfiles();
+    await loadDM(true);
+  }
   loadFilters();
   loadNotifications();
   renderNotificationsIcon();
@@ -2359,9 +2369,11 @@ qs('#btnLogin').onclick=async function(){
   }
   var user={id:authResp.data.user.id,username:profile.username,name:profile.display_name,role:profile.role};
   setSession(user); 
-  await loadProfiles(); 
-  await loadFromSupabase(); 
-  await loadDM(true); 
+  await loadFromSupabase();
+  if(ENABLE_DM){
+    await loadProfiles();
+    await loadDM(true);
+  }
   showApp(); 
   loadFilters();
   render(); 
