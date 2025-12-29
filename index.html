@@ -1182,7 +1182,7 @@ async function loadFromSupabase(){
   var me=currentUser(); if(me){var lr=await supa.from('last_reads').select('ticket_id,last_read_at').eq('user_id',me.id); (lr.data||[]).forEach(r=>lastReadMap[r.ticket_id]=new Date(r.last_read_at).getTime())}
 
   data=tks.map(t=>({
-    id:t.id, abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
+    id:String(t.id), abertoEm:new Date(t.aberto_em).getTime(), solicitante:t.solicitante, categoria:t.categoria, assunto:t.assunto,
     prioridade:t.prioridade, descricao:t.descricao||'', status:t.status, responsavel:t.responsavel||'', prazo:t.prazo?new Date(t.prazo).toISOString().slice(0,10):'',
     codigo:t.codigo||'', transportadora:t.transportadora||'', canal: (t.canal||''), pendente:!!t.pendente, retomar_em:t.retomar_em?new Date(t.retomar_em).toISOString().slice(0,10):'',
     openedBy:t.opened_by||null, closedAt:t.closed_at?new Date(t.closed_at).getTime():null, historico:[]
@@ -1241,7 +1241,7 @@ async function supaAddMessage(ticketId, text){
 
   await loadTicketChat(ticketId);
 }
-async function supaMarkRead(ticketId){ if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
+async function supaMarkRead(ticketId){ ticketId = String(ticketId); if(!supaReady())return; var u=currentUser(); if(!u)return; var nowIso=new Date().toISOString(); await supa.from('last_reads').upsert({ticket_id:(String)(ticketId),user_id:u.id,last_read_at:nowIso}); lastReadMap[ticketId]=new Date(nowIso).getTime()}
 /* ========= Realtime + fallback ========= */
 var __rtOK={messages:false,tickets:false,dm:(!ENABLE_DM)}; 
 var __pollId=null;
@@ -1778,7 +1778,7 @@ function renderTicketChat(list){
 
 async function loadTicketChat(ticketId){
   if (!supa) return;
-  const d    = Array.isArray(data) ? data.find(x => x.id === ticketId) : null;
+  const d    = Array.isArray(data) ? data.find(x => String(x.id) === String(ticketId)) : null;
   const key1 = (ticketId + "");
   let   key2 = d && d.codigo ? (d.codigo + "") : null;
   if (!key2) {
@@ -1808,6 +1808,8 @@ function setSelectValue(sel,value){
 }
 function openNew(){resetForm();qs('#modalTitle').textContent='Nova solicitação';openModal(true)}
 async function subscribeTicketChannel(ticketId){
+  ticketId = String(ticketId);
+
   if (!supa) return;
   if (ticketChannels.has(ticketId)) return;
   var ch = supa.channel('ticket-'+ticketId);
@@ -1828,7 +1830,9 @@ async function subscribeTicketChannel(ticketId){
 }
 var ticketChannels = new Map();
 async function openEdit(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
+  id = String(id);
+
+  var d=data.find(x=>String(x.id)===id); if(!d)return;
   resetForm(); qs('#modalTitle').textContent='Editar solicitação'; qs('#ticketId').value=d.id;
   qs('#solicitante').value=d.solicitante||((currentUser()||{}).name||'');
   qs('#categoriaSel').value=d.categoria||'Frota - Transportadora';
@@ -1846,8 +1850,8 @@ async function openEdit(id){
   await supaMarkRead(d.id); await subscribeTicketChannel(d.id); render(); openModal(true);
 }
 function collectForm(){
-  var id=qs('#ticketId').value||uid(); var now=Date.now();
-  var exists=data.find(x=>x.id===id); var abertoEm=exists?exists.abertoEm:now; var prevClosedAt=exists?exists.closedAt||null:null;
+  var id=String(qs('#ticketId').value||uid()); var now=Date.now();
+  var exists=data.find(x=>String(x.id)===id); var abertoEm=exists?exists.abertoEm:now; var prevClosedAt=exists?exists.closedAt||null:null;
   var rawPrazo=qs('#prazo').value; var prioridadeSel=qs('#prioridade').value;
   var prazo=exists?ensureSLA(rawPrazo,prioridadeSel,abertoEm):ensureSLAForForm(rawPrazo,prioridadeSel,abertoEm);
   var categoria=qs('#categoriaSel').value; var responsavel=qs('#responsavel').value.trim(); if(categoria==='SAK') responsavel='';
@@ -1904,7 +1908,7 @@ async function save(e){
 
   var rec = collectForm();
 
-  var i = data.findIndex(x => x.id === rec.id);
+  var i = data.findIndex(x=>String(x.id)===String(rec.id));
   if (i >= 0) {
     data[i] = Object.assign({}, data[i], rec);
   } else {
@@ -1922,16 +1926,22 @@ async function save(e){
   openEdit(rec.id);
 }
 async function addHistory(id,text,ts){
-  var d=data.find(x=>x.id===id); if(!d)return;
+  id = String(id);
+
+  var d=data.find(x=>String(x.id)===id); if(!d)return;
   var stamp = ts || Date.now();
   d.historico=d.historico||[]; d.historico.push({at:stamp,txt:text,user:((currentUser()||{}).name)||''});
   await loadTicketChat(d.id);
   await supaAddMessage(id,text);
 }
-async function removeTicket(id){ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>x.id!==id); await supaDeleteTicket(id); render(); openModal(false)}
+async function removeTicket(id){
+  id = String(id);
+ if(((currentUser()||{}).role)!=='admin'){alert('Apenas administradores podem excluir.');return;} if(!confirm('Deseja excluir esta solicitação?'))return; data=data.filter(x=>String(x.id)!==id); await supaDeleteTicket(id); render(); openModal(false)}
 
 async function snoozeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
+  id = String(id);
+
+  var d=data.find(x=>String(x.id)===id); if(!d)return;
   var pad=n=>String(n).padStart(2,'0');
   var def=d.retomar_em || (function(){var k=new Date();k.setDate(k.getDate()+1);return k.getFullYear()+'-'+pad(k.getMonth()+1)+'-'+pad(k.getDate())})();
   var val=prompt('Retomar em (AAAA-MM-DD):',def); if(!val)return;
@@ -1939,13 +1949,17 @@ async function snoozeTicket(id){
   await supaUpsertTicket(d); await addHistory(id,'Adiado (status Pendente) até '+new Date(val).toLocaleDateString('pt-BR')); render();
 }
 async function resumeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
+  id = String(id);
+
+  var d=data.find(x=>String(x.id)===id); if(!d)return;
   d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
   await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
 }
 
 async function closeTicket(id){
-  var d=data.find(x=>x.id===id); if(!d)return;
+  id = String(id);
+
+  var d=data.find(x=>String(x.id)===id); if(!d)return;
   if(d.status==='Encerrado'){
     toast('Esta solicitação já está encerrada.');
     return;
@@ -1973,7 +1987,9 @@ async function closeTicket(id){
   render();
 }
 async function confirmTicket(id){
-  var d = data.find(x => x.id === id);
+  id = String(id);
+
+  var d = data.find(x=>String(x.id)===id);
   if (!d) return;
 
   // só faz sentido confirmar se ainda está em Aberto
@@ -2398,4 +2414,3 @@ window.setSort=setSort;
 </script>
 </body>
 </html>
-
