@@ -1194,7 +1194,7 @@ async function supaUpsertTicket(rec){
   if(!supaReady())return;
   var me=currentUser();
   var payload={
-    id:rec.id, 
+    id:String(rec.id), 
     aberto_em:new Date(rec.abertoEm).toISOString(), 
     solicitante:rec.solicitante, 
     categoria:rec.categoria,
@@ -1208,7 +1208,7 @@ async function supaUpsertTicket(rec){
     transportadora:rec.transportadora||null, 
     pendente:!!rec.pendente, 
     retomar_em:rec.retomar_em||null,
-    opened_by: me? me.id : rec.openedBy || null, 
+    opened_by: rec.openedBy || null, 
     closed_at:rec.closedAt?new Date(rec.closedAt).toISOString():null
   };
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
