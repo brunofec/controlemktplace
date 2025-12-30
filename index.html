@@ -1958,7 +1958,8 @@ async function resumeTicket(id){
   id = String(id);
 
   var d=data.find(x=>String(x.id)===id); if(!d)return;
-  d.pendente=false; d.retomar_em=''; d.status='Em tratativa';
+  d.retomar_em=''; d.status='Em tratativa';
+  d.pendente = true;
   await supaUpsertTicket(d); await addHistory(id,'Retomado (status Em tratativa)'); render()
 }
 
@@ -1983,9 +1984,9 @@ async function closeTicket(id){
   d.prazo = ensureSLA(d.prazo, d.prioridade, d.abertoEm);
 
   // remove pendência/retomada e marca como encerrado
-  d.pendente = false;
   d.retomar_em = '';
   d.status = 'Encerrado';
+  d.pendente = false;
   d.closedAt = Date.now();
 
   await supaUpsertTicket(d);
