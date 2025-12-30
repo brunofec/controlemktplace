@@ -2027,19 +2027,21 @@ function updateKPIs(){
 }
 
 function syncQuickUI(){
-  // chips
+  // lê filtros atuais (avançados)
+  var sla=(qs('#fSLA')&&qs('#fSLA').value)||'';
+  var cat=(qs('#fCategoria')&&qs('#fCategoria').value)||'';
+  var canalF=(qs('#fCanal')&&qs('#fCanal').value)||'';
   var mine=!!(qs('#fMine')&&qs('#fMine').checked);
-  // aplica overrides dos chips (mesmo se selects não existirem ou tiverem valores diferentes)
-  if(quickFilters){
+
+  // aplica overrides dos chips (chips = fonte da verdade)
+  if(typeof quickFilters!=='undefined' && quickFilters){
     if(quickFilters.sla) sla = quickFilters.sla;
     if(quickFilters.categoria) cat = quickFilters.categoria;
     if(quickFilters.canal) canalF = quickFilters.canal;
     if(quickFilters.mine) mine = true;
   }
 
-  var sla=(qs('#fSLA')&&qs('#fSLA').value)||'';
-  var cat=(qs('#fCategoria')&&qs('#fCategoria').value)||'';
-  var canal=(qs('#fCanal')&&qs('#fCanal').value)||'';
+  // reflete na UI
   qsa('#quickChips .chip').forEach(function(b){
     if(b.id==='chipReset') return;
     var ch=b.dataset.chip, v=b.dataset.value;
@@ -2047,7 +2049,7 @@ function syncQuickUI(){
     if(ch==='mine') on=mine;
     if(ch==='sla') on=(sla && sla===v);
     if(ch==='categoria') on=(cat && cat===v);
-    if(ch==='canal') on=(canal && canal===v);
+    if(ch==='canal') on=(canalF && canalF===v);
     b.classList.toggle('active', !!on);
   });
 }
@@ -2079,6 +2081,14 @@ function render(){
   var pend=(qs('#fPend')&&qs('#fPend').value)||'';
   var mine=!!(qs('#fMine')&&qs('#fMine').checked);
   var hideClosed=false;
+
+  // overrides dos chips (fonte da verdade)
+  if(typeof quickFilters!=='undefined' && quickFilters){
+    if(quickFilters.sla) sla = quickFilters.sla;
+    if(quickFilters.categoria) cat = quickFilters.categoria;
+    if(quickFilters.canal) canalF = quickFilters.canal;
+    if(quickFilters.mine) mine = true;
+  }
 
   var rows=data.filter(d=>{
     var sLA=slaStatus(d.prazo).code;
