@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.7.1"/>
+<meta name="app-version" content="V2.7.5"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2098,13 +2098,11 @@ function render(){
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
     var isPendDue=isPend && retoma && retoma < today0();
 
-    // Busca SEMPRE tem prioridade: se digitou, ignoramos filtros restritivos
+    // Busca: se digitou, filtra pelo termo (e ainda aplica chips/tabs/avançados)
     if(term){
       if(searchable.indexOf(term)===-1) return false;
-      return true;
     }
-
-    // Sem termo de busca: aplica filtros normalmente
+// Sem termo de busca: aplica filtros normalmente
     if(hideClosed && d.status==='Encerrado') return false;
 
     if(st && d.status!==st) return false;
