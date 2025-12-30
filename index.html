@@ -1476,7 +1476,7 @@ function render(){
     var sLA=slaStatus(d.prazo).code;
     var searchable=[d.solicitante,d.assunto,d.descricao,d.codigo,d.transportadora,d.canal].join(' ').toLowerCase();
 
-    var isPend=(d.status==='Pendente');
+    var isPend=(d.status!=='Encerrado');
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
     var isPendDue=isPend && retoma && retoma < today0();
 
