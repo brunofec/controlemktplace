@@ -1480,8 +1480,14 @@ function render(){
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
     var isPendDue=isPend && retoma && retoma < today0();
 
-    if(term && searchable.indexOf(term)===-1) return false;
-    if(!term && hideClosed && d.status==='Encerrado') return false;
+    // Busca SEMPRE tem prioridade: se digitou, ignoramos filtros restritivos
+    if(term){
+      if(searchable.indexOf(term)===-1) return false;
+      return true;
+    }
+
+    // Sem termo de busca: aplica filtros normalmente
+    if(hideClosed && d.status==='Encerrado') return false;
 
     if(st && d.status!==st) return false;
     if(pr && d.prioridade!==pr) return false;
