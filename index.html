@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.4"/>
+<meta name="app-version" content="V2.6"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,6 +438,73 @@ html[data-theme='light'] #toast .t{
   #btnDiag{
     display:none !important;
   }
+
+  /* ===== UX v2.6: tabs, chips, view modes, actions menu, SLA semáforo ===== */
+
+  /* colunas por modo (apenas lista principal) */
+  #tbl.mode-operacao th:nth-child(2), #tbl.mode-operacao td:nth-child(2),
+  #tbl.mode-operacao th:nth-child(5), #tbl.mode-operacao td:nth-child(5),
+  #tbl.mode-operacao th:nth-child(6), #tbl.mode-operacao td:nth-child(6),
+  #tbl.mode-operacao th:nth-child(10), #tbl.mode-operacao td:nth-child(10){
+    display:none;
+  }
+  /* Operação: prioridade mais leve */
+  #tbl.mode-operacao .prio-lite{opacity:.8}
+  #tbl.mode-gestao th:nth-child(7), #tbl.mode-gestao td:nth-child(7){
+    display:none;
+  }
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab-btn{
+    padding:8px 12px;border-radius:999px;
+    background:transparent;border:1px solid var(--border);color:var(--text);
+    cursor:pointer;font-weight:600;font-size:13px
+  }
+  .tab-btn.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(79,140,255,.18) inset;
+  }
+  .chipbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{
+    padding:6px 10px;border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.02);
+    color:var(--text);
+    font-size:12px;
+    cursor:pointer;
+    user-select:none;
+  }
+  body.theme-light .chip{background:rgba(15,23,42,.03)}
+  .chip.active{border-color:var(--primary); box-shadow:0 0 0 2px rgba(79,140,255,.18) inset}
+  .viewmodes{display:flex;gap:8px;flex-wrap:wrap}
+  .view-btn{padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;font-size:13px}
+  .view-btn.active{border-color:var(--primary); box-shadow:0 0 0 2px rgba(79,140,255,.18) inset}
+  .actions-menu{position:relative;display:inline-flex}
+  .menu{
+    position:absolute;right:0;top:42px;min-width:180px;
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;box-shadow:var(--shadow);
+    padding:6px;display:none;z-index:50
+  }
+  .menu.show{display:block}
+  .menu button{
+    width:100%;
+    display:flex;align-items:center;gap:8px;justify-content:flex-start;
+    padding:8px 10px;border-radius:10px;
+    background:transparent;border:1px solid transparent;
+    color:var(--text);box-shadow:none;font-weight:600
+  }
+  .menu button:hover{border-color:var(--border); background:rgba(255,255,255,.03)}
+  body.theme-light .menu button:hover{background:rgba(15,23,42,.04)}
+  .sla-pill{border:1px solid transparent}
+  .sla-ok{background:rgba(33,195,138,.12);border-color:rgba(33,195,138,.35);color:#7eedc0}
+  .sla-risk{background:rgba(255,191,71,.12);border-color:rgba(255,191,71,.35);color:#ffd58a}
+  .sla-late{background:rgba(255,93,93,.12);border-color:rgba(255,93,93,.35);color:#ff9f9f}
+  body.theme-light .sla-ok{color:#0f5132}
+  body.theme-light .sla-risk{color:#6b3d00}
+  body.theme-light .sla-late{color:#7f1d1d}
+  .prio-lite{opacity:.85}
+
 </style>
 </head>
 <body>
@@ -500,6 +567,33 @@ html[data-theme='light'] #toast .t{
   <main id="listPage" class="wrap">
     <section class="panel panel-fill">
       <div class="row" style="align-items:center;margin-bottom:10px">
+        <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+          <div class="row" style="align-items:center;justify-content:space-between;gap:10px">
+            <div class="tabs" id="statusTabs">
+              <button class="tab-btn active" data-tab="Abertos">📥 Abertos</button>
+              <button class="tab-btn" data-tab="Em tratativa">🛠 Em tratativa</button>
+              <button class="tab-btn" data-tab="Pendente">⏸ Pendentes</button>
+              <button class="tab-btn" data-tab="Encerrado">✅ Encerrados</button>
+              <button class="tab-btn" data-tab="Tudo">📚 Tudo</button>
+            </div>
+            <div class="viewmodes" id="viewModes">
+              <button class="view-btn active" data-view="operacao" title="Fila Operacional">Operação</button>
+              <button class="view-btn" data-view="detalhado" title="Tabela completa">Detalhado</button>
+              <button class="view-btn" data-view="gestao" title="Visão de gestão">Gestão</button>
+            </div>
+          </div>
+          <div class="chipbar" id="quickChips">
+            <span class="chip" data-chip="late">🔴 Vencidos</span>
+            <span class="chip" data-chip="risk">🟠 Em risco</span>
+            <span class="chip" data-chip="pend">⏸ Pendentes</span>
+            <span class="chip" data-chip="mine">👤 Meus</span>
+            <span class="chip" data-chip="frota">🚚 Frota</span>
+            <span class="chip" data-chip="meli">🛒 Mercado Livre</span>
+            <span class="chip" data-chip="shopee">🛍 Shopee</span>
+            <span class="chip" data-chip="reset">♻️ Reset rápido</span>
+          </div>
+        </div>
+
         <div class="filters" style="flex:1">
           <input id="fSearch" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
           <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
@@ -912,7 +1006,7 @@ function statusBadge(s){
   var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Pendente':'status-pendente','Encerrado':'status-encerrado'};
   return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'
 }
-function prioBadge(p){return '<span class="badge '+(p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa')+'">'+p+'</span>'}
+function prioBadge(p){return '<span class="badge prio-lite '+(p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa')+'">'+p+'</span>'}
 const ym=d=>d.toISOString().slice(0,7);
 const startOfDay=dt=>{var d=new Date(dt);d.setHours(0,0,0,0);return d}
 const today0=()=>{var d=new Date();d.setHours(0,0,0,0);return d}
@@ -923,6 +1017,8 @@ var sortField='default';
 var sortDir='asc';
 var pageSize=50;
 var currentPage=1;
+var viewMode='operacao';
+var statusTab='Abertos';
 
 /* filtros salvos / tema */
 const FILTER_KEY_BASE='ticket_filters_';
@@ -1128,6 +1224,20 @@ function loadFilters(){
       qs('#fHideClosed').checked = f.hideClosed;
       qs('#tgHideClosed').classList.toggle('active', f.hideClosed);
     }
+  }catch(e){}
+
+  // sincroniza tabs/visão com filtros salvos (sem reescrever filtros)
+  try{
+    var st = qs('#fStatus').value || '';
+    if(st==='Aberto' || st==='Em tratativa' || st==='Pendente'){
+      statusTab = st;
+    }else if(st==='Encerrado'){
+      statusTab = 'Encerrado';
+    }else{
+      statusTab = 'Tudo';
+    }
+    qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===statusTab));
+    qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
   }catch(e){}
 }
 
@@ -1468,6 +1578,9 @@ function updateSortIcons(){
 }
 
 function render(){
+  // aplica modo de visualização
+  var tblEl=qs('#tbl');
+  if(tblEl){tblEl.classList.remove('mode-operacao','mode-detalhado','mode-gestao'); tblEl.classList.add('mode-'+(viewMode||'operacao'));}
   var term=(qs('#fSearch').value||'').toLowerCase().trim();
   var st=qs('#fStatus').value, pr=qs('#fPrio').value, cat=qs('#fCategoria').value, sla=qs('#fSLA').value;
   var pend=qs('#fPend').value; var mine=qs('#fMine').checked; var hideClosed=qs('#fHideClosed').checked;
@@ -1528,10 +1641,20 @@ function render(){
   tbody.innerHTML=pageRows.map(d=>{
     var slaObj=slaStatus(d.prazo,d);
     var tooltip = slaTooltip(d.prazo,d);
-    var slaPill='<span class="badge" title="'+(tooltip || d.prazo || '')+'">'+slaObj.label+'</span>';
+    var slaClass = (slaObj.code==='late'?'sla-late':(slaObj.code==='risk'?'sla-risk':'sla-ok'));
+    var slaPill='<span class="badge sla-pill '+slaClass+'" title="'+(tooltip || d.prazo || '')+'">'+slaObj.label+'</span>';
     var showConfirm=d.status==='Aberto';
     var unread=d.status==='Em tratativa'?getUnreadCount(d):0;
     var unreadBadge=unread>0?'<span class="badge-unread" title="'+unread+' nova(s)">'+unread+'</span>':'';
+    var primaryHtml='';
+    if(d.status==='Aberto'){
+      primaryHtml='<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>';
+    }else if(d.status==='Pendente'){
+      primaryHtml='<button class="btn-warning btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>';
+    }else{
+      primaryHtml='<button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>';
+    }
+
     var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
@@ -1548,11 +1671,17 @@ function render(){
       <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
       <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
       <td class="table-actions">\
-        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
-        <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>\
-        <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>\
-        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
-        '+(d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+'\
+        '+primaryHtml+'\
+        <div class="actions-menu">\
+          <button class="btn-ghost btn-icon" title="Mais ações" onclick="toggleRowMenu(\''+d.id+'\', event)"><i class="fa fa-ellipsis-vertical"></i></button>\
+          <div class="menu" id="menu-'+d.id+'">\
+            <button onclick="openEdit(\''+d.id+'\'); closeAllMenus()"><i class="fa fa-pen-to-square"></i> Abrir</button>\
+            <button onclick="closeTicket(\''+d.id+'\'); closeAllMenus()"><i class="fa fa-check"></i> Encerrar</button>\
+            <button onclick="snoozeTicket(\''+d.id+'\'); closeAllMenus()"><i class="fa fa-clock"></i> Adiar</button>\
+            '+(d.status==='Pendente'?'<button onclick="resumeTicket(\''+d.id+'\'); closeAllMenus()"><i class="fa fa-play"></i> Retomar</button>':'')+'\
+            '+(((currentUser()||{}).role==='admin')?'<button onclick="removeTicket(\''+d.id+'\'); closeAllMenus()"><i class="fa fa-trash"></i> Excluir</button>':'')+'\
+          </div>\
+        </div>\
       </td>\
     </tr>';
   }).join('');
@@ -1597,6 +1726,22 @@ function setSort(field){
   currentPage = 1;
   render();
 }
+
+
+/* ===== Actions menu (kebab) ===== */
+function closeAllMenus(){
+  document.querySelectorAll('.menu.show').forEach(m=>m.classList.remove('show'));
+}
+function toggleRowMenu(id, ev){
+  try{ ev && ev.stopPropagation(); ev && ev.preventDefault(); }catch(e){}
+  closeAllMenus();
+  var el=document.getElementById('menu-'+id);
+  if(el) el.classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+  // fecha menus ao clicar fora
+  if(!e.target.closest('.actions-menu')) closeAllMenus();
+});
 
 /* bind cabeçalhos sortáveis */
 qsa('th.sortable').forEach(th=>{
@@ -2064,6 +2209,105 @@ qs('#btnClear').onclick=function(){
   currentPage=1;
   render()
 };
+
+
+/* ===== Status Tabs + Quick Chips (v2.6) ===== */
+function setActive(el, on){ if(!el) return; el.classList.toggle('active', !!on); }
+function applyStatusTab(tab){
+  statusTab = tab || 'Abertos';
+  // UI active
+  qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===statusTab));
+  // aplica filtros
+  if(statusTab==='Tudo'){
+    qs('#fStatus').value='';
+    qs('#fHideClosed').checked=false;
+    qs('#tgHideClosed').classList.toggle('active', false);
+  }else if(statusTab==='Encerrado'){
+    qs('#fStatus').value='Encerrado';
+    qs('#fHideClosed').checked=false;
+    qs('#tgHideClosed').classList.toggle('active', false);
+  }else{
+    qs('#fStatus').value = statusTab; // Aberto / Em tratativa / Pendente
+    // por padrão esconde encerrados quando não estou na aba Encerrados/Tudo
+    qs('#fHideClosed').checked=true;
+    qs('#tgHideClosed').classList.toggle('active', true);
+  }
+  saveFilters();
+  currentPage=1;
+  render();
+}
+function applyViewMode(mode){
+  viewMode = mode || 'operacao';
+  qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
+  render();
+}
+function applyQuickChip(kind){
+  if(kind==='reset'){
+    // não mexe na busca, só limpa chips/filtros rápidos
+    qs('#fSLA').value='';
+    qs('#fPend').value='';
+    qs('#fCategoria').value='';
+    qs('#fMine').checked=false; qs('#tgMine').classList.remove('active');
+    qsa('#quickChips .chip').forEach(c=>c.classList.remove('active'));
+    saveFilters();
+    currentPage=1;
+    render();
+    return;
+  }
+  if(kind==='mine'){
+    qs('#fMine').checked = !qs('#fMine').checked;
+    qs('#tgMine').classList.toggle('active', qs('#fMine').checked);
+    setActive(document.querySelector('#quickChips .chip[data-chip="mine"]'), qs('#fMine').checked);
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='late' || kind==='risk'){
+    // alterna SLA
+    var v = (qs('#fSLA').value===kind) ? '' : kind;
+    qs('#fSLA').value = v;
+    qsa('#quickChips .chip[data-chip="late"], #quickChips .chip[data-chip="risk"]').forEach(c=>c.classList.remove('active'));
+    if(v) setActive(document.querySelector('#quickChips .chip[data-chip="'+v+'"]'), true);
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='pend'){
+    // força aba pendente + filtro pend
+    applyStatusTab('Pendente');
+    qs('#fPend').value = (qs('#fPend').value==='pend' ? '' : 'pend');
+    setActive(document.querySelector('#quickChips .chip[data-chip="pend"]'), qs('#fPend').value==='pend');
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='frota'){
+    qs('#fCategoria').value = (qs('#fCategoria').value==='Frota - Transportadora' ? '' : 'Frota - Transportadora');
+    setActive(document.querySelector('#quickChips .chip[data-chip="frota"]'), qs('#fCategoria').value==='Frota - Transportadora');
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='meli' || kind==='shopee'){
+    // usamos busca rápida por canal
+    var term = (kind==='meli'?'mercado livre':'shopee');
+    var cur = (qs('#fSearch').value||'').toLowerCase().trim();
+    if(cur===term) qs('#fSearch').value='';
+    else qs('#fSearch').value=term;
+    qsa('#quickChips .chip[data-chip="meli"], #quickChips .chip[data-chip="shopee"]').forEach(c=>c.classList.remove('active'));
+    if((qs('#fSearch').value||'').toLowerCase().trim()===term){
+      setActive(document.querySelector('#quickChips .chip[data-chip="'+kind+'"]'), true);
+    }
+    saveFilters(); currentPage=1; render(); return;
+  }
+}
+(function bindTabsAndChips(){
+  // tabs
+  qsa('#statusTabs .tab-btn').forEach(b=>{
+    b.addEventListener('click', ()=>applyStatusTab(b.dataset.tab));
+  });
+  // view
+  qsa('#viewModes .view-btn').forEach(b=>{
+    b.addEventListener('click', ()=>applyViewMode(b.dataset.view));
+  });
+  // chips
+  qsa('#quickChips .chip').forEach(c=>{
+    c.addEventListener('click', ()=>applyQuickChip(c.dataset.chip));
+  });
+})();
+
 
 /* Toggle compactos (ícones) */
 qs('#tgMine').onclick=function(){
