@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.7.5"/>
+<meta name="app-version" content="V2.7.1"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -778,20 +778,20 @@ html[data-theme='light'] #toast .t{
       <!-- Chips rápidos -->
       <div class="row" style="align-items:center;gap:10px;margin-bottom:10px">
         <div class="chips" id="quickChips">
-          <button class="chip dot-red" data-chip="sla" data-value="late" onclick="onChipClick(event,this)"><span class="dot"></span>Vencidos</button>
-          <button class="chip dot-amber" data-chip="sla" data-value="risk" onclick="onChipClick(event,this)"><span class="dot"></span>Em risco</button>
-          <button class="chip dot-blue" data-chip="mine" data-value="1" onclick="onChipClick(event,this)"><span class="dot"></span>Meus</button>
-          <button class="chip dot-gray" data-chip="categoria" data-value="Frota - Transportadora" onclick="onChipClick(event,this)"><span class="dot"></span>Frota</button>
-          <button class="chip dot-gray" data-chip="categoria" data-value="SAK" onclick="onChipClick(event,this)"><span class="dot"></span>SAK</button>
-          <button class="chip dot-gray" data-chip="canal" data-value="Mercado Livre" onclick="onChipClick(event,this)"><span class="dot"></span>Mercado Livre</button>
-          <button class="chip dot-gray" data-chip="canal" data-value="Shopee" onclick="onChipClick(event,this)"><span class="dot"></span>Shopee</button>
+          <button class="chip dot-red" data-chip="sla" data-value="late"><span class="dot"></span>Vencidos</button>
+          <button class="chip dot-amber" data-chip="sla" data-value="risk"><span class="dot"></span>Em risco</button>
+          <button class="chip dot-blue" data-chip="mine" data-value="1"><span class="dot"></span>Meus</button>
+          <button class="chip dot-gray" data-chip="categoria" data-value="Frota - Transportadora"><span class="dot"></span>Frota</button>
+          <button class="chip dot-gray" data-chip="categoria" data-value="SAK"><span class="dot"></span>SAK</button>
+          <button class="chip dot-gray" data-chip="canal" data-value="Mercado Livre"><span class="dot"></span>Mercado Livre</button>
+          <button class="chip dot-gray" data-chip="canal" data-value="Shopee"><span class="dot"></span>Shopee</button>
           <button class="chip dot-green" id="chipReset"><span class="dot"></span>Reset rápido</button>
         </div>
       </div>
 
       <!-- Barra principal -->
       <div class="toolbar">
-        <input id="fSearch" class="search" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..." oninput="onSearchInput(event)"/>
+        <input id="fSearch" class="search" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
         <button id="btnAdvanced" class="btn-ghost"><i class="fa fa-sliders"></i> Filtros avançados</button>
       </div>
 
@@ -1207,31 +1207,6 @@ function setChip(chip, value, on){
     }
   });
 }
-
-function onChipClick(e, el){
-  try{
-    if(e){ e.preventDefault(); e.stopPropagation(); }
-    var chip=el.dataset.chip, val=el.dataset.value;
-    if(el.id==='chipReset'){ resetRapido(); return; }
-    if(chip==='mine'){
-      var c=document.getElementById('fMine');
-      var on = !(c && c.checked);
-      setChip('mine','1',on);
-    }else{
-      var isActive = el.classList.contains('active');
-      setChip(chip,val,!isActive);
-    }
-  }catch(err){ console.error('chip click error', err); }
-}
-var __searchDebounced = debounce(function(){
-  saveFilters();
-  currentPage=1;
-  render();
-},200);
-function onSearchInput(e){
-  __searchDebounced();
-}
-
 function resetRapido(){
   // limpa busca e filtros
   var s=document.getElementById('fSearch'); if(s) s.value='';
@@ -1262,7 +1237,23 @@ function wireEnterpriseUI(){
     var vb = e.target.closest('.view-btn'); 
     if(vb){ applyView(vb.dataset.view); }
   });
-  // Chips (handled by inline onclick)
+  // Chips
+  var chips = document.getElementById('quickChips');
+  if(chips){
+    chips.addEventListener('click', function(e){
+      var b = e.target.closest('.chip'); if(!b) return;
+      if(b.id==='chipReset'){ resetRapido(); return; }
+      var chip=b.dataset.chip, val=b.dataset.value;
+      if(chip==='mine'){
+        var c=document.getElementById('fMine');
+        var on = !(c && c.checked);
+        setChip('mine','1',on);
+      }else{
+        var isActive = b.classList.contains('active');
+        setChip(chip,val,!isActive);
+      }
+    });
+  }
   // KPIs
   var strip=document.getElementById('kpiStrip');
   if(strip){
@@ -1295,7 +1286,7 @@ function wireEnterpriseUI(){
   var advClear=document.getElementById('advClear');
   var advMine=document.getElementById('advMine');
   if(advApply){ advApply.onclick=function(){ drawer.classList.remove('show'); currentPage=1; render(); }; }
-  if(advClear){ advClear.onclick=function(){ ['fSearch','fStatus','fPrio','fCategoria','fSLA','fPend','fResp'].forEach(function(id){ var el=document.getElementById(id); if(el){ if(el.type==='checkbox') el.checked=false; else el.value=''; } }); window.__filterUnassigned=false; currentPage=1; render(); }; }
+  if(advClear){ advClear.onclick=function(){ ['fStatus','fPrio','fCategoria','fCanal','fSLA','fPend','fResp'].forEach(id=>{var el=document.getElementById(id); if(el) el.value='';}); var mine=document.getElementById('fMine'); if(mine) mine.checked=false; window.__filterUnassigned=false; currentPage=1; render(); }; }
   if(advMine){ advMine.onclick=function(){ var c=document.getElementById('fMine'); if(c) c.checked=!c.checked; render(); }; }
 
   // iniciar estado salvo
@@ -2107,11 +2098,13 @@ function render(){
     var retoma=d.retomar_em? startOfDay(d.retomar_em) : null;
     var isPendDue=isPend && retoma && retoma < today0();
 
-    // Busca: se digitou, filtra pelo termo (e ainda aplica chips/tabs/avançados)
+    // Busca SEMPRE tem prioridade: se digitou, ignoramos filtros restritivos
     if(term){
       if(searchable.indexOf(term)===-1) return false;
+      return true;
     }
-// Sem termo de busca: aplica filtros normalmente
+
+    // Sem termo de busca: aplica filtros normalmente
     if(hideClosed && d.status==='Encerrado') return false;
 
     if(st && d.status!==st) return false;
@@ -2747,10 +2740,11 @@ document.getElementById('btnNew').addEventListener('click',function(e){e.prevent
     render();
   });
 });
-qs('#fSearch').addEventListener('input', debounce(function(){ saveFilters(); currentPage=1; render(); },200));
-
-
-
+qs('#fSearch').addEventListener('input',debounce(function(){
+  saveFilters();
+  currentPage=1;
+  render();
+},200));
 
 qs('#btnClear').onclick=function(){
   qs('#fSearch').value='';qs('#fStatus').value='';qs('#fPrio').value='';qs('#fCategoria').value='';
