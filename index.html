@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.4"/>
+<meta name="app-version" content="V2.7.1"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -438,6 +438,229 @@ html[data-theme='light'] #toast .t{
   #btnDiag{
     display:none !important;
   }
+
+  /* ===== UX v2.6: tabs, chips, view modes, actions menu, SLA semáforo ===== */
+
+  /* colunas por modo (apenas lista principal) */
+  #tbl.mode-operacao th:nth-child(2), #tbl.mode-operacao td:nth-child(2),
+  #tbl.mode-operacao th:nth-child(5), #tbl.mode-operacao td:nth-child(5),
+  #tbl.mode-operacao th:nth-child(6), #tbl.mode-operacao td:nth-child(6),
+  #tbl.mode-operacao th:nth-child(10), #tbl.mode-operacao td:nth-child(10){
+    display:none;
+  }
+  /* Operação: prioridade mais leve */
+  #tbl.mode-operacao .prio-lite{opacity:.8}
+  #tbl.mode-gestao th:nth-child(7), #tbl.mode-gestao td:nth-child(7){
+    display:none;
+  }
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab-btn{
+    padding:8px 12px;border-radius:999px;
+    background:transparent;border:1px solid var(--border);color:var(--text);
+    cursor:pointer;font-weight:600;font-size:13px
+  }
+  .tab-btn.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(79,140,255,.18) inset;
+  }
+  .chipbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{
+    padding:6px 10px;border-radius:999px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.02);
+    color:var(--text);
+    font-size:12px;
+    cursor:pointer;
+    user-select:none;
+  }
+  body.theme-light .chip{background:rgba(15,23,42,.03)}
+  .chip.active{border-color:var(--primary); box-shadow:0 0 0 2px rgba(79,140,255,.18) inset}
+  .viewmodes{display:flex;gap:8px;flex-wrap:wrap}
+  .view-btn{padding:8px 10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-weight:600;font-size:13px}
+  .view-btn.active{border-color:var(--primary); box-shadow:0 0 0 2px rgba(79,140,255,.18) inset}
+  .actions-menu{position:relative;display:inline-flex}
+  .menu{
+    position:absolute;right:0;top:42px;min-width:180px;
+    background:var(--panel);border:1px solid var(--border);
+    border-radius:12px;box-shadow:var(--shadow);
+    padding:6px;display:none;z-index:50
+  }
+  .menu.show{display:block}
+  .menu button{
+    width:100%;
+    display:flex;align-items:center;gap:8px;justify-content:flex-start;
+    padding:8px 10px;border-radius:10px;
+    background:transparent;border:1px solid transparent;
+    color:var(--text);box-shadow:none;font-weight:600
+  }
+  .menu button:hover{border-color:var(--border); background:rgba(255,255,255,.03)}
+  body.theme-light .menu button:hover{background:rgba(15,23,42,.04)}
+  .sla-pill{border:1px solid transparent}
+  .sla-ok{background:rgba(33,195,138,.12);border-color:rgba(33,195,138,.35);color:#7eedc0}
+  .sla-risk{background:rgba(255,191,71,.12);border-color:rgba(255,191,71,.35);color:#ffd58a}
+  .sla-late{background:rgba(255,93,93,.12);border-color:rgba(255,93,93,.35);color:#ff9f9f}
+  body.theme-light .sla-ok{color:#0f5132}
+  body.theme-light .sla-risk{color:#6b3d00}
+  body.theme-light .sla-late{color:#7f1d1d}
+  .prio-lite{opacity:.85}
+
+
+  /* ===== Enterprise UI: Tabs, Chips, KPIs, Menu, Drawer ===== */
+  .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .kpi-mini{
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:12px 12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .kpi-mini:hover{transform:translateY(-1px)}
+  .kpi-mini .label{color:var(--muted);font-size:12px}
+  .kpi-mini .value{font-size:22px;font-weight:700}
+  .kpi-mini .hint{font-size:11px;color:var(--muted)}
+  .kpi-mini .icon{width:34px;height:34px;border-radius:12px;border:1px solid var(--border);display:grid;place-items:center}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap}
+  .tab-btn{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:8px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:600;
+    box-shadow:none;
+  }
+  .tab-btn.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(79,140,255,.18) inset;
+  }
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:8px 10px;
+    border-radius:999px;
+    cursor:pointer;
+    box-shadow:none;
+    font-weight:600;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .chip.active{
+    border-color:var(--primary);
+    box-shadow:0 0 0 2px rgba(79,140,255,.18) inset;
+  }
+  .chip .dot{width:8px;height:8px;border-radius:999px;background:var(--border)}
+  .chip.dot-red  .dot{background:var(--danger)}
+  .chip.dot-amber .dot{background:var(--warning)}
+  .chip.dot-green .dot{background:var(--success)}
+  .chip.dot-blue .dot{background:var(--primary)}
+  .chip.dot-gray .dot{background:var(--muted)}
+  .toolbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .toolbar .search{flex:1;min-width:260px}
+  .view-modes{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .view-btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:12px;cursor:pointer;box-shadow:none;font-weight:700}
+  .view-btn.active{border-color:var(--primary);box-shadow:0 0 0 2px rgba(79,140,255,.18) inset}
+  .sla-pill{border:1px solid var(--border)}
+  .sla-ok{border-color:rgba(33,195,138,.45); background:rgba(33,195,138,.12)}
+  .sla-risk{border-color:rgba(255,191,71,.55); background:rgba(255,191,71,.14)}
+  .sla-late{border-color:rgba(255,93,93,.55); background:rgba(255,93,93,.12)}
+  .actions-wrap{position:relative;display:inline-flex;gap:8px;align-items:center}
+  .more-menu{
+    position:absolute;
+    right:0;
+    top:42px;
+    min-width:220px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:8px;
+    z-index:99;
+    display:none;
+  }
+  .more-menu.show{display:block}
+  .more-item{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding:10px 10px;
+    border-radius:12px;
+    cursor:pointer;
+    color:var(--text);
+    border:1px solid transparent;
+    user-select:none;
+  }
+  .more-item:hover{
+    background:rgba(255,255,255,.04);
+    border-color:rgba(255,255,255,.06);
+  }
+  body.theme-light .more-item:hover{
+    background:rgba(15,23,42,.04);
+    border-color:rgba(15,23,42,.06);
+  }
+
+
+  /* View modes: hide/show columns */
+  body[data-view="operacao"] .col-solicitante,
+  body[data-view="operacao"] .col-categoria,
+  body[data-view="operacao"] .col-canal,
+  body[data-view="operacao"] .col-resp{
+    display:none;
+  }
+  body[data-view="gestao"] .col-descricao,
+  body[data-view="gestao"] .col-acoes{ /* keep actions, but hide some noisy cols */
+  }
+  body[data-view="gestao"] .col-assunto{ }
+  body[data-view="gestao"] .col-codigo{ }
+
+  /* Drawer (Filtros avançados) */
+  .drawer{
+    position:fixed; inset:0;
+    display:none;
+    z-index:2000;
+    background:rgba(0,0,0,.45);
+  }
+  .drawer.show{display:block}
+  .drawer-panel{
+    position:absolute;
+    right:0; top:0; bottom:0;
+    width:min(420px,92vw);
+    background:var(--panel);
+    border-left:1px solid var(--border);
+    padding:16px;
+    box-shadow:var(--shadow);
+    overflow:auto;
+  }
+  .drawer-head{display:flex;align-items:center;gap:10px}
+  .drawer-head h3{margin:0;font-size:16px}
+  .drawer-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .drawer-grid label{font-size:12px;color:var(--muted)}
+  .drawer-grid .field{display:flex;flex-direction:column;gap:6px}
+  .drawer-actions{display:flex;gap:10px;margin-top:14px}
+  @media (max-width:1100px){
+    .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  }
+
 </style>
 </head>
 <body>
@@ -499,44 +722,197 @@ html[data-theme='light'] #toast .t{
   <!-- LISTA -->
   <main id="listPage" class="wrap">
     <section class="panel panel-fill">
-      <div class="row" style="align-items:center;margin-bottom:10px">
-        <div class="filters" style="flex:1">
-          <input id="fSearch" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
-          <select id="fStatus"><option value="">Todos os status</option><option>Aberto</option><option>Em tratativa</option><option>Pendente</option><option>Encerrado</option></select>
-          <select id="fPrio"><option value="">Todas as prioridades</option><option>Alta</option><option>Média</option><option>Baixa</option></select>
-          <select id="fCategoria"><option value="">Todas as categorias</option><option>Frota - Transportadora</option><option>SAK</option></select>
-          <select id="fSLA"><option value="">SLA</option><option value="ok">No prazo</option><option value="risk">Risco (≤12h)</option><option value="late">Vencido</option></select>
-          <select id="fPend"><option value="">Pendências</option><option value="pend">Só pendentes</option><option value="due">Pendentes vencidas</option></select>
-
-          <input type="checkbox" id="fMine" class="hidden-input">
-          <input type="checkbox" id="fHideClosed" class="hidden-input" checked>
-
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="tgMine" class="btn-ghost btn-icon" title="Só meus"><i class="fa fa-user-check"></i></button>
-            <button id="tgHideClosed" class="btn-ghost btn-icon active" title="Ocultar encerrados"><i class="fa fa-eye-slash"></i></button>
+      <!-- KPIs operacionais (clique para filtrar) -->
+      <div class="kpi-strip" id="kpiStrip">
+        <div class="kpi-mini" data-kpi="late" title="Clique para filtrar vencidos">
+          <div>
+            <div class="label">Vencidos</div>
+            <div class="value" id="kpiLate">0</div>
+            <div class="hint">SLA estourado</div>
           </div>
+          <div class="icon"><i class="fa fa-triangle-exclamation"></i></div>
         </div>
-
-        <button id="btnClear" class="btn-ghost" title="Limpar filtros"><i class="fa fa-eraser"></i></button>
+        <div class="kpi-mini" data-kpi="risk" title="Clique para filtrar em risco">
+          <div>
+            <div class="label">Em risco</div>
+            <div class="value" id="kpiRisk">0</div>
+            <div class="hint">≤ 12h do prazo</div>
+          </div>
+          <div class="icon"><i class="fa fa-hourglass-half"></i></div>
+        </div>
+        <div class="kpi-mini" data-kpi="unassigned" title="Clique para filtrar sem responsável">
+          <div>
+            <div class="label">Sem responsável</div>
+            <div class="value" id="kpiUnassigned">0</div>
+            <div class="hint">Abertos/Tratativa</div>
+          </div>
+          <div class="icon"><i class="fa fa-user-xmark"></i></div>
+        </div>
+        <div class="kpi-mini" data-kpi="pendDue" title="Clique para filtrar pendências vencidas">
+          <div>
+            <div class="label">Pendentes vencidas</div>
+            <div class="value" id="kpiPendDue">0</div>
+            <div class="hint">Retomar &lt; hoje</div>
+          </div>
+          <div class="icon"><i class="fa fa-clock"></i></div>
+        </div>
       </div>
 
-      <!-- tabela expandida até a margem -->
-      <div class="table-wrap edge">
+      <!-- Tabs de fila -->
+      <div class="row" style="align-items:center;gap:10px;margin-bottom:10px;justify-content:space-between">
+        <div class="tabs" id="statusTabs">
+          <button class="tab-btn active" data-tab="Aberto">Abertos</button>
+          <button class="tab-btn" data-tab="Em tratativa">Em tratativa</button>
+          <button class="tab-btn" data-tab="Pendente">Pendentes</button>
+          <button class="tab-btn" data-tab="Encerrado">Encerrados</button>
+          <button class="tab-btn" data-tab="Tudo">Tudo</button>
+        </div>
+
+        <div class="view-modes" title="Modos de visualização">
+          <button class="view-btn active" data-view="operacao"><i class="fa fa-bolt"></i> Operação</button>
+          <button class="view-btn" data-view="detalhado"><i class="fa fa-table"></i> Detalhado</button>
+          <button class="view-btn" data-view="gestao"><i class="fa fa-chart-simple"></i> Gestão</button>
+        </div>
+      </div>
+
+      <!-- Chips rápidos -->
+      <div class="row" style="align-items:center;gap:10px;margin-bottom:10px">
+        <div class="chips" id="quickChips">
+          <button class="chip dot-red" data-chip="sla" data-value="late"><span class="dot"></span>Vencidos</button>
+          <button class="chip dot-amber" data-chip="sla" data-value="risk"><span class="dot"></span>Em risco</button>
+          <button class="chip dot-blue" data-chip="mine" data-value="1"><span class="dot"></span>Meus</button>
+          <button class="chip dot-gray" data-chip="categoria" data-value="Frota - Transportadora"><span class="dot"></span>Frota</button>
+          <button class="chip dot-gray" data-chip="categoria" data-value="SAK"><span class="dot"></span>SAK</button>
+          <button class="chip dot-gray" data-chip="canal" data-value="Mercado Livre"><span class="dot"></span>Mercado Livre</button>
+          <button class="chip dot-gray" data-chip="canal" data-value="Shopee"><span class="dot"></span>Shopee</button>
+          <button class="chip dot-green" id="chipReset"><span class="dot"></span>Reset rápido</button>
+        </div>
+      </div>
+
+      <!-- Barra principal -->
+      <div class="toolbar">
+        <input id="fSearch" class="search" placeholder="Buscar por assunto, solicitante, código do cliente, transportadora, descrição..."/>
+        <button id="btnAdvanced" class="btn-ghost"><i class="fa fa-sliders"></i> Filtros avançados</button>
+      </div>
+
+      <!-- Filtros avançados (drawer) -->
+      <div id="advDrawer" class="drawer">
+        <div class="drawer-panel">
+          <div class="drawer-head">
+            <h3><i class="fa fa-sliders"></i> Filtros avançados</h3>
+            <div style="margin-left:auto"></div>
+            <button id="advClose" class="btn-ghost btn-icon" title="Fechar"><i class="fa fa-xmark"></i></button>
+          </div>
+
+          <div class="drawer-grid">
+            <div class="field">
+              <label>Status</label>
+              <select id="fStatus">
+                <option value="">Todos</option>
+                <option>Aberto</option>
+                <option>Em tratativa</option>
+                <option>Pendente</option>
+                <option>Encerrado</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Prioridade</label>
+              <select id="fPrio">
+                <option value="">Todas</option>
+                <option>Alta</option>
+                <option>Média</option>
+                <option>Baixa</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Categoria</label>
+              <select id="fCategoria">
+                <option value="">Todas</option>
+                <option>Frota - Transportadora</option>
+                <option>SAK</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Canal</label>
+              <select id="fCanal">
+                <option value="">Todos</option>
+                <option>Mercado Livre</option>
+                <option>Shopee</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>SLA</label>
+              <select id="fSLA">
+                <option value="">Todos</option>
+                <option value="ok">No prazo</option>
+                <option value="risk">Risco (≤12h)</option>
+                <option value="late">Vencido</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Pendências</label>
+              <select id="fPend">
+                <option value="">Todas</option>
+                <option value="pend">Só pendentes</option>
+                <option value="due">Pendentes vencidas</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Responsável</label>
+              <select id="fResp">
+                <option value="">Todos</option>
+                <option>Bruno</option><option>Maurilio</option><option>Jessica</option><option>Anna</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Somente meus</label>
+              <div class="row" style="gap:10px">
+                <button id="advMine" class="btn-ghost" type="button"><i class="fa fa-user-check"></i> Alternar</button>
+                <span class="muted" style="font-size:12px">Usa solicitante/responsável/criador</span>
+              </div>
+            </div>
+
+            <input type="checkbox" id="fMine" class="hidden-input">
+            <input type="checkbox" id="fHideClosed" class="hidden-input">
+
+            <button id="btnClear" style="display:none"></button>
+            <button id="tgMine" style="display:none"></button>
+            <button id="tgHideClosed" style="display:none"></button>
+
+          </div>
+
+          <div class="drawer-actions">
+            <button id="advClear" class="btn-ghost" type="button"><i class="fa fa-eraser"></i> Limpar</button>
+            <button id="advApply" class="btn-success" type="button"><i class="fa fa-check"></i> Aplicar</button>
+          </div>
+
+          <div class="space"></div>
+          <div class="badge">Dica: use chips/tabs/KPIs pra operação. Deixe isso aqui pra filtros raros.</div>
+        </div>
+      </div>
+<div class="table-wrap edge">
         <table id="tbl">
           <thead>
             <tr>
               <!-- Cabeçalhos agora “clicáveis” para ordenar -->
-              <th data-field="abertoEm" class="sortable">Aberto em<span class="sort-icon"></span></th>
-              <th data-field="solicitante" class="sortable">Solicitante<span class="sort-icon"></span></th>
-              <th data-field="assunto" class="sortable">Assunto<span class="sort-icon"></span></th>
-              <th data-field="codigo" class="sortable">Código cliente<span class="sort-icon"></span></th>
-              <th data-field="categoria" class="sortable">Categoria<span class="sort-icon"></span></th>
-              <th data-field="canal" class="sortable">Canal<span class="sort-icon"></span></th>
-              <th data-field="prioridade" class="sortable">Prioridade<span class="sort-icon"></span></th>
-              <th data-field="status" class="sortable">Status<span class="sort-icon"></span></th>
-              <th data-field="prazo" class="sortable">SLA<span class="sort-icon"></span></th>
-              <th data-field="responsavel" class="sortable">Resp.<span class="sort-icon"></span></th>
-              <th class="nowrap">Ações</th>
+              <th data-field="abertoEm" class="sortable col-abertoEm">Aberto em<span class="sort-icon"></span></th>
+              <th data-field="solicitante" class="sortable col-solicitante">Solicitante<span class="sort-icon"></span></th>
+              <th data-field="assunto" class="sortable col-assunto">Assunto<span class="sort-icon"></span></th>
+              <th data-field="codigo" class="sortable col-codigo">Código cliente<span class="sort-icon"></span></th>
+              <th data-field="categoria" class="sortable col-categoria">Categoria<span class="sort-icon"></span></th>
+              <th data-field="canal" class="sortable col-canal">Canal<span class="sort-icon"></span></th>
+              <th data-field="prioridade" class="sortable col-prioridade">Prioridade<span class="sort-icon"></span></th>
+              <th data-field="status" class="sortable col-status">Status<span class="sort-icon"></span></th>
+              <th data-field="prazo" class="sortable col-sla">SLA<span class="sort-icon"></span></th>
+              <th data-field="responsavel" class="sortable col-resp">Resp.<span class="sort-icon"></span></th>
+              <th class="nowrap col-acoes">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -765,6 +1141,151 @@ function setHeadH(){
 window.addEventListener('load', setHeadH); 
 window.addEventListener('resize', setHeadH);
 
+
+/* ===== Enterprise State (tabs/chips/view) ===== */
+var VIEW_KEY='ticket_view_mode';
+var TAB_KEY='ticket_active_tab';
+var activeTab = (localStorage.getItem(TAB_KEY) || 'Aberto');
+var activeView = (localStorage.getItem(VIEW_KEY) || 'operacao');
+
+function applyView(v){
+  activeView = v || 'operacao';
+  document.body.setAttribute('data-view', activeView);
+  try{ localStorage.setItem(VIEW_KEY, activeView); }catch(e){}
+  // botões
+  qsa('.view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===activeView));
+  // colunas: aplica também no tbody (tds herdam classe via render)
+  if(!window.__booting) render();
+}
+function applyTab(tab){
+  activeTab = tab || 'Aberto';
+  try{ localStorage.setItem(TAB_KEY, activeTab); }catch(e){}
+  qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===activeTab));
+  // sincroniza filtro avançado
+  var st = (activeTab==='Tudo') ? '' : (activeTab==='Pendente' ? 'Pendente' : (activeTab==='Encerrado' ? 'Encerrado' : (activeTab==='Em tratativa' ? 'Em tratativa' : 'Aberto')));
+  var sel = document.getElementById('fStatus');
+  if(sel) sel.value = st;
+  currentPage = 1;
+  if(!window.__booting) render();
+}
+function setChip(chip, value, on){
+  // chip: sla/categoria/canal/mine
+  if(chip==='mine'){
+    var c = document.getElementById('fMine'); if(c) c.checked = !!on;
+  }else if(chip==='sla'){
+    var s = document.getElementById('fSLA'); if(s) s.value = on ? value : '';
+  }else if(chip==='categoria'){
+    var s2 = document.getElementById('fCategoria'); if(s2) s2.value = on ? value : '';
+  }else if(chip==='canal'){
+    var s3 = document.getElementById('fCanal'); if(s3) s3.value = on ? value : '';
+  }
+  currentPage=1;
+  render();
+  // UI
+  qsa('#quickChips .chip').forEach(btn=>{
+    if(btn.id==='chipReset') return;
+    var same = btn.dataset.chip===chip && btn.dataset.value===value;
+    if(same) btn.classList.toggle('active', !!on);
+    // chips de mesmo grupo se excluem (sla/categoria/canal)
+    var groupExclusive = ['sla','categoria','canal'].includes(chip);
+    if(groupExclusive && btn.dataset.chip===chip && btn.dataset.value!==value && !!on){
+      btn.classList.remove('active');
+    }
+    if(chip==='mine' && btn.dataset.chip==='mine'){
+      btn.classList.toggle('active', !!(document.getElementById('fMine') && document.getElementById('fMine').checked));
+    }
+  });
+}
+function resetRapido(){
+  // limpa busca e filtros
+  var s=document.getElementById('fSearch'); if(s) s.value='';
+  ['fPrio','fCategoria','fCanal','fSLA','fPend','fResp'].forEach(id=>{var el=document.getElementById(id); if(el) el.value='';});
+  var mine=document.getElementById('fMine'); if(mine) mine.checked=false;
+  // limpa chips
+  qsa('#quickChips .chip').forEach(b=>b.classList.remove('active'));
+  // volta padrão
+  applyView('operacao');
+  applyTab('Aberto');
+  // ordenação padrão
+  sortField='default'; sortDir='asc';
+  currentPage=1;
+  render();
+}
+function wireEnterpriseUI(){
+  // Tabs
+  var tabs = document.getElementById('statusTabs');
+  if(tabs){
+    tabs.addEventListener('click', function(e){
+      var b = e.target.closest('.tab-btn'); if(!b) return;
+      applyTab(b.dataset.tab);
+    });
+  }
+  // View buttons
+  document.addEventListener('click', function(e){
+    var vb = e.target.closest('.view-btn'); 
+    if(vb){ applyView(vb.dataset.view); }
+  });
+  // Chips
+  var chips = document.getElementById('quickChips');
+  if(chips){
+    chips.addEventListener('click', function(e){
+      var b = e.target.closest('.chip'); if(!b) return;
+      if(b.id==='chipReset'){ resetRapido(); return; }
+      var chip=b.dataset.chip, val=b.dataset.value;
+      if(chip==='mine'){
+        var c=document.getElementById('fMine');
+        var on = !(c && c.checked);
+        setChip('mine','1',on);
+      }else{
+        var isActive = b.classList.contains('active');
+        setChip(chip,val,!isActive);
+      }
+    });
+  }
+  // KPIs
+  var strip=document.getElementById('kpiStrip');
+  if(strip){
+    strip.addEventListener('click', function(e){
+      var k = e.target.closest('.kpi-mini'); if(!k) return;
+      var type=k.dataset.kpi;
+      resetRapido();
+      if(type==='late'){ applyTab('Tudo'); setChip('sla','late',true); }
+      if(type==='risk'){ applyTab('Tudo'); setChip('sla','risk',true); }
+      if(type==='unassigned'){ applyTab('Tudo'); window.__filterUnassigned=true; render(); }
+      if(type==='pendDue'){ applyTab('Pendente'); document.getElementById('fPend').value='due'; render(); }
+    });
+  }
+  // Drawer
+  var btnAdv=document.getElementById('btnAdvanced');
+  var drawer=document.getElementById('advDrawer');
+  var close=document.getElementById('advClose');
+  if(btnAdv && drawer){
+    btnAdv.onclick=function(){ drawer.classList.add('show'); };
+  }
+  if(close && drawer){
+    close.onclick=function(){ drawer.classList.remove('show'); };
+  }
+  if(drawer){
+    drawer.addEventListener('click', function(e){
+      if(e.target===drawer) drawer.classList.remove('show');
+    });
+  }
+  var advApply=document.getElementById('advApply');
+  var advClear=document.getElementById('advClear');
+  var advMine=document.getElementById('advMine');
+  if(advApply){ advApply.onclick=function(){ drawer.classList.remove('show'); currentPage=1; render(); }; }
+  if(advClear){ advClear.onclick=function(){ ['fStatus','fPrio','fCategoria','fCanal','fSLA','fPend','fResp'].forEach(id=>{var el=document.getElementById(id); if(el) el.value='';}); var mine=document.getElementById('fMine'); if(mine) mine.checked=false; window.__filterUnassigned=false; currentPage=1; render(); }; }
+  if(advMine){ advMine.onclick=function(){ var c=document.getElementById('fMine'); if(c) c.checked=!c.checked; render(); }; }
+
+  // iniciar estado salvo
+  applyView(activeView);
+  applyTab(activeTab);
+
+  // fecha menus ao clicar fora
+  document.addEventListener('click', function(e){
+    if(!e.target.closest('.actions-wrap')) hideAllMoreMenus();
+  });
+}
 /* ===== Helpers ===== */
 const qs=s=>document.querySelector(s);
 const qsa=(s,el)=>Array.prototype.slice.call((el||document).querySelectorAll(s));
@@ -912,7 +1433,7 @@ function statusBadge(s){
   var map={'Aberto':'status-aberto','Em tratativa':'status-tratativa','Pendente':'status-pendente','Encerrado':'status-encerrado'};
   return '<span class="badge '+(map[s]||'')+'"><i class="fa fa-circle"></i>'+s+'</span>'
 }
-function prioBadge(p){return '<span class="badge '+(p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa')+'">'+p+'</span>'}
+function prioBadge(p){return '<span class="badge prio-lite '+(p==='Alta'?'prio-alta':p==='Média'?'prio-media':'prio-baixa')+'">'+p+'</span>'}
 const ym=d=>d.toISOString().slice(0,7);
 const startOfDay=dt=>{var d=new Date(dt);d.setHours(0,0,0,0);return d}
 const today0=()=>{var d=new Date();d.setHours(0,0,0,0);return d}
@@ -923,6 +1444,8 @@ var sortField='default';
 var sortDir='asc';
 var pageSize=50;
 var currentPage=1;
+var viewMode='operacao';
+var statusTab='Abertos';
 
 /* filtros salvos / tema */
 const FILTER_KEY_BASE='ticket_filters_';
@@ -1081,6 +1604,8 @@ function toggleNotifPanel(){
 
 /* ===== Estado ===== */
 var data=[]; var lastReadMap={};
+var __filterUnassigned=false;
+var __booting=true;
 var chartAbertos=null, chartConcluidos=null, chartTransp=null, chartCanal=null;
 
 /* ===== Perfis e DM ===== */
@@ -1128,6 +1653,20 @@ function loadFilters(){
       qs('#fHideClosed').checked = f.hideClosed;
       qs('#tgHideClosed').classList.toggle('active', f.hideClosed);
     }
+  }catch(e){}
+
+  // sincroniza tabs/visão com filtros salvos (sem reescrever filtros)
+  try{
+    var st = qs('#fStatus').value || '';
+    if(st==='Aberto' || st==='Em tratativa' || st==='Pendente'){
+      statusTab = st;
+    }else if(st==='Encerrado'){
+      statusTab = 'Encerrado';
+    }else{
+      statusTab = 'Tudo';
+    }
+    qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===statusTab));
+    qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
   }catch(e){}
 }
 
@@ -1454,6 +1993,46 @@ function sortRows(rows){
   });
 }
 
+function updateKPIs(){
+  var late=0, risk=0, unassigned=0, pendDue=0;
+  var today = new Date(); today.setHours(0,0,0,0);
+  data.forEach(function(d){
+    var st = d.status||'';
+    if(st==='Encerrado') return;
+    var slaObj = slaStatus(d.prazo,d);
+    if(slaObj.code==='late') late++;
+    else if(slaObj.code==='risk') risk++;
+    if((d.responsavel||'').trim()==='') unassigned++;
+    if(st==='Pendente'){
+      var r = d.retomarEm ? new Date(d.retomarEm) : null;
+      if(r && r.getTime() < today.getTime()) pendDue++;
+    }
+  });
+  var el;
+  el=document.getElementById('kpiLate'); if(el) el.textContent=late;
+  el=document.getElementById('kpiRisk'); if(el) el.textContent=risk;
+  el=document.getElementById('kpiUnassigned'); if(el) el.textContent=unassigned;
+  el=document.getElementById('kpiPendDue'); if(el) el.textContent=pendDue;
+}
+
+function syncQuickUI(){
+  // chips
+  var mine=!!(qs('#fMine')&&qs('#fMine').checked);
+  var sla=(qs('#fSLA')&&qs('#fSLA').value)||'';
+  var cat=(qs('#fCategoria')&&qs('#fCategoria').value)||'';
+  var canal=(qs('#fCanal')&&qs('#fCanal').value)||'';
+  qsa('#quickChips .chip').forEach(function(b){
+    if(b.id==='chipReset') return;
+    var ch=b.dataset.chip, v=b.dataset.value;
+    var on=false;
+    if(ch==='mine') on=mine;
+    if(ch==='sla') on=(sla && sla===v);
+    if(ch==='categoria') on=(cat && cat===v);
+    if(ch==='canal') on=(canal && canal===v);
+    b.classList.toggle('active', !!on);
+  });
+}
+
 function updateSortIcons(){
   qsa('th.sortable').forEach(th=>{
     var f=th.dataset.field;
@@ -1468,9 +2047,19 @@ function updateSortIcons(){
 }
 
 function render(){
-  var term=(qs('#fSearch').value||'').toLowerCase().trim();
-  var st=qs('#fStatus').value, pr=qs('#fPrio').value, cat=qs('#fCategoria').value, sla=qs('#fSLA').value;
-  var pend=qs('#fPend').value; var mine=qs('#fMine').checked; var hideClosed=qs('#fHideClosed').checked;
+  // aplica modo de visualização
+  var tblEl=qs('#tbl');
+  if(tblEl){tblEl.classList.remove('mode-operacao','mode-detalhado','mode-gestao'); tblEl.classList.add('mode-'+(viewMode||'operacao'));}
+  var term=(qs('#fSearch')&&qs('#fSearch').value||'').toLowerCase().trim();
+  var st=(qs('#fStatus')&&qs('#fStatus').value)||'';
+  var pr=(qs('#fPrio')&&qs('#fPrio').value)||'';
+  var cat=(qs('#fCategoria')&&qs('#fCategoria').value)||'';
+  var canalF=(qs('#fCanal')&&qs('#fCanal').value)||'';
+  var respF=(qs('#fResp')&&qs('#fResp').value)||'';
+  var sla=(qs('#fSLA')&&qs('#fSLA').value)||'';
+  var pend=(qs('#fPend')&&qs('#fPend').value)||'';
+  var mine=!!(qs('#fMine')&&qs('#fMine').checked);
+  var hideClosed=false;
 
   var rows=data.filter(d=>{
     var sLA=slaStatus(d.prazo).code;
@@ -1492,7 +2081,14 @@ function render(){
     if(st && d.status!==st) return false;
     if(pr && d.prioridade!==pr) return false;
     if(cat && d.categoria!==cat) return false;
+    if(canalF && (d.canal||'')!==canalF) return false;
+    if(respF && (d.responsavel||'')!==respF) return false;
     if(sla && sLA!==sla) return false;
+    if(window.__filterUnassigned){
+      var st2=d.status||'';
+      if(st2==='Encerrado') return false;
+      if((d.responsavel||'').trim()!=='') return false;
+    }
     if(pend==='pend' && !isPend) return false;
     if(pend==='due' && !isPendDue) return false;
 
@@ -1528,34 +2124,70 @@ function render(){
   tbody.innerHTML=pageRows.map(d=>{
     var slaObj=slaStatus(d.prazo,d);
     var tooltip = slaTooltip(d.prazo,d);
-    var slaPill='<span class="badge" title="'+(tooltip || d.prazo || '')+'">'+slaObj.label+'</span>';
+    var slaClass = (slaObj.code==='late'?'sla-late':(slaObj.code==='risk'?'sla-risk':'sla-ok'));
+    var slaPill='<span class="badge sla-pill '+slaClass+'" title="'+(tooltip || d.prazo || '')+'">'+slaObj.label+'</span>';
     var showConfirm=d.status==='Aberto';
     var unread=d.status==='Em tratativa'?getUnreadCount(d):0;
     var unreadBadge=unread>0?'<span class="badge-unread" title="'+unread+' nova(s)">'+unread+'</span>':'';
+    var primaryHtml='';
+    if(d.status==='Aberto'){
+      primaryHtml='<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>';
+    }else if(d.status==='Pendente'){
+      primaryHtml='<button class="btn-warning btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>';
+    }else{
+      primaryHtml='<button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>';
+    }
+
+    
+    var primaryBtn = primaryHtml;
+    // Menu contextual (limpa a linha: deixa só ação principal + ⋮)
+    var items=[];
+    function mi(icon, label, fn){
+      return '<div class="more-item" onclick="'+fn+'; hideAllMoreMenus(); event.stopPropagation();"><i class="fa '+icon+'"></i><span>'+label+'</span></div>';
+    }
+    // Abrir quase sempre existe
+    if(d.status!=='Aberto'){ items.push(mi('fa-pen-to-square','Abrir','openEdit(\''+d.id+'\')')); }
+    else { items.push(mi('fa-pen-to-square','Abrir','openEdit(\''+d.id+'\')')); }
+
+    if(d.status!=='Encerrado'){
+      items.push(mi('fa-check','Encerrar','closeTicket(\''+d.id+'\')'));
+      items.push(mi('fa-clock','Adiar','snoozeTicket(\''+d.id+'\')'));
+    }
+    if(d.status==='Aberto'){
+      // confirmar já é primário, então não repete no menu
+    }
+    if(d.status==='Pendente'){
+      // retomar é primário, então não repete no menu
+    }
+    items.push(mi('fa-trash','Excluir','deleteTicket(\''+d.id+'\')'));
+    var moreHtml = items.length ? ('<div class="more-menu" id="more-'+d.id+'" onclick="event.stopPropagation();">'+items.join('')+'</div>') : '';
+
     var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
                  : d.categoria==='Frota - Transportadora' ? '<span class="badge frota-badge">Frota - Transportadora</span>'
                  : (d.categoria||'-');
 
     return '<tr>\
-      <td>'+fmtDate(d.abertoEm)+'</td>\
-      <td>'+ (d.solicitante||'-') +'</td>\
-      <td>'+ (d.assunto||'-') +'</td>\
-      <td>'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
-      <td>'+catCell+'</td>\
-      <td>'+ (d.canal||'<span class="muted">—</span>') +'</td>\
-      <td>'+prioBadge(d.prioridade||'-')+'</td>\
-      <td>'+statusBadge(d.status||'-')+'</td>\
-      <td>'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
-      <td>'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
-      <td class="table-actions">\
-        '+(showConfirm?'<button class="btn-warning btn-icon" title="Confirmar (vai para Em tratativa)" onclick="confirmTicket(\''+d.id+'\')"><i class="fa fa-check-double"></i></button>':'')+'\
-        <button class="btn-ghost btn-icon" title="Abrir" onclick="openEdit(\''+d.id+'\')"><i class="fa fa-pen-to-square"></i>'+unreadBadge+'</button>\
-        <button class="btn-ghost btn-icon" title="Encerrar" onclick="closeTicket(\''+d.id+'\')"><i class="fa fa-check"></i></button>\
-        <button class="btn-ghost btn-icon" title="Adiar (definir data)" onclick="snoozeTicket(\''+d.id+'\')"><i class="fa fa-clock"></i></button>\
-        '+(d.status==='Pendente'?'<button class="btn-ghost btn-icon" title="Retomar agora" onclick="resumeTicket(\''+d.id+'\')"><i class="fa fa-play"></i></button>':'')+'\
+      <td class="col-abertoEm">'+fmtDate(d.abertoEm)+'</td>\
+      <td class="col-solicitante">'+ (d.solicitante||'-') +'</td>\
+      <td class="col-assunto">'+ (d.assunto||'-') +'</td>\
+      <td class="col-codigo">'+ (d.codigo||'<span class="muted">—</span>') +'</td>\
+      <td class="col-categoria">'+catCell+'</td>\
+      <td class="col-canal">'+ (d.canal||'<span class="muted">—</span>') +'</td>\
+      <td class="col-prioridade">'+prioBadge(d.prioridade||'-')+'</td>\
+      <td class="col-status">'+statusBadge(d.status||'-')+'</td>\
+      <td class="col-sla">'+ (d.prazo? slaPill : '<span class="muted">—</span>') +'</td>\
+      <td class="col-resp">'+ (d.responsavel||'<span class="muted">—</span>') +'</td>\
+      <td class="table-actions col-acoes">\
+        <div class="actions-wrap">\
+          '+primaryBtn+'\
+          '+(moreHtml?('<button class="btn-ghost btn-icon" title="Mais" onclick="toggleMore(event,\''+d.id+'\');"><i class="fa fa-ellipsis-vertical"></i></button>'+moreHtml):'')+'\
+        </div>\
       </td>\
     </tr>';
   }).join('');
+
+  updateKPIs();
+  syncQuickUI();
 
   /* render paginação */
   var pager=qs('#pager');
@@ -1597,6 +2229,36 @@ function setSort(field){
   currentPage = 1;
   render();
 }
+
+
+/* ===== Actions menu (kebab) ===== */
+function closeAllMenus(){
+  document.querySelectorAll('.menu.show').forEach(m=>m.classList.remove('show'));
+}
+
+function hideAllMoreMenus(){
+  document.querySelectorAll('.more-menu.show').forEach(function(m){ m.classList.remove('show'); });
+}
+function toggleMore(ev,id){
+  try{ if(ev){ ev.stopPropagation(); ev.preventDefault(); } }catch(e){}
+  // aceita chamada antiga toggleMore(id)
+  if(typeof id==='undefined'){ id=ev; ev=null; }
+  hideAllMoreMenus();
+  var el = document.getElementById('more-'+id);
+  if(el){ el.classList.toggle('show'); }
+}
+
+function toggleRowMenu(id, ev){
+  try{ ev && ev.stopPropagation(); ev && ev.preventDefault(); }catch(e){}
+  closeAllMenus();
+  var el=document.getElementById('menu-'+id);
+  if(el) el.classList.toggle('show');
+}
+document.addEventListener('click', function(e){
+  // fecha menus ao clicar fora
+  if(!e.target.closest('.actions-menu')) closeAllMenus();
+  if(!e.target.closest('.more-menu') && !e.target.closest('.fa-ellipsis-vertical') && !e.target.closest('[title="Mais"]')) hideAllMoreMenus();
+});
 
 /* bind cabeçalhos sortáveis */
 qsa('th.sortable').forEach(th=>{
@@ -2065,6 +2727,105 @@ qs('#btnClear').onclick=function(){
   render()
 };
 
+
+/* ===== Status Tabs + Quick Chips (v2.6) ===== */
+function setActive(el, on){ if(!el) return; el.classList.toggle('active', !!on); }
+function applyStatusTab(tab){
+  statusTab = tab || 'Abertos';
+  // UI active
+  qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===statusTab));
+  // aplica filtros
+  if(statusTab==='Tudo'){
+    qs('#fStatus').value='';
+    qs('#fHideClosed').checked=false;
+    qs('#tgHideClosed').classList.toggle('active', false);
+  }else if(statusTab==='Encerrado'){
+    qs('#fStatus').value='Encerrado';
+    qs('#fHideClosed').checked=false;
+    qs('#tgHideClosed').classList.toggle('active', false);
+  }else{
+    qs('#fStatus').value = statusTab; // Aberto / Em tratativa / Pendente
+    // por padrão esconde encerrados quando não estou na aba Encerrados/Tudo
+    qs('#fHideClosed').checked=true;
+    qs('#tgHideClosed').classList.toggle('active', true);
+  }
+  saveFilters();
+  currentPage=1;
+  render();
+}
+function applyViewMode(mode){
+  viewMode = mode || 'operacao';
+  qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
+  render();
+}
+function applyQuickChip(kind){
+  if(kind==='reset'){
+    // não mexe na busca, só limpa chips/filtros rápidos
+    qs('#fSLA').value='';
+    qs('#fPend').value='';
+    qs('#fCategoria').value='';
+    qs('#fMine').checked=false; qs('#tgMine').classList.remove('active');
+    qsa('#quickChips .chip').forEach(c=>c.classList.remove('active'));
+    saveFilters();
+    currentPage=1;
+    render();
+    return;
+  }
+  if(kind==='mine'){
+    qs('#fMine').checked = !qs('#fMine').checked;
+    qs('#tgMine').classList.toggle('active', qs('#fMine').checked);
+    setActive(document.querySelector('#quickChips .chip[data-chip="mine"]'), qs('#fMine').checked);
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='late' || kind==='risk'){
+    // alterna SLA
+    var v = (qs('#fSLA').value===kind) ? '' : kind;
+    qs('#fSLA').value = v;
+    qsa('#quickChips .chip[data-chip="late"], #quickChips .chip[data-chip="risk"]').forEach(c=>c.classList.remove('active'));
+    if(v) setActive(document.querySelector('#quickChips .chip[data-chip="'+v+'"]'), true);
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='pend'){
+    // força aba pendente + filtro pend
+    applyStatusTab('Pendente');
+    qs('#fPend').value = (qs('#fPend').value==='pend' ? '' : 'pend');
+    setActive(document.querySelector('#quickChips .chip[data-chip="pend"]'), qs('#fPend').value==='pend');
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='frota'){
+    qs('#fCategoria').value = (qs('#fCategoria').value==='Frota - Transportadora' ? '' : 'Frota - Transportadora');
+    setActive(document.querySelector('#quickChips .chip[data-chip="frota"]'), qs('#fCategoria').value==='Frota - Transportadora');
+    saveFilters(); currentPage=1; render(); return;
+  }
+  if(kind==='meli' || kind==='shopee'){
+    // usamos busca rápida por canal
+    var term = (kind==='meli'?'mercado livre':'shopee');
+    var cur = (qs('#fSearch').value||'').toLowerCase().trim();
+    if(cur===term) qs('#fSearch').value='';
+    else qs('#fSearch').value=term;
+    qsa('#quickChips .chip[data-chip="meli"], #quickChips .chip[data-chip="shopee"]').forEach(c=>c.classList.remove('active'));
+    if((qs('#fSearch').value||'').toLowerCase().trim()===term){
+      setActive(document.querySelector('#quickChips .chip[data-chip="'+kind+'"]'), true);
+    }
+    saveFilters(); currentPage=1; render(); return;
+  }
+}
+(function bindTabsAndChips(){
+  // tabs
+  qsa('#statusTabs .tab-btn').forEach(b=>{
+    b.addEventListener('click', ()=>applyStatusTab(b.dataset.tab));
+  });
+  // view
+  qsa('#viewModes .view-btn').forEach(b=>{
+    b.addEventListener('click', ()=>applyViewMode(b.dataset.view));
+  });
+  // chips
+  qsa('#quickChips .chip').forEach(c=>{
+    c.addEventListener('click', ()=>applyQuickChip(c.dataset.chip));
+  });
+})();
+
+
 /* Toggle compactos (ícones) */
 qs('#tgMine').onclick=function(){
   var c=qs('#fMine');c.checked=!c.checked;
@@ -2362,8 +3123,10 @@ async function boot(){ if(!ensureLatestVersion()) return; initTheme();
     await loadDM(true);
   }
   loadFilters();
+  wireEnterpriseUI();
   loadNotifications();
   renderNotificationsIcon();
+  __booting=false;
   render(); 
   setupRealtime(); 
   setHeadH();
