@@ -1444,7 +1444,6 @@ var sortField='default';
 var sortDir='asc';
 var pageSize=50;
 var currentPage=1;
-var viewMode='operacao';
 var statusTab='Abertos';
 
 /* filtros salvos / tema */
@@ -1666,7 +1665,7 @@ function loadFilters(){
       statusTab = 'Tudo';
     }
     qsa('#statusTabs .tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===statusTab));
-    qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
+    qsa('.view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===activeView));
   }catch(e){}
 }
 
@@ -2049,7 +2048,7 @@ function updateSortIcons(){
 function render(){
   // aplica modo de visualização
   var tblEl=qs('#tbl');
-  if(tblEl){tblEl.classList.remove('mode-operacao','mode-detalhado','mode-gestao'); tblEl.classList.add('mode-'+(viewMode||'operacao'));}
+  if(tblEl){tblEl.classList.remove('mode-operacao','mode-detalhado','mode-gestao'); tblEl.classList.add('mode-'+(activeView||'operacao'));}
   var term=(qs('#fSearch')&&qs('#fSearch').value||'').toLowerCase().trim();
   var st=(qs('#fStatus')&&qs('#fStatus').value)||'';
   var pr=(qs('#fPrio')&&qs('#fPrio').value)||'';
@@ -2753,77 +2752,6 @@ function applyStatusTab(tab){
   currentPage=1;
   render();
 }
-function applyViewMode(mode){
-  viewMode = mode || 'operacao';
-  qsa('#viewModes .view-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===viewMode));
-  render();
-}
-function applyQuickChip(kind){
-  if(kind==='reset'){
-    // não mexe na busca, só limpa chips/filtros rápidos
-    qs('#fSLA').value='';
-    qs('#fPend').value='';
-    qs('#fCategoria').value='';
-    qs('#fMine').checked=false; qs('#tgMine').classList.remove('active');
-    qsa('#quickChips .chip').forEach(c=>c.classList.remove('active'));
-    saveFilters();
-    currentPage=1;
-    render();
-    return;
-  }
-  if(kind==='mine'){
-    qs('#fMine').checked = !qs('#fMine').checked;
-    qs('#tgMine').classList.toggle('active', qs('#fMine').checked);
-    setActive(document.querySelector('#quickChips .chip[data-chip="mine"]'), qs('#fMine').checked);
-    saveFilters(); currentPage=1; render(); return;
-  }
-  if(kind==='late' || kind==='risk'){
-    // alterna SLA
-    var v = (qs('#fSLA').value===kind) ? '' : kind;
-    qs('#fSLA').value = v;
-    qsa('#quickChips .chip[data-chip="late"], #quickChips .chip[data-chip="risk"]').forEach(c=>c.classList.remove('active'));
-    if(v) setActive(document.querySelector('#quickChips .chip[data-chip="'+v+'"]'), true);
-    saveFilters(); currentPage=1; render(); return;
-  }
-  if(kind==='pend'){
-    // força aba pendente + filtro pend
-    applyStatusTab('Pendente');
-    qs('#fPend').value = (qs('#fPend').value==='pend' ? '' : 'pend');
-    setActive(document.querySelector('#quickChips .chip[data-chip="pend"]'), qs('#fPend').value==='pend');
-    saveFilters(); currentPage=1; render(); return;
-  }
-  if(kind==='frota'){
-    qs('#fCategoria').value = (qs('#fCategoria').value==='Frota - Transportadora' ? '' : 'Frota - Transportadora');
-    setActive(document.querySelector('#quickChips .chip[data-chip="frota"]'), qs('#fCategoria').value==='Frota - Transportadora');
-    saveFilters(); currentPage=1; render(); return;
-  }
-  if(kind==='meli' || kind==='shopee'){
-    // usamos busca rápida por canal
-    var term = (kind==='meli'?'mercado livre':'shopee');
-    var cur = (qs('#fSearch').value||'').toLowerCase().trim();
-    if(cur===term) qs('#fSearch').value='';
-    else qs('#fSearch').value=term;
-    qsa('#quickChips .chip[data-chip="meli"], #quickChips .chip[data-chip="shopee"]').forEach(c=>c.classList.remove('active'));
-    if((qs('#fSearch').value||'').toLowerCase().trim()===term){
-      setActive(document.querySelector('#quickChips .chip[data-chip="'+kind+'"]'), true);
-    }
-    saveFilters(); currentPage=1; render(); return;
-  }
-}
-(function bindTabsAndChips(){
-  // tabs
-  qsa('#statusTabs .tab-btn').forEach(b=>{
-    b.addEventListener('click', ()=>applyStatusTab(b.dataset.tab));
-  });
-  // view
-  qsa('#viewModes .view-btn').forEach(b=>{
-    b.addEventListener('click', ()=>applyViewMode(b.dataset.view));
-  });
-  // chips
-  qsa('#quickChips .chip').forEach(c=>{
-    c.addEventListener('click', ()=>applyQuickChip(c.dataset.chip));
-  });
-})();
 
 
 /* Toggle compactos (ícones) */
