@@ -1148,6 +1148,10 @@ var TAB_KEY='ticket_active_tab';
 var activeTab = (localStorage.getItem(TAB_KEY) || 'Aberto');
 var activeView = (localStorage.getItem(VIEW_KEY) || 'operacao');
 
+// Estado rápido dos chips (fonte da verdade p/ filtros rápidos)
+var quickFilters = { sla:'', categoria:'', canal:'', mine:false };
+
+
 function applyView(v){
   activeView = v || 'operacao';
   document.body.setAttribute('data-view', activeView);
@@ -1170,6 +1174,13 @@ function applyTab(tab){
 }
 function setChip(chip, value, on){
   // chip: sla/categoria/canal/mine
+
+  // mantém estado em memória (chips são a verdade)
+  if(chip==='mine'){ quickFilters.mine = !!on; }
+  if(chip==='sla'){ quickFilters.sla = on ? value : ''; }
+  if(chip==='categoria'){ quickFilters.categoria = on ? value : ''; }
+  if(chip==='canal'){ quickFilters.canal = on ? value : ''; }
+
   if(chip==='mine'){
     var c = document.getElementById('fMine'); if(c) c.checked = !!on;
   }else if(chip==='sla'){
@@ -1201,6 +1212,7 @@ function resetRapido(){
   var s=document.getElementById('fSearch'); if(s) s.value='';
   ['fPrio','fCategoria','fCanal','fSLA','fPend','fResp'].forEach(id=>{var el=document.getElementById(id); if(el) el.value='';});
   var mine=document.getElementById('fMine'); if(mine) mine.checked=false;
+  quickFilters = { sla:'', categoria:'', canal:'', mine:false };
   // limpa chips
   qsa('#quickChips .chip').forEach(b=>b.classList.remove('active'));
   // volta padrão
@@ -2017,6 +2029,14 @@ function updateKPIs(){
 function syncQuickUI(){
   // chips
   var mine=!!(qs('#fMine')&&qs('#fMine').checked);
+  // aplica overrides dos chips (mesmo se selects não existirem ou tiverem valores diferentes)
+  if(quickFilters){
+    if(quickFilters.sla) sla = quickFilters.sla;
+    if(quickFilters.categoria) cat = quickFilters.categoria;
+    if(quickFilters.canal) canalF = quickFilters.canal;
+    if(quickFilters.mine) mine = true;
+  }
+
   var sla=(qs('#fSLA')&&qs('#fSLA').value)||'';
   var cat=(qs('#fCategoria')&&qs('#fCategoria').value)||'';
   var canal=(qs('#fCanal')&&qs('#fCanal').value)||'';
