@@ -1738,7 +1738,12 @@ async function loadFromSupabase(){
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,closed_at';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
   }
-  if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
+  if(error){
+    console.error('load tickets error:', error);
+    toast('Não consegui listar tickets (SELECT). Provável RLS/policy no Supabase: ' + (error.message||''));
+    // IMPORTANTE: não sobrescreve o que já está em tela se o SELECT falhar
+    return;
+  }
 
   tks.sort((a,b)=>new Date(b.aberto_em)-new Date(a.aberto_em));
 
