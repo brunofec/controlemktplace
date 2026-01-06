@@ -2635,6 +2635,29 @@ async function save(e){
     (i >= 0 ? 'Atualizado' : 'Criado') + ' por ' + (((currentUser() || {}).name) || 'sistema')
   );
 
+  // Garantir que o ticket recém-criado apareça na lista mesmo se havia filtros ativos
+  if (i < 0) {
+    try {
+      // limpa filtros que normalmente escondem o novo ticket
+      qs('#fStatus').value = '';
+      qs('#fPrio').value = '';
+      qs('#fCategoria').value = '';
+      qs('#fSLA').value = '';
+      qs('#fPend').value = '';
+
+      // mantém o "ocultar encerrados" ligado (não afeta tickets abertos)
+      // e desliga "só meus" caso esteja atrapalhando (ex.: sessão inconsistente)
+      qs('#fMine').checked = false;
+      qs('#tgMine').classList.remove('active');
+
+      // busca automaticamente pelo código do cliente do ticket criado
+      qs('#fSearch').value = (rec.codigo || rec.id || '').toString();
+
+      saveFilters();
+      currentPage = 1;
+    } catch (e) {}
+  }
+
   render();
   openEdit(rec.id);
 }
