@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<meta name="app-version" content="V2.7.6"/>
+<meta name="app-version" content="V2.7.5"/>
 <title>Controle Interno de Solicitações</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1802,25 +1802,53 @@ function initTheme(){
 }
 
 /* ========= TICKETS: load ========= */
+
+/* ========= SUPABASE: select paginado (evita limite padrão de 1000) ========= */
+async function supaSelectAllTickets(sel){
+  // IMPORTANT: Supabase retorna no máx 1000 linhas por chamada.
+  // Para não "sumir" ticket novo quando a base passa de 1000, buscamos em páginas.
+  var out = [];
+  var from = 0;
+  var pageSize = 1000;
+  var maxTotal = 10000; // segurança
+  while(true){
+    var q = supa.from('tickets')
+      .select(sel)
+      .order('aberto_em', { ascending:false })
+      .range(from, from + pageSize - 1);
+
+    var r = await q;
+    if(r.error){
+      return { data: null, error: r.error };
+    }
+    var batch = r.data || [];
+    out = out.concat(batch);
+    if(batch.length < pageSize) break;
+    from += pageSize;
+    if(out.length >= maxTotal) break;
+  }
+  return { data: out, error: null };
+}
+
 async function loadFromSupabase(){
   if(!supaReady()){toast('Config Supabase ausente.'); data=[]; render(); return;}
 
   // tenta com a coluna 'canal'
   var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by,closed_at';
-  var resp=await supa.from('tickets').select(sel);
+  var resp=await supaSelectAllTickets(sel);
   var tks=resp.data; var error=resp.error;
   if(!error){ HAS_CANAL=true; }
   if(error){
     // fallback sem 'canal'
     HAS_CANAL=false;
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by,closed_at';
-    resp=await supa.from('tickets').select(sel);
+    resp=await supaSelectAllTickets(sel);
     tks=resp.data; error=resp.error;
   }
   if(error){
     // fallback mínimo
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,closed_at';
-    resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
+    resp=await supaSelectAllTickets(sel); tks=resp.data; error=resp.error;
   }
   if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
 
