@@ -2312,7 +2312,7 @@ function render(){
     if(d.status==='Pendente'){
       // retomar é primário, então não repete no menu
     }
-    items.push(mi('fa-trash','Excluir','deleteTicket(\''+d.id+'\')'));
+    items.push(mi('fa-trash','Excluir','removeTicket(\''+d.id+'\')'));
     var moreHtml = items.length ? ('<div class="more-menu" id="more-'+d.id+'" onclick="event.stopPropagation();">'+items.join('')+'</div>') : '';
 
     var catCell = d.categoria==='SAK' ? '<span class="badge sak-badge">SAK</span>'
@@ -3263,6 +3263,9 @@ window.resumeTicket=resumeTicket;
 window.openDm=openDm;
 window.goPage=goPage;
 window.setSort=setSort;
+window.removeTicket=removeTicket;
+window.deleteTicket=removeTicket;
+
 </script>
 </body>
 </html>
