@@ -1344,6 +1344,11 @@ function toast(msg){
   },3000);
 }
 
+const DEBUG = true;
+function dbg(){ if(!DEBUG) return; try{ console.log.apply(console, ['[DBG]'].concat([].slice.call(arguments))); }catch(e){} }
+function dbgToast(msg){ if(!DEBUG) return; try{ toast('DBG: '+msg); }catch(e){} }
+window.__DBG = { lastTicketsSelect:null, lastUpsert:null, lastCheck:null };
+
 function canUseNativeNotif(){
   return typeof window!=='undefined' && 'Notification' in window;
 }
@@ -1725,6 +1730,7 @@ async function loadFromSupabase(){
   var sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,canal,pendente,retomar_em,opened_by,closed_at';
   var resp=await supa.from('tickets').select(sel);
   var tks=resp.data; var error=resp.error;
+  try{ window.__DBG.lastTicketsSelect = { step:'with_canal', sel: sel, count: (tks||[]).length, error: error? (error.message||String(error)) : null }; dbg('tickets select (with canal)', window.__DBG.lastTicketsSelect); }catch(e){}
   if(!error){ HAS_CANAL=true; }
   if(error){
     // fallback sem 'canal'
@@ -1732,18 +1738,16 @@ async function loadFromSupabase(){
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,transportadora,pendente,retomar_em,opened_by,closed_at';
     resp=await supa.from('tickets').select(sel);
     tks=resp.data; error=resp.error;
+    try{ window.__DBG.lastTicketsSelect = { step:'no_canal', sel: sel, count: (tks||[]).length, error: error? (error.message||String(error)) : null }; dbg('tickets select (no canal)', window.__DBG.lastTicketsSelect); }catch(e){}
   }
   if(error){
     // fallback mínimo
     sel='id,aberto_em,solicitante,categoria,assunto,prioridade,descricao,status,responsavel,prazo,codigo,closed_at';
     resp=await supa.from('tickets').select(sel); tks=resp.data; error=resp.error;
+    try{ window.__DBG.lastTicketsSelect = { step:'minimal', sel: sel, count: (tks||[]).length, error: error? (error.message||String(error)) : null }; dbg('tickets select (minimal)', window.__DBG.lastTicketsSelect); }catch(e){}
   }
-  if(error){
-    console.error('load tickets error:', error);
-    toast('Não consegui listar tickets (SELECT). Provável RLS/policy no Supabase: ' + (error.message||''));
-    // IMPORTANTE: não sobrescreve o que já está em tela se o SELECT falhar
-    return;
-  }
+  if(error){console.error(error);toast('Erro ao carregar tickets'); tks=[]}
+  try{ dbgToast('Tickets carregados: '+((tks||[]).length)); }catch(e){}
 
   tks.sort((a,b)=>new Date(b.aberto_em)-new Date(a.aberto_em));
 
@@ -1765,28 +1769,63 @@ async function loadFromSupabase(){
 /* ========= TICKETS: persist ========= */
 async function supaUpsertTicket(rec){
   if(!supaReady())return;
-  var me=currentUser();
   var payload={
-    id:String(rec.id), 
-    aberto_em:new Date(rec.abertoEm).toISOString(), 
-    solicitante:rec.solicitante, 
+    id:String(rec.id),
+    aberto_em:new Date(rec.abertoEm).toISOString(),
+    solicitante:rec.solicitante,
     categoria:rec.categoria,
-    assunto:rec.assunto, 
-    prioridade:rec.prioridade, 
-    descricao:rec.descricao||null, 
-    status:rec.status, 
+    assunto:rec.assunto,
+    prioridade:rec.prioridade,
+    descricao:rec.descricao||null,
+    status:rec.status,
     responsavel:rec.responsavel||null,
-    prazo:rec.prazo||null, 
-    codigo:rec.codigo||null, 
-    transportadora:rec.transportadora||null, 
-    pendente:!!rec.pendente, 
+    prazo:rec.prazo||null,
+    codigo:rec.codigo||null,
+    transportadora:rec.transportadora||null,
+    pendente:!!rec.pendente,
     retomar_em:rec.retomar_em||null,
-    opened_by: rec.openedBy || null, 
+    opened_by: rec.openedBy || null,
     closed_at:rec.closedAt?new Date(rec.closedAt).toISOString():null
   };
   if (HAS_CANAL) payload.canal = rec.canal || null; // só envia se a coluna existir
-  var r=await supa.from('tickets').upsert(payload); 
-  if(r.error){console.error(r.error); toast('Sem permissão para salvar (RLS/policies?)')}
+
+  var r = await supa.from('tickets').upsert(payload);
+  try{
+    window.__DBG.lastUpsert = { id: rec.id, error: r.error ? (r.error.message || String(r.error)) : null };
+    dbg('upsert ticket', window.__DBG.lastUpsert);
+  }catch(e){}
+
+  if(r.error){
+    console.error(r.error);
+    toast('Falha ao salvar no Supabase: ' + (r.error.message || 'erro'));
+    return;
+  }
+
+  // Checagem: consegue ler o próprio ticket por ID?
+  try{
+    var chk = await supa
+      .from('tickets')
+      .select('id,codigo,aberto_em,status,opened_by')
+      .eq('id', String(rec.id))
+      .maybeSingle();
+
+    window.__DBG.lastCheck = {
+      id: rec.id,
+      found: !!(chk && chk.data),
+      error: chk && chk.error ? (chk.error.message || String(chk.error)) : null,
+      data: chk && chk.data ? chk.data : null
+    };
+    dbg('post-upsert select by id', window.__DBG.lastCheck);
+
+    if (DEBUG && (chk && chk.error)) {
+      toast('DBG: SELECT por ID deu erro (provável RLS/policy). Veja console.');
+    }
+    if (DEBUG && (!chk || !chk.data) && !(chk && chk.error)) {
+      toast('DBG: Ticket salvou, mas SELECT por ID não retornou nada (estranho). Veja console.');
+    }
+  }catch(e){
+    dbg('post-upsert check exception', e);
+  }
 }
 async function supaDeleteTicket(id){ if(!supaReady())return; var r=await supa.from('tickets').delete().eq('id',id); if(r.error){console.error(r.error); toast('Sem permissão para excluir')}}
 async function supaAddMessage(ticketId, text){
@@ -3163,7 +3202,7 @@ qs('#btnLogin').onclick=async function(){
   }
   showApp(); 
   loadFilters();
-  render();
+  render(); 
   setupRealtime(); 
   
   loadNotifications();
@@ -3177,6 +3216,7 @@ boot();;
 window.openEdit=openEdit; 
 window.closeTicket=closeTicket; 
 window.confirmTicket=confirmTicket;
+window.removeTicket=removeTicket;
 window.snoozeTicket=snoozeTicket; 
 window.resumeTicket=resumeTicket;
 window.openDm=openDm;
