@@ -3228,6 +3228,11 @@ qs('#btnLogin').onclick=async function(){
   if(authResp.error){alert(authResp.error.message||'Usuário ou senha inválidos.');return;}
 
   var profileResp=await supa.from('profiles').select('*').eq('id',authResp.data.user.id).maybeSingle();
+  if (profileResp.data && profileResp.data.bloqueado) {
+  await supa.auth.signOut();
+  alert('Você está bloqueado pelo gerenciador Bruno');
+  return;
+  }
   var profile=profileResp.data;
   if(!profile){
     var username=email.split('@')[0];
